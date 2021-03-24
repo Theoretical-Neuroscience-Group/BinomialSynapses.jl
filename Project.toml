@@ -3,8 +3,16 @@ uuid = "8a0f34ba-5679-4d46-87d2-b44c4b1cf105"
 authors = ["Simone Carlo Surace", "Camille Gontier"]
 version = "0.1.0"
 
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+BinomialGPU = "c5bbfde1-2136-42cd-9b65-d5719df69ebf"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+
 [compat]
-julia = "1"
+BenchmarkTools = "0.6"
+BinomialGPU = "0.2"
+CUDA = "2"
+julia = "1.5"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

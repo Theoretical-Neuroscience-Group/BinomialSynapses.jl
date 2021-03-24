@@ -1,6 +1,11 @@
 using BinomialSynapses
+using CUDA
+
+using BenchmarkTools
 using Test
 
 @testset "BinomialSynapses.jl" begin
-    # Write your tests here.
+    include("types.jl")
+    include("propagate.jl")
+    include("likelihood.jl")
 end
