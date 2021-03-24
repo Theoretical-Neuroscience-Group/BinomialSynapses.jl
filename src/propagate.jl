@@ -2,8 +2,6 @@ relu(x) = max(x, 0)
 
 function propagate!(n, k, model::BinomialModel, dt)
     # propagate the hidden states n, k by one timestep
-    # release k vesicles:
-    #n       .= n .- k
 
     # refill counts and probabilities
     @. n     = relu(model.N - n + k)
