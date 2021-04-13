@@ -1,7 +1,7 @@
 @testset "likelihood" begin
     @testset "consistency" begin
         using BinomialSynapses: likelihood_indices
-        
+
         m_out  = 1024
         m_in   = 1024
         Ns     = CuArray(rand(1:128, m_out))
@@ -24,7 +24,7 @@
         @test minimum(idx) >= 1
 
         println("")
-        println("Benchmarking function likelihood!: should take about 4ms")
+        println("Benchmarking function likelihood!: should take about 300μs")
         display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
         println("")
         println("Benchmarking function likelihood_indices: should take about 4ms")
@@ -38,6 +38,8 @@
         Ns     = 5 .* CUDA.ones(Int, M_out)
         ps     = CUDA.rand(M_out)
         qs     = CUDA.ones(M_out)
+        println("")
+        println("Scalar operations warning expected here:")
         qs[1]  = 1f0
         qs[2]  = 1f0
         qs[3]  = 3f0
@@ -50,5 +52,7 @@
 
         @test u[1] > u[3]
         @test u[2] > u[3]
+        println("Scalar operations over")
+        println("-------------------------------------------------------------------------")
     end
 end
