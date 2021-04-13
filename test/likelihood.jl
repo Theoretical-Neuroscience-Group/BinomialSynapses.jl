@@ -27,6 +27,7 @@
         println("Benchmarking function likelihood!: should take about 300μs")
         display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
         println("")
+        println("")
         println("Benchmarking function likelihood_indices: should take about 4ms")
         display(@benchmark CUDA.@sync likelihood_indices($ks, $model, 0.3f0))
         println("")
