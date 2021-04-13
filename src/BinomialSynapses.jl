@@ -2,6 +2,7 @@ module BinomialSynapses
 
 using BinomialGPU
 using CUDA
+using GPUArrays
 using Statistics: mean
 
 # data structures and types
