@@ -23,7 +23,7 @@
         state = BinomialState(ns, ks)
         u = CUDA.rand(m_out)
         println("")
-        println("Benchmarking function outer_resample!: should take about 4ms")
+        println("Benchmarking function outer_resample!: should take about 5ms")
         display(@benchmark CUDA.@sync outer_resample!($state, $u))
         println("")
     end
