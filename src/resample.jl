@@ -1,8 +1,4 @@
-using CUDA
-using GPUArrays
-
 # Same algorithm as in https://tianjun.me/essays/Categorical_Sampling_on_GPU_with_Julia
-
 function make_alias_table!(w::AbstractVector{T}, wsum::S,
                            a::AbstractVector{T},
                            alias::AbstractVector{<:Integer}) where {S, T}

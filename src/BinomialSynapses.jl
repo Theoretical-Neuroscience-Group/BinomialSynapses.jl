@@ -2,6 +2,7 @@ module BinomialSynapses
 
 using BinomialGPU
 using CUDA
+using GPUArrays
 
 # data structures and types
 include("types.jl")
