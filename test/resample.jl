@@ -1,5 +1,5 @@
-@testset "resample!" begin
-    @testset "internals"
+@testset "outer_resample!" begin
+    @testset "internals" begin
         N, K = 10, 10
 
         wv = Array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
