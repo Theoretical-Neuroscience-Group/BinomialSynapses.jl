@@ -79,6 +79,7 @@ function likelihood_indices(k, model::BinomialModel, observation)
         threads=threads, blocks=blocks
     )
     return u, idx
+end
 
 function likelihood_resample!(state::BinomialState, model, observation)
     u, idx = likelihood_indices(state.k, model, observation)
