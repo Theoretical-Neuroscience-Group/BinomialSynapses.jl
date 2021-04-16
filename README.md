@@ -15,7 +15,7 @@ To install this package in Julia 1.5 or 1.6, type
 
 User API is work in progress. This is a sketch for the function performing a single update of the nested particle filter:
 ```julia
-function update!(filterstate::NestedFilterState, observation::BinomialObservation, filter::NestedFilter)
+function update!(filterstate, observation, filter)
     state = filterstate.state
     model = filterstate.model
 
