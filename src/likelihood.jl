@@ -1,6 +1,6 @@
 function likelihood(k, model::BinomialModel, observation)
     return mean(
-                exp.(-0.25f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
+                exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
                 ./ (sqrt(2*Float32(pi)) .* model.sigma)
            , dims = 2
            )[:,1]
@@ -17,7 +17,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         CurMax = 1f0
         for i in 1:M_in
             # omitting normalization constant here; it is only needed for u
-            vi      = CUDA.exp(-0.25f0 *((observation - q[j] * kT[i,j]) / sigma[j])^2)
+            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / sigma[j])^2)
             vsum   += vi
             v[i, j] = vsum
             # sample descending sequence of sorted random numbers
