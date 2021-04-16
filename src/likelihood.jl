@@ -17,7 +17,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         CurMax = 1f0
         for i in 1:M_in
             # omitting normalization constant here; it is only needed for u
-            vi      = CUDA.exp(-0.25f0 *((observation - q[j] * kT[i,j]) / sigma[j])^2)
+            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / sigma[j])^2)
             vsum   += vi
             v[i, j] = vsum
             # sample descending sequence of sorted random numbers
