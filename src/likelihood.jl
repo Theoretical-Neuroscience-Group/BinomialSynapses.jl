@@ -1,6 +1,6 @@
 function likelihood(k, model::BinomialModel, observation)
     return mean(
-                exp.(-0.25f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
+                exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
                 ./ (sqrt(2*Float32(pi)) .* model.sigma)
            , dims = 2
            )[:,1]
@@ -79,6 +79,7 @@ function likelihood_indices(k, model::BinomialModel, observation)
         threads=threads, blocks=blocks
     )
     return u, idx
+end
 
 function likelihood_resample!(state::BinomialState, model, observation)
     u, idx = likelihood_indices(state.k, model, observation)
