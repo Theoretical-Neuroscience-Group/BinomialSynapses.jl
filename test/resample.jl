@@ -6,7 +6,7 @@
     a = CuArray{Int64}(1:N)
     x = CuArray{Int64}(zeros(Int64, K));
 
-    cu_alias_sample!(a,wv, x)
+    cu_alias_sample!(a, wv, x)
 
     # Resampling should only pick the second index (the only one with a non-
     # zero likelihood)
