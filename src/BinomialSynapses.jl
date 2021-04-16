@@ -15,6 +15,7 @@ include("likelihood.jl")
         likelihood,
         likelihood_resample!,
         propagate!
+include("resample.jl")
         outer_resample!
 
 end#module
