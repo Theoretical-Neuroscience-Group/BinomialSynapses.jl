@@ -8,4 +8,5 @@ using Test
     include("types.jl")
     include("propagate.jl")
     include("likelihood.jl")
+    include("resample.jl")
 end
