@@ -72,6 +72,7 @@ function cu_alias_sample!(a::CuArray{Ta}, wv::AbstractVector{Tw}, x::CuArray{Ta}
 end
 
 function outer_resample!(state::BinomialState, u)
+    M_out = size(state.n, 1)
     a = CuArray{Int64}(1:M_out)
     x = CuArray{Int64}(zeros(Int64, M_out))
     cu_alias_sample!(a,u,x)
