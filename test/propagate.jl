@@ -23,4 +23,41 @@
     println("Benchmarking function propagate!: should take about 4ms")
     display(@benchmark CUDA.@sync propagate!($ns, $ks, $model, 0.1f0))
     println("")
+
+    dt     = 0.1
+    m_out  = 4
+    m_in   = 4
+    Ns     = 10 .* CUDA.ones(Int, m_out)
+    ps     = CUDA.ones(m_out)
+    ps[1] = 0.0
+    ps[2] = 0.0
+    qs     = CUDA.rand(m_out)
+    sigmas = CUDA.rand(m_out)
+    taus   = CUDA.rand(m_out)
+    taus[1] = 100
+    taus[2] = 0.0001
+    taus[3] = 0.0001
+    taus[4] = 100
+    model  = BinomialModel(Ns, ps, qs, sigmas, taus);
+    ns = 5 .* CUDA.ones(Int, m_out, m_in)
+    ks = 4 .* CUDA.ones(Int, m_out, m_in)
+
+    propagate!(ns, ks, model, dt)
+
+    # When tau is much larger than dt, no vesicle is refilled
+    println(ns)
+    @test all(ns[1,:] .== 1)
+    @test all(ns[4,:] .== 1)
+    # When tau is much shorter than dt, all vesicles are refilled
+    @test all(ns[2,:] .== 10)
+    @test all(ns[3,:] .== 10)
+
+    # When the release probability is 0, no vesicle is released
+    @test all(ks[1,:] .== 0)
+    @test all(ks[2,:] .== 0)
+    # When the release probability is 1, all vesicles are released
+    @test all(ks[3,:] .== 10)
+    @test all(ks[4,:] .== 1)
+
+
 end
