@@ -1,36 +1,11 @@
-using CUDA
-using GPUArrays
-
-function likelihood_indices(k, model::BinomialModel, observation)
-    M_out, M_in = size(k)
-    r           = CuArray{Float32}(undef, M_in, M_out)
-    u           = CuArray{Float32}(undef, M_out)
-    v           = CuArray{Float32}(undef, M_in, M_out)
-    idx         = CuArray{Int}(undef, M_out, M_in)
-    rng = GPUArrays.default_rng(CuArray)
-    kernel  = @cuda launch=false kernel_likelihood_indices!(
-                u, v,
-                idx', k',
-                model.q, model.sigma,
-                Float32(observation),
-                r,
-                rng.state
-              )
-    config  = launch_configuration(kernel.fun)
-    threads = Base.min(M_out, config.threads, 256)
-    blocks  = cld(M_out, threads)
-    kernel(
-        u, v,
-        idx', k', # pass transposes for column-major indexing (gives a 3x speedup)
-        model.q, model.sigma,
-        observation,
-        r,
-        rng.state
-        ;
-        threads=threads, blocks=blocks
-    )
-    return u, idx
+function likelihood(k, model::BinomialModel, observation)
+    return mean(
+                exp.(-0.25f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
+                ./ (sqrt(2*Float32(pi)) .* model.sigma)
+           , dims = 2
+           )[:,1]
 end
+
 function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, randstates)
     # use column-index first (gives a 3x speedup)
     # kT stands for the transpose of k
@@ -71,4 +46,43 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         end
     end
     return nothing
+end
+
+function likelihood_indices(k, model::BinomialModel, observation)
+    M_out, M_in = size(k)
+    r           = CuArray{Float32}(undef, M_in, M_out)
+    u           = CuArray{Float32}(undef, M_out)
+    v           = CuArray{Float32}(undef, M_in, M_out)
+    idx         = CuArray{Int}(undef, M_out, M_in)
+
+    rng = GPUArrays.default_rng(CuArray)
+
+    kernel  = @cuda launch=false kernel_likelihood_indices!(
+                u, v,
+                idx', k',
+                model.q, model.sigma,
+                Float32(observation),
+                r,
+                rng.state
+              )
+    config  = launch_configuration(kernel.fun)
+    threads = Base.min(M_out, config.threads, 256)
+    blocks  = cld(M_out, threads)
+    kernel(
+        u, v,
+        idx', k', # pass transposes for column-major indexing (gives a 3x speedup)
+        model.q, model.sigma,
+        observation,
+        r,
+        rng.state
+        ;
+        threads=threads, blocks=blocks
+    )
+    return u, idx
+
+function likelihood_resample!(state::BinomialState, model, observation)
+    u, idx = likelihood_indices(state.k, model, observation)
+    state.n .= state.n[idx]
+    state.k .= state.k[idx]
+    return u
 end
