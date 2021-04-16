@@ -70,3 +70,11 @@ function cu_alias_sample!(a::CuArray{Ta}, wv::AbstractVector{Tw}, x::CuArray{Ta}
     gpu_call(kernel, x, (alias, ap, x, a, GPUArrays.default_rng(typeof(x)).state))
     x
 end
+
+function outer_resample!(state::BinomialState, u)
+    a = CuArray{Int64}(1:M_out)
+    x = CuArray{Int64}(zeros(Int64, M_out))
+    cu_alias_sample!(a,u,x)
+    state.n .= state.n[x,:]
+    state.k .= state.k[x,:]
+end

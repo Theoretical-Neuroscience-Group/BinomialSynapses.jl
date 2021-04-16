@@ -11,6 +11,9 @@ export BinomialModel
 # filtering part
 include("propagate.jl")
 include("likelihood.jl")
-export likelihood, propagate!
+export
+        likelihood,
+        propagate!,
+        outer_resample!
 
 end
