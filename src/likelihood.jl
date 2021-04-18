@@ -38,7 +38,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
             # scale random numbers (this is equivalent to normalizing v)
             rsample = r[i, j] * vsum
             # checking bindex <= M_in - 1 is redundant since
-            # v[M_in, j] = vsum and
+            # v[M_in, j] = vsum
             while rsample > v[bindex, j]
                 bindex += 1
             end

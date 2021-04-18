@@ -16,10 +16,10 @@ function kernel_outer_indices!(idx, u, r, randstates)
     end
     bindex = 1 # bin index
     @inbounds for i in 1:M_out
-        # scale random numbers (this is equivalent to normalizing v)
+        # scale random numbers (this is equivalent to normalizing u)
         rsample = r[i] * usum
-        # checking bindex <= M_in - 1 is redundant since
-        # v[M_in, j] = vsum and
+        # checking bindex <= M_out - 1 is redundant since
+        # u[M_in] = usum
         while rsample > u[bindex]
             bindex += 1
         end
