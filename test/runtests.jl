@@ -5,9 +5,10 @@ using BenchmarkTools
 using Test
 
 @testset "BinomialSynapses.jl" begin
-    include("types.jl")
+    include("models.jl")
     include("propagate.jl")
     include("likelihood.jl")
-    include("update_parameters.jl")
+    include("jitter.jl")
     include("resample.jl")
+    include("filter.jl")
 end

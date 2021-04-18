@@ -81,8 +81,8 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
     return u, idx
 end
 
-function likelihood_resample!(state::BinomialState, model, observation)
-    u, idx = likelihood_indices(state.k, model, observation)
+function likelihood_resample!(state::BinomialState, model, observation::BinomialObservation)
+    u, idx = likelihood_indices(state.k, model, observation.EPSP)
     M_out  = size(state.n, 1)
     @inbounds for i in 1:M_out
         state.n[i,:] .= state.n[i, idx[i,:]]

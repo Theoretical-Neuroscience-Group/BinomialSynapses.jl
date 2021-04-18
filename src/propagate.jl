@@ -15,3 +15,7 @@ function propagate!(n, k, model::AbstractBinomialModel, dt)
     BinomialGPU.rand_binomial!(k, count = n, prob = model.p)
     return n, k
 end
+
+function propagate!(state::BinomialState, model, dt)
+    propagate!(state.n, state.k, model, dt)
+end

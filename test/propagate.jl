@@ -24,13 +24,15 @@
     display(@benchmark CUDA.@sync propagate!($ns, $ks, $model, 0.1f0))
     println("")
 
+    println("")
+    println("Scalar operations warning expected here:")
     dt     = 0.1
     m_out  = 4
     m_in   = 4
     Ns     = 10 .* CUDA.ones(Int, m_out)
     ps     = CUDA.ones(m_out)
-    ps[1] = 0.0
-    ps[2] = 0.0
+    ps[1]  = 0.0
+    ps[2]  = 0.0
     qs     = CUDA.rand(m_out)
     sigmas = CUDA.rand(m_out)
     taus   = CUDA.rand(m_out)
@@ -57,6 +59,7 @@
     # When the release probability is 1, all vesicles are released
     @test all(ks[3,:] .== 10)
     @test all(ks[4,:] .== 1)
-
+    println("Scalar operations over")
+    println("-------------------------------------------------------------------------")
 
 end

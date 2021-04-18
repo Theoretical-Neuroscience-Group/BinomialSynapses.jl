@@ -126,7 +126,7 @@ function kernel_draw_theta!(
     return nothing
 end
 
-function update!(model::BinomialGridModel, jittering_kernel_width)
+function jitter!(model::BinomialGridModel, jittering_kernel_width)
     indices = hcat(model.Nind, model.pind, model.qind, model.sigmaind, model.tauind)
     M_out, n_parameters = size(indices)
     r       = CUDA.rand(M_out, n_parameters)

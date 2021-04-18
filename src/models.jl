@@ -66,3 +66,8 @@ struct BinomialState{T}
     n::T
     k::T
 end
+
+struct BinomialObservation{T1, T2}
+    EPSP::T1
+    dt::T2
+end

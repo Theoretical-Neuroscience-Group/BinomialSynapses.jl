@@ -5,24 +5,26 @@ using CUDA
 using GPUArrays
 using Statistics: mean
 
-# data structures and types
-include("types.jl")
+include("models.jl")
+        export
+               BinomialModel,
+               BinomialGridModel,
+               BinomialState,
+               BinomialObservation
 
-export
-       BinomialModel,
-       BinomialGridModel,
-       BinomialState
-
-# filtering part
 include("propagate.jl")
+export propagate!
+
 include("likelihood.jl")
-include("update_parameters.jl")
+export likelihood, likelihood_resample!
+
+include("jitter.jl")
+export jitter!
+
 include("resample.jl")
-export
-        likelihood,
-        likelihood_resample!,
-        propagate!,
-        update!,
-        outer_resample!
+export outer_resample!
+
+include("filter.jl")
+export NestedParticleFilter, NestedParticleState, update!
 
 end#module

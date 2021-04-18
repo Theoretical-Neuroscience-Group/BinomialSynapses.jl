@@ -34,7 +34,8 @@
         println("")
         println("Benchmarking function likelihood_resample!: should take about 4ms")
         state = BinomialState(ns, ks)
-        display(@benchmark CUDA.@sync likelihood_resample!($state, $model, 0.3f0))
+        obs   = BinomialObservation(0.3f0, 0.1f0)
+        display(@benchmark CUDA.@sync likelihood_resample!($state, $model, $obs))
         println("")
     end
     @testset "correctness of values" begin
