@@ -18,6 +18,6 @@ function update!(
     jitter!(model, filter.jittering_width)
     propagate!(state, model, observation.dt)
     u = likelihood_resample!(state, model, observation)
-    outer_resample!(state, u)
+    outer_resample!(state, model, u)
     return filterstate
 end

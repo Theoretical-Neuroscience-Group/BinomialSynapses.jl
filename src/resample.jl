@@ -43,8 +43,14 @@ function outer_indices(u)
     return idx
 end
 
-function outer_resample!(state::BinomialState, u)
+function outer_resample!(state::BinomialState, model::BinomialGridModel, u)
     idx = outer_indices(u)
     state.n .= state.n[idx,:]
     state.k .= state.k[idx,:]
+    model.Nind .= model.Nind[idx]
+    model.pind .= model.pind[idx]
+    model.qind .= model.qind[idx]
+    model.sigmaind .= model.sigmaind[idx]
+    model.tauind .= model.tauind[idx]
+    return state, model
 end
