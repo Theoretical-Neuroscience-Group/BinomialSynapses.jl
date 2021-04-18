@@ -6,11 +6,11 @@ using GPUArrays
 using Statistics: mean
 
 include("models.jl")
-        export
-               BinomialModel,
-               BinomialGridModel,
-               BinomialState,
-               BinomialObservation
+export
+       BinomialModel,
+       BinomialGridModel,
+       BinomialState,
+       BinomialObservation
 
 include("propagate.jl")
 export propagate!
