@@ -155,5 +155,6 @@ function update!(model::BinomialGridModel, jittering_kernel_width)
         threads=threads,
         blocks=blocks
     )
+    refresh!(model)
     return model
 end
