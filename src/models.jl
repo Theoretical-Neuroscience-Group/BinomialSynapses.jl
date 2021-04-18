@@ -43,7 +43,7 @@ function BinomialGridModel(
     )
 end
 
-function BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
+function BinomialGridModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
     Nrng     = CuArray(Int.(my_Nrng))
     prng     = CuArray(Float32.(my_prng))
     qrng     = CuArray(Float32.(my_qrng))
