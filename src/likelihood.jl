@@ -83,7 +83,9 @@ end
 
 function likelihood_resample!(state::BinomialState, model, observation)
     u, idx = likelihood_indices(state.k, model, observation)
-    state.n .= state.n[idx]
-    state.k .= state.k[idx]
+    for i in 1:M_out
+        state.n[i,:] .= state.n[i, idx[i,:]]
+        state.k[i,:] .= state.k[i, idx[i,:]]
+    end
     return u
 end

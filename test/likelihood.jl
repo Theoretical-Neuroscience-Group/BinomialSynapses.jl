@@ -31,6 +31,11 @@
         println("Benchmarking function likelihood_indices: should take about 4ms")
         display(@benchmark CUDA.@sync likelihood_indices($ks, $model, 0.3f0))
         println("")
+        println("")
+        println("Benchmarking function likelihood_resample!: should take about 4ms")
+        state = BinomialState(ns, ks)
+        display(@benchmark CUDA.@sync likelihood_resample!($state, $model, 0.3f0))
+        println("")
     end
     @testset "correctness of values" begin
         observation = 3.0
