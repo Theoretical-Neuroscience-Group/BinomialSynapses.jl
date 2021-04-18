@@ -81,12 +81,35 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
     return u, idx
 end
 
+function inner_resample_helper!(in, out, idx)
+    function kernel(in, out, idx)
+        j = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+        @inbounds if j <= size(out, 2)
+            @inbounds for i in 1:size(out, 1)
+                out[i, j] = in[i, idx[i, j]]
+            end
+        end#if
+        return nothing
+    end
+    kernel  = @cuda launch=false kernel(in, out, idx)
+    config  = launch_configuration(kernel.fun)
+    threads = Base.min(size(out, 2), config.threads, 256)
+    blocks  = cld(size(out, 2), threads)
+    kernel(in, out, idx; threads=threads, blocks=blocks)
+    return out
+end
+
+function inner_resample_helper!(in, idx)
+    out = similar(in)
+    inner_resample_helper!(in, out, idx)
+    in .= out
+    return in
+end
+
 function likelihood_resample!(state::BinomialState, model, observation::BinomialObservation)
     u, idx = likelihood_indices(state.k, model, observation.EPSP)
     M_out  = size(state.n, 1)
-    @inbounds for i in 1:M_out
-        state.n[i,:] .= state.n[i, idx[i,:]]
-        state.k[i,:] .= state.k[i, idx[i,:]]
-    end
+    inner_resample_helper!(state.n, idx)
+    inner_resample_helper!(state.k, idx)
     return u
 end
