@@ -13,16 +13,23 @@ To install this package in Julia 1.5 or 1.6, type
 
 ## Usage
 
-User API is work in progress. This is a sketch for the function performing a single update of the nested particle filter:
+User API is work in progress. This is a minimal working example for a basic setup and performing a single update of the nested particle filter:
 ```julia
-function update!(filterstate, observation, filter)
-    state = filterstate.state
-    model = filterstate.model
+using BinomialSynapses, CUDA
 
-    update!(model, filter.jittering_width)
-    propagate!(state, model, observation.dt)
-    u = likelihood_resample!(state, model, observation)
-    outer_resample!(state, u)
-    return filterstate
-end
+state = BinomialState(128, 1024, 1024)
+model = BinomialGridModel(
+    1024,
+    1:5,
+    LinRange(0.05,0.95,5),
+    LinRange(0.1,2,5),
+    LinRange(0.05,2,5),
+    LinRange(0.05,2,5)
+)
+
+fstate = NestedParticleState(state, model)
+filter = NestedParticleFilter(12)
+obs    = BinomialObservation(0.3f0, 0.1f0)
+
+update!(fstate, obs, filter)
 ```

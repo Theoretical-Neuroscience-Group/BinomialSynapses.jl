@@ -43,6 +43,25 @@ function BinomialGridModel(
     )
 end
 
+function BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
+    Nrng     = CuArray(Int.(my_Nrng))
+    prng     = CuArray(Float32.(my_prng))
+    qrng     = CuArray(Float32.(my_qrng))
+    sigmarng = CuArray(Float32.(my_sigmarng))
+    taurng   = CuArray(Float32.(my_taurng))
+
+    Nind     = cu(rand(1:length(Nrng),     m_out))
+    pind     = cu(rand(1:length(prng),     m_out))
+    qind     = cu(rand(1:length(qrng),     m_out))
+    sigmaind = cu(rand(1:length(sigmarng), m_out))
+    tauind   = cu(rand(1:length(taurng),   m_out))
+
+    return BinomialGridModel(
+                Nind, pind, qind, sigmaind, tauind,
+                Nrng, prng, qrng, sigmarng, taurng
+            )
+end
+
 function refresh!(model::BinomialGridModel)
     model.N     .= model.Nrng[model.Nind]
     model.p     .= model.prng[model.pind]
@@ -65,6 +84,12 @@ end
 struct BinomialState{T}
     n::T
     k::T
+end
+
+function BinomialState(nmax::Int, m_out::Int, m_in::Int)
+    n = CuArray(rand(1:nmax, m_out, m_in))
+    k = CUDA.zeros(Int, m_out, m_in)
+    return BinomialState(n, k)
 end
 
 struct BinomialObservation{T1, T2}
