@@ -27,7 +27,7 @@
     obs    = BinomialObservation(0.3f0, 0.1f0)
 
     println("")
-    println("Benchmarking one filter step: should take under 10ms")
+    println("Benchmarking one filter update step: should take less than 10ms")
     display(@benchmark CUDA.@sync update!($fstate, $obs, $filter))
     println("")
 end
