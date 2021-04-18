@@ -19,6 +19,14 @@
     for i in 1:100
         model_old = deepcopy(model)
         jitter!(model, 12)
+        # check whether new indices are in the allowed range of indices
+        @test all(1 .<= model.Nind     .<= length(Nrng))
+        @test all(1 .<= model.pind     .<= length(prng))
+        @test all(1 .<= model.qind     .<= length(qrng))
+        @test all(1 .<= model.sigmaind .<= length(sigmarng))
+        @test all(1 .<= model.tauind   .<= length(taurng))
+
+        # check whether new indices are different by at most one from old indices
         @test all(abs.(model.Nind     .- model_old.Nind)     .<= 1)
         @test all(abs.(model.pind     .- model_old.pind)     .<= 1)
         @test all(abs.(model.qind     .- model_old.qind)     .<= 1)
