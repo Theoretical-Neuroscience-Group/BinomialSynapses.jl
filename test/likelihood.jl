@@ -40,23 +40,16 @@
         M_in = 4
         Ns = 10 .* CUDA.ones(Int, M_out)
         ps = CUDA.rand(M_out)
-        qs = CUDA.ones(M_out)
-        println("")
-        println("Scalar operations warning expected here:")
-        qs[3] = 3.0
-        qs[4] = 3.0
-        qs[6] = 3.0
+        qs = cu([1f0, 1f0, 3f0, 3f0, 1f0, 3f0])
         sigmas = Float32(0.1) .* CUDA.ones(M_out)
-        taus = CUDA.rand(M_out)
-        model = BinomialModel(Ns, ps, qs, sigmas, taus);
+        taus   = CUDA.rand(M_out)
+        model  = BinomialModel(Ns, ps, qs, sigmas, taus);
 
-        ks = CUDA.ones(Int, M_out, M_in)
-        ks[1,:] = [3,3,3,3]
-        ks[4,:] = [3,3,3,3]
-        ks[5,1] = 3
-        ks[6,2:4] = [3,3,3]
+        ks = cu([3 3 3 3; 1 1 1 1; 1 1 1 1; 3 3 3 3; 3 1 1 1; 1 3 3 3])
 
-        u,idx = likelihood_indices(ks, model, observation)
+        u, idx = likelihood_indices(ks, model, observation)
+        u = Array(u)
+        idx = Array(idx)
 
         # Combinations of q and k that correspond to the observation should have
         # a high likelihood
@@ -70,7 +63,5 @@
 
         # Resampling should pick the particles that match q and the observation
         @test all(idx[5:6,:].==1)
-        println("Scalar operations over")
-        println("-------------------------------------------------------------------------")
     end
 end

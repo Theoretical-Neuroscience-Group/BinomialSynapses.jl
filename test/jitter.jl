@@ -1,30 +1,24 @@
-@testset "update!" begin
-    M_out    = 5
-    Nrng     = CuArray(1:5)
-    prng     = CuArray(Float32.(LinRange(0.05,0.95,5)))
-    qrng     = CuArray(Float32.(LinRange(0.1,2,5)))
-    sigmarng = CuArray(Float32.(LinRange(0.05,2,5)))
-    taurng   = CuArray(Float32.(LinRange(0.05,2,5)))
-    Nind     = CUDA.ones(Int, M_out)
-    pind     = CUDA.ones(Int, M_out)
-    qind     = CUDA.ones(Int, M_out)
-    sigmaind = CUDA.ones(Int, M_out)
-    tauind   = CUDA.ones(Int, M_out)
-
+@testset "jitter!" begin
+    m_out = 5
     model = BinomialGridModel(
-        Nind, pind, qind, sigmaind, tauind,
-        Nrng, prng, qrng, sigmarng, taurng
+        m_out,
+        1:5,
+        LinRange(0.05,0.95,5),
+        LinRange(0.1,2,5),
+        LinRange(0.05,2,5),
+        LinRange(0.05,2,5)
     )
 
     for i in 1:100
         model_old = deepcopy(model)
         jitter!(model, 12)
+        
         # check whether new indices are in the allowed range of indices
-        @test all(1 .<= model.Nind     .<= length(Nrng))
-        @test all(1 .<= model.pind     .<= length(prng))
-        @test all(1 .<= model.qind     .<= length(qrng))
-        @test all(1 .<= model.sigmaind .<= length(sigmarng))
-        @test all(1 .<= model.tauind   .<= length(taurng))
+        @test all(1 .<= model.Nind     .<= length(model.Nrng))
+        @test all(1 .<= model.pind     .<= length(model.prng))
+        @test all(1 .<= model.qind     .<= length(model.qrng))
+        @test all(1 .<= model.sigmaind .<= length(model.sigmarng))
+        @test all(1 .<= model.tauind   .<= length(model.taurng))
 
         # check whether new indices are different by at most one from old indices
         @test all(abs.(model.Nind     .- model_old.Nind)     .<= 1)
@@ -34,21 +28,14 @@
         @test all(abs.(model.tauind   .- model_old.tauind)   .<= 1)
     end
 
-    M_out    = 1024
-    Nrng     = CuArray(1:5)
-    prng     = CuArray(Float32.(LinRange(0.05,0.95,5)))
-    qrng     = CuArray(Float32.(LinRange(0.1,2,5)))
-    sigmarng = CuArray(Float32.(LinRange(0.05,2,5)))
-    taurng   = CuArray(Float32.(LinRange(0.05,2,5)))
-    Nind     = CUDA.ones(Int, M_out)
-    pind     = CUDA.ones(Int, M_out)
-    qind     = CUDA.ones(Int, M_out)
-    sigmaind = CUDA.ones(Int, M_out)
-    tauind   = CUDA.ones(Int, M_out)
-
+    m_out = 1024
     model = BinomialGridModel(
-        Nind, pind, qind, sigmaind, tauind,
-        Nrng, prng, qrng, sigmarng, taurng
+        m_out,
+        1:5,
+        LinRange(0.05,0.95,5),
+        LinRange(0.1,2,5),
+        LinRange(0.05,2,5),
+        LinRange(0.05,2,5)
     )
 
     println("")
