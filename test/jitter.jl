@@ -44,7 +44,7 @@
     )
 
     println("")
-    println("Benchmarking function update!: should take about 60μs")
+    println("Benchmarking function jitter!: should take about 60μs")
     display(@benchmark CUDA.@sync jitter!($model, 12))
     println("")
 end
