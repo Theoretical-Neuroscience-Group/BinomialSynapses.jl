@@ -1,4 +1,4 @@
-function likelihood(k, model::BinomialModel, observation)
+function likelihood(k, model::AbstractBinomialModel, observation)
     return mean(
                 exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
                 ./ (sqrt(2*Float32(pi)) .* model.sigma)
@@ -48,7 +48,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
     return nothing
 end
 
-function likelihood_indices(k, model::BinomialModel, observation)
+function likelihood_indices(k, model::AbstractBinomialModel, observation)
     M_out, M_in = size(k)
     r           = CuArray{Float32}(undef, M_in, M_out)
     u           = CuArray{Float32}(undef, M_out)

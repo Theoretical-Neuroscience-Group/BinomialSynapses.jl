@@ -1,6 +1,6 @@
 relu(x) = max(x, 0)
 
-function propagate!(n, k, model::BinomialModel, dt)
+function propagate!(n, k, model::AbstractBinomialModel, dt)
     # propagate the hidden states n, k by one timestep
 
     # refill counts and probabilities
