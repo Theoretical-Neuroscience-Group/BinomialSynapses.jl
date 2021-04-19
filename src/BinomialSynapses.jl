@@ -2,18 +2,25 @@ module BinomialSynapses
 
 using BinomialGPU
 using CUDA
+using Distributions: Binomial, Exponential, Normal
 using GPUArrays
 using Statistics: mean
 
 include("models.jl")
 export
+       AbstractBinomialModel,
        BinomialModel,
        BinomialGridModel,
+       ScalarBinomialModel,
        BinomialState,
+       ScalarBinomialState,
        BinomialObservation
 
 include("propagate.jl")
 export propagate!
+
+include("emission.jl")
+export propagate_emit!
 
 include("likelihood.jl")
 export likelihood, likelihood_resample!

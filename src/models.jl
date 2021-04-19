@@ -76,13 +76,21 @@ function BinomialModel(model::BinomialGridModel)
    return BinomialModel(model.N, model.p, model.q, model.sigma, model.tau)
 end
 
-function BinomialModel(nmax::Int, m_out::Int)
-    Ns     = CuArray(rand(1:nmax, m_out))
-    ps     = CUDA.rand(m_out)
-    qs     = CUDA.rand(m_out)
-    sigmas = CUDA.rand(m_out)
-    taus   = CUDA.rand(m_out)
-    return BinomialModel(Ns, ps, qs, sigmas, taus)
+function BinomialModel(nmax::Int, m_out::Int, device = :gpu)
+    if device == :gpu
+        N     = CuArray(rand(1:nmax, m_out))
+        p     = CUDA.rand(m_out)
+        q     = CUDA.rand(m_out)
+        sigma = CUDA.rand(m_out)
+        tau   = CUDA.rand(m_out)
+    elseif device == :cpu
+        N     = rand(1:nmax, m_out)
+        p     = rand(m_out)
+        q     = rand(m_out)
+        sigma = rand(m_out)
+        tau   = rand(m_out)
+    end
+    return BinomialModel(N, p, q, sigma, tau)
 end
 
 function BinomialModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
@@ -90,15 +98,56 @@ function BinomialModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_sigmarng, my_ta
     return BinomialModel(gridmodel)
 end
 
+function ScalarBinomialModel(nmax, device = :cpu)
+    return BinomialModel(nmax, 1, device)
+end
+
+function ScalarBinomialModel(N::Int, p, q, sigma, tau, device = :cpu)
+    if device == :cpu
+        Ns     = N .* ones(Int, 1)
+        ps     = p .* ones(1)
+        qs     = q .* ones(1)
+        sigmas = sigma .* ones(1)
+        taus   = tau .* ones(1)
+    elseif device == :gpu
+        Ns     = N .* CUDA.ones(Int, 1)
+        ps     = Float32(p) .* CUDA.ones(1)
+        qs     = Float32(q) .* CUDA.ones(1)
+        sigmas = Float32(sigma) .* CUDA.ones(1)
+        taus   = Float32(tau) .* CUDA.ones(1)
+    end
+    return BinomialModel(Ns, ps, qs, sigmas, taus)
+end
+
 struct BinomialState{T}
     n::T
     k::T
 end
 
-function BinomialState(nmax::Int, m_out::Int, m_in::Int)
-    n = CuArray(rand(1:nmax, m_out, m_in))
-    k = CUDA.zeros(Int, m_out, m_in)
+function BinomialState(nmax::Int, m_out::Int, m_in::Int, device = :gpu)
+    if device == :gpu
+        n = CuArray(rand(1:nmax, m_out, m_in))
+        k = CUDA.zeros(Int, m_out, m_in)
+    elseif device == :cpu
+        n = rand(1:nmax, m_out, m_in)
+        k = zeros(Int, m_out, m_in)
+    end
     return BinomialState(n, k)
+end
+
+function ScalarBinomialState(nmax::Int, device = :cpu)
+    return BinomialState(nmax, 1, 1, device)
+end
+
+function ScalarBinomialState(n::Int, k::Int, device = :cpu)
+    if device == :cpu
+        ns     = n .* ones(Int, 1, 1)
+        ks     = k .* ones(Int, 1, 1)
+    elseif device == :gpu
+        ns     = n .* CUDA.ones(Int, 1, 1)
+        ks     = k .* CUDA.ones(Int, 1, 1)
+    end
+    return BinomialState(ns, ks)
 end
 
 struct BinomialObservation{T1, T2}
