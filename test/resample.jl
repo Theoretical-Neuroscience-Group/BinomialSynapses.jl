@@ -31,7 +31,7 @@
             outer_indices!(u)
             uu = Array(u)
             for j in 1:4
-                if uu[j] == 2 or uu[j] == 3
+                if uu[j] == 2 || uu[j] == 3
                     count += 1
                 end
             end
