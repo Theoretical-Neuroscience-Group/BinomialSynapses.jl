@@ -17,16 +17,16 @@ User API is work in progress. This is a minimal working example for running the 
 ```julia
 using BinomialSynapses
 
-hidden = ScalarBinomialState(125, 62)
-hmodel = ScalarBinomialModel(128, 0.1, 0.2, 0.3, 0.4)
-fstate = NestedParticleState(16, 16, 1:5, LinRange(0.05,0.95,5), LinRange(0.1,2,5), LinRange(0.05,2,5), LinRange(0.05,2,5))
-filter = NestedParticleFilter(12)
+hidden = ScalarBinomialState(10, 3)
+hmodel = ScalarBinomialModel(10, 0.85, 1.0, 0.2, 0.2)
+fstate = NestedParticleState(1024, 1024, 1:20, LinRange(0.05,0.95,5), LinRange(0.1,2,5), LinRange(0.05,2,5), LinRange(0.05,2,5))
+filter = NestedParticleFilter(4)
 
 T = 1000
 for i in 1:T
-    println("t= ", i)
-    obs = propagate_emit!(hidden, hmodel)
+    #println("t= ", i)
+    obs = propagate_emit!(hidden, hmodel, λ = 0.121)
     update!(fstate, obs, filter)
-    # add output
+    # now save whatever you need to save
 end
 ```
