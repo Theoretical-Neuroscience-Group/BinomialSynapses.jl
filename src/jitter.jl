@@ -2,12 +2,12 @@ using CUDA
 
 function jitter!(model::BinomialGridModel, width)
     prob = Float32(1/width)
-    
-    jitter!(model.Nind,     length(model.Nrng),     prob)
-    jitter!(model.pind,     length(model.prng),     prob)
-    jitter!(model.qind,     length(model.qrng),     prob)
-    jitter!(model.sigmaind, length(model.sigmarng), prob)
-    jitter!(model.tauind,   length(model.taurng),   prob)
+
+    jitter!(model.Nind, length(model.Nrng), prob)
+    jitter!(model.pind, length(model.prng), prob)
+    jitter!(model.qind, length(model.qrng), prob)
+    jitter!(model.σind, length(model.σrng), prob)
+    jitter!(model.τind, length(model.τrng), prob)
 
     refresh!(model)
     return model

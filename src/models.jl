@@ -4,97 +4,97 @@ struct BinomialModel{T1,T2} <: AbstractBinomialModel
     N::T1
     p::T2
     q::T2
-    sigma::T2
-    tau::T2
+    σ::T2
+    τ::T2
 end
 
 struct BinomialGridModel{T1, T2, T3, T4, T5} <: AbstractBinomialModel
     Nind::T1
     pind::T1
     qind::T1
-    sigmaind::T1
-    tauind::T1
+    σind::T1
+    τind::T1
     Nrng::T2
     prng::T3
     qrng::T3
-    sigmarng::T3
-    taurng::T3
+    σrng::T3
+    τrng::T3
     N::T4
     p::T5
     q::T5
-    sigma::T5
-    tau::T5
+    σ::T5
+    τ::T5
 end
 
 function BinomialGridModel(
-    Nind, pind, qind, sigmaind, tauind,
-    Nrng, prng, qrng, sigmarng, taurng
+    Nind, pind, qind, σind, τind,
+    Nrng, prng, qrng, σrng, τrng
 )
     N     = Nrng[Nind]
     p     = prng[pind]
     q     = qrng[qind]
-    sigma = sigmarng[sigmaind]
-    tau   = taurng[tauind]
+    σ = σrng[σind]
+    τ   = τrng[τind]
 
     return BinomialGridModel(
-        Nind, pind, qind, sigmaind, tauind,
-        Nrng, prng, qrng, sigmarng, taurng,
-        N,    p,    q,    sigma,    tau
+        Nind, pind, qind, σind, τind,
+        Nrng, prng, qrng, σrng, τrng,
+        N,    p,    q,    σ,    τ
     )
 end
 
-function BinomialGridModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
-    Nrng     = CuArray(Int.(my_Nrng))
-    prng     = CuArray(Float32.(my_prng))
-    qrng     = CuArray(Float32.(my_qrng))
-    sigmarng = CuArray(Float32.(my_sigmarng))
-    taurng   = CuArray(Float32.(my_taurng))
+function BinomialGridModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+    Nrng = CuArray(Int.(my_Nrng))
+    prng = CuArray(Float32.(my_prng))
+    qrng = CuArray(Float32.(my_qrng))
+    σrng = CuArray(Float32.(my_σrng))
+    τrng = CuArray(Float32.(my_τrng))
 
-    Nind     = cu(rand(1:length(Nrng),     m_out))
-    pind     = cu(rand(1:length(prng),     m_out))
-    qind     = cu(rand(1:length(qrng),     m_out))
-    sigmaind = cu(rand(1:length(sigmarng), m_out))
-    tauind   = cu(rand(1:length(taurng),   m_out))
+    Nind = cu(rand(1:length(Nrng), m_out))
+    pind = cu(rand(1:length(prng), m_out))
+    qind = cu(rand(1:length(qrng), m_out))
+    σind = cu(rand(1:length(σrng), m_out))
+    τind = cu(rand(1:length(τrng), m_out))
 
     return BinomialGridModel(
-                Nind, pind, qind, sigmaind, tauind,
-                Nrng, prng, qrng, sigmarng, taurng
+                Nind, pind, qind, σind, τind,
+                Nrng, prng, qrng, σrng, τrng
             )
 end
 
 function refresh!(model::BinomialGridModel)
-    model.N     .= model.Nrng[model.Nind]
-    model.p     .= model.prng[model.pind]
-    model.q     .= model.qrng[model.qind]
-    model.sigma .= model.sigmarng[model.sigmaind]
-    model.tau   .= model.taurng[model.tauind]
+    model.N .= model.Nrng[model.Nind]
+    model.p .= model.prng[model.pind]
+    model.q .= model.qrng[model.qind]
+    model.σ .= model.σrng[model.σind]
+    model.τ .= model.τrng[model.τind]
     return model
 end
 
 # special outer constructor to convert a BinomialGridModel into a BinomialModel
 function BinomialModel(model::BinomialGridModel)
-   return BinomialModel(model.N, model.p, model.q, model.sigma, model.tau)
+   return BinomialModel(model.N, model.p, model.q, model.σ, model.τ)
 end
 
 function BinomialModel(nmax::Int, m_out::Int, device = :gpu)
     if device == :gpu
-        N     = CuArray(rand(1:nmax, m_out))
-        p     = CUDA.rand(m_out)
-        q     = CUDA.rand(m_out)
-        sigma = CUDA.rand(m_out)
-        tau   = CUDA.rand(m_out)
+        N = CuArray(rand(1:nmax, m_out))
+        p = CUDA.rand(m_out)
+        q = CUDA.rand(m_out)
+        σ = CUDA.rand(m_out)
+        τ = CUDA.rand(m_out)
     elseif device == :cpu
-        N     = rand(1:nmax, m_out)
-        p     = rand(m_out)
-        q     = rand(m_out)
-        sigma = rand(m_out)
-        tau   = rand(m_out)
+        N = rand(1:nmax, m_out)
+        p = rand(m_out)
+        q = rand(m_out)
+        σ = rand(m_out)
+        τ = rand(m_out)
     end
-    return BinomialModel(N, p, q, sigma, tau)
+    return BinomialModel(N, p, q, σ, τ)
 end
 
-function BinomialModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
-    gridmodel = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
+function BinomialModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+    gridmodel = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
     return BinomialModel(gridmodel)
 end
 
@@ -102,21 +102,21 @@ function ScalarBinomialModel(nmax, device = :cpu)
     return BinomialModel(nmax, 1, device)
 end
 
-function ScalarBinomialModel(N::Int, p, q, sigma, tau, device = :cpu)
+function ScalarBinomialModel(N::Int, p, q, σ, τ, device = :cpu)
     if device == :cpu
-        Ns     = N .* ones(Int, 1)
-        ps     = p .* ones(1)
-        qs     = q .* ones(1)
-        sigmas = sigma .* ones(1)
-        taus   = tau .* ones(1)
+        Ns = N .* ones(Int, 1)
+        ps = p .* ones(1)
+        qs = q .* ones(1)
+        σs = σ .* ones(1)
+        τs = τ .* ones(1)
     elseif device == :gpu
-        Ns     = N .* CUDA.ones(Int, 1)
-        ps     = Float32(p) .* CUDA.ones(1)
-        qs     = Float32(q) .* CUDA.ones(1)
-        sigmas = Float32(sigma) .* CUDA.ones(1)
-        taus   = Float32(tau) .* CUDA.ones(1)
+        Ns = N .* CUDA.ones(Int, 1)
+        ps = Float32(p) .* CUDA.ones(1)
+        qs = Float32(q) .* CUDA.ones(1)
+        σs = Float32(σ) .* CUDA.ones(1)
+        τs = Float32(τ) .* CUDA.ones(1)
     end
-    return BinomialModel(Ns, ps, qs, sigmas, taus)
+    return BinomialModel(Ns, ps, qs, σs, τs)
 end
 
 struct BinomialState{T}

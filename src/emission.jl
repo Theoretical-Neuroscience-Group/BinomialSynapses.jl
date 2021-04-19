@@ -4,15 +4,15 @@ function propagate_emit!(state::BinomialState{<:Array}, model::AbstractBinomialM
         return nothing
     else
         if dt == nothing
-            delta = rand(Exponential(λ))
+            δ = rand(Exponential(λ))
         else
-            delta = dt
+            δ = dt
         end
-        propagate!(state, model, delta)
-        q     = model.q[1]
-        sigma = model.sigma[1]
-        k     = state.k[1,1]
-        EPSP  = rand(Normal(q*k, sigma))
-        return BinomialObservation(EPSP, delta)
+        propagate!(state, model, δ)
+        q = model.q[1]
+        σ = model.σ[1]
+        k = state.k[1,1]
+        EPSP = rand(Normal(q*k, σ))
+        return BinomialObservation(EPSP, δ)
     end
 end

@@ -8,7 +8,7 @@ function propagate!(n::AbstractArray, k::AbstractArray, model::AbstractBinomialM
         @inbounds for j in 1:m_in
             # refill counts and probabilities
             n[i, j]  = relu(model.N[i] - n[i, j] + k[i, j])
-            p_refill = 1 - exp(-dt / model.tau[i])
+            p_refill = 1 - exp(-dt / model.τ[i])
 
             # draw vesicles to be refilled, update n
             k[i, j] = rand(Binomial(n[i, j], p_refill))
@@ -26,7 +26,7 @@ function propagate!(n::AnyCuArray, k::AnyCuArray, model::AbstractBinomialModel, 
 
     # refill counts and probabilities
     @. n     = relu(model.N - n + k)
-    p_refill = @. 1 - exp(-dt / model.tau)
+    p_refill = @. 1 - exp(-dt / model.τ)
 
     # draw vesicles to be refilled, update n
     BinomialGPU.rand_binomial!(k, count = n, prob = p_refill)

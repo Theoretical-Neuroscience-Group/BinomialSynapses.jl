@@ -2,14 +2,14 @@
     @testset "consistency" begin
         using BinomialSynapses: likelihood_indices
 
-        m_out  = 1024
-        m_in   = 1024
-        Ns     = CuArray(rand(1:128, m_out))
-        ps     = CUDA.rand(m_out)
-        qs     = CUDA.rand(m_out)
-        sigmas = CUDA.rand(m_out)
-        taus   = CUDA.rand(m_out)
-        model  = BinomialModel(Ns, ps, qs, sigmas, taus);
+        m_out = 1024
+        m_in  = 1024
+        Ns = CuArray(rand(1:128, m_out))
+        ps = CUDA.rand(m_out)
+        qs = CUDA.rand(m_out)
+        σs = CUDA.rand(m_out)
+        τs = CUDA.rand(m_out)
+        model = BinomialModel(Ns, ps, qs, σs, τs);
 
         ns = CuArray(rand(1:128, m_out, m_in))
         ks = CUDA.zeros(Int, m_out, m_in);
@@ -41,9 +41,9 @@
         Ns = 10 .* CUDA.ones(Int, M_out)
         ps = CUDA.rand(M_out)
         qs = cu([1f0, 1f0, 3f0, 3f0, 1f0, 3f0])
-        sigmas = Float32(0.1) .* CUDA.ones(M_out)
-        taus   = CUDA.rand(M_out)
-        model  = BinomialModel(Ns, ps, qs, sigmas, taus);
+        σs = Float32(0.1) .* CUDA.ones(M_out)
+        τs = CUDA.rand(M_out)
+        model = BinomialModel(Ns, ps, qs, σs, τs);
 
         ks = cu([3 3 3 3; 1 1 1 1; 1 1 1 1; 3 3 3 3; 3 1 1 1; 1 3 3 3])
 

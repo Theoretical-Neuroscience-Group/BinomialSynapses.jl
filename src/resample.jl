@@ -51,7 +51,7 @@ function outer_resample!(state::BinomialState, model::BinomialGridModel, u)
     model.Nind .= model.Nind[idx]
     model.pind .= model.pind[idx]
     model.qind .= model.qind[idx]
-    model.sigmaind .= model.sigmaind[idx]
-    model.tauind .= model.tauind[idx]
+    model.σind .= model.σind[idx]
+    model.τind .= model.τind[idx]
     return state, model
 end

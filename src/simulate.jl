@@ -6,8 +6,8 @@ struct NestedFilterSimulation{T1, T2, T3, T4}
 end
 
 function NestedFilterSimulation(
-    N, p, q, sigma, tau,
-    Nrng, prng, qrng, sigmarng, taurng,
+    N, p, q, σ, τ,
+    Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
     λ = 0.121,
     dt = nothing
@@ -17,7 +17,7 @@ function NestedFilterSimulation(
     hstate = ScalarBinomialState(N, 0)
     fstate = NestedParticleState(
                 m_out, m_in,
-                Nrng, prng, qrng, sigmarng, taurng
+                Nrng, prng, qrng, σrng, τrng
              )
     return NestedFilterSimulation(hmodel, filter, hstate, fstate)
 end

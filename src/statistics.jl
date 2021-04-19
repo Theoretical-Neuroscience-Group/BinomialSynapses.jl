@@ -5,12 +5,12 @@ function MAP(model::BinomialModel)
                 :N => mode(Array(model.N)),
                 :p => mode(Array(model.p)),
                 :q => mode(Array(model.q)),
-                :σ => mode(Array(model.sigma)),
-                :τ => mode(Array(model.tau))
+                :σ => mode(Array(model.σ)),
+                :τ => mode(Array(model.τ))
         )
 end
 
 function MAP(model::BinomialGridModel)
         refresh!(model)
-        MAP(BinomialModel(model.N, model.p, model.q, model.sigma, model.tau))
+        MAP(BinomialModel(model.N, model.p, model.q, model.σ, model.τ))
 end

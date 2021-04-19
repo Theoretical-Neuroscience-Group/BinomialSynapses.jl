@@ -1,12 +1,12 @@
 function likelihood(k, model::AbstractBinomialModel, observation)
     return mean(
-                exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
-                ./ (sqrt(2*Float32(pi)) .* model.sigma)
+                exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.σ).^2)
+                ./ (sqrt(2*Float32(pi)) .* model.σ)
            , dims = 2
            )[:,1]
 end
 
-function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, randstates)
+function kernel_likelihood_indices!(u, v, idxT, kT, q, σ, observation, r, randstates)
     # use column-index first (gives a 3x speedup)
     # kT stands for the transpose of k
     # idxT stands for the transpose of idx
@@ -17,7 +17,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         CurMax = 1f0
         for i in 1:M_in
             # omitting normalization constant here; it is only needed for u
-            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / sigma[j])^2)
+            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / σ[j])^2)
             vsum   += vi
             v[i, j] = vsum
             # sample descending sequence of sorted random numbers
@@ -31,7 +31,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         end
         # compute average likelihood across inner particles
         # (with normalization constant that was omitted from v for speed)
-        u[j] = vsum / (M_in * CUDA.sqrt(2*Float32(pi)) * sigma[j])
+        u[j] = vsum / (M_in * CUDA.sqrt(2*Float32(pi)) * σ[j])
         # O(n) binning algorithm for sorted samples
         bindex = 1 # bin index
         @inbounds for i in 1:M_in
@@ -60,7 +60,7 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
     kernel  = @cuda launch=false kernel_likelihood_indices!(
                 u, v,
                 idx', k',
-                model.q, model.sigma,
+                model.q, model.σ,
                 Float32(observation),
                 r,
                 rng.state
@@ -71,7 +71,7 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
     kernel(
         u, v,
         idx', k', # pass transposes for column-major indexing (gives a 3x speedup)
-        model.q, model.sigma,
+        model.q, model.σ,
         observation,
         r,
         rng.state

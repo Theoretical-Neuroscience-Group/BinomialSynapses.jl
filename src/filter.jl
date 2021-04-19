@@ -9,9 +9,9 @@ end
 
 function NestedParticleState(
     m_out::Int, m_in::Int,
-    my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng
+    my_Nrng, my_prng, my_qrng, my_σrng, my_τrng
 )
-    model = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
+    model = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
     n     = repeat(model.N, 1, m_in)
     k     = CUDA.zeros(Int, m_out, m_in)
     state = BinomialState(n, k)
