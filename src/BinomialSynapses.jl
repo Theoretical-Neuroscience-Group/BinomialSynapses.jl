@@ -36,6 +36,9 @@ export outer_resample!
 include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
 
+include("simulate.jl")
+export NestedFilterSimulation, run!
+
 include("visualize.jl")
 export posterior_plot
 
