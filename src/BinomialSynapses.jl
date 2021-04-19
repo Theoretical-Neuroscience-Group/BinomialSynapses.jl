@@ -4,6 +4,8 @@ using BinomialGPU
 using CUDA
 using Distributions: Binomial, Exponential, Normal
 using GPUArrays
+using LaTeXStrings
+using Plots
 using Statistics: mean
 
 include("models.jl")
@@ -33,5 +35,8 @@ export outer_resample!
 
 include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
+
+include("visualize.jl")
+export posterior_plot
 
 end#module
