@@ -73,12 +73,21 @@ end
 
 # special outer constructor to convert a BinomialGridModel into a BinomialModel
 function BinomialModel(model::BinomialGridModel)
-   N     = model.Nrng[model.Nind]
-   p     = model.prng[model.pind]
-   q     = model.qrng[model.qind]
-   sigma = model.sigmarng[model.sigmaind]
-   tau   = model.taurng[model.tauind]
-   return BinomialModel(N, p, q, sigma, tau)
+   return BinomialModel(model.N, model.p, model.q, model.sigma, model.tau)
+end
+
+function BinomialModel(nmax::Int, m_out::Int)
+    Ns     = CuArray(rand(1:nmax, m_out))
+    ps     = CUDA.rand(m_out)
+    qs     = CUDA.rand(m_out)
+    sigmas = CUDA.rand(m_out)
+    taus   = CUDA.rand(m_out)
+    return BinomialModel(Ns, ps, qs, sigmas, taus)
+end
+
+function BinomialModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
+    gridmodel = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_sigmarng, my_taurng)
+    return BinomialModel(gridmodel)
 end
 
 struct BinomialState{T}
