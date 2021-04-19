@@ -39,3 +39,5 @@ function run!(sim::NestedFilterSimulation; T::Int)
     end
     return times, epsps
 end
+
+MAP(sim::NestedFilterSimulation) = MAP(sim.fstate.model)

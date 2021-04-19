@@ -7,6 +7,7 @@ using GPUArrays
 using LaTeXStrings
 using Plots
 using Statistics: mean
+using StatsBase: mode
 
 include("models.jl")
 export
@@ -35,6 +36,9 @@ export outer_resample!
 
 include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
+
+include("statistics.jl")
+export MAP
 
 include("simulate.jl")
 export NestedFilterSimulation, run!

@@ -12,4 +12,7 @@ using Test
     include("jitter.jl")
     include("resample.jl")
     include("filter.jl")
+    include("statistics.jl")
+
+    include("_integration.jl")
 end
