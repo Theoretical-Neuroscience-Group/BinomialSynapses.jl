@@ -7,6 +7,7 @@ using Test
 @testset "BinomialSynapses.jl" begin
     include("models.jl")
     include("propagate.jl")
+    include("emission.jl")
     include("likelihood.jl")
     include("jitter.jl")
     include("resample.jl")

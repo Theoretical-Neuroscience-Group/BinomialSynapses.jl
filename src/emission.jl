@@ -9,10 +9,10 @@ function propagate_emit!(state::BinomialState{<:Array}, model::AbstractBinomialM
             delta = dt
         end
         propagate!(state, model, delta)
-        q = model.q[1]
+        q     = model.q[1]
         sigma = model.sigma[1]
-        k = state.k[1,1]
-        EPSP = rand(Normal(q*k, sigma))
+        k     = state.k[1,1]
+        EPSP  = rand(Normal(q*k, sigma))
         return BinomialObservation(EPSP, delta)
     end
 end
