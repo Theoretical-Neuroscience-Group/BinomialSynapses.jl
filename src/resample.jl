@@ -1,10 +1,10 @@
 function kernel_outer_indices!(idx, u, r, randstates)
     M_out = length(u)
-    usum = 0f0
+    usum = u[M_out]
     CurMax = 1f0
     @inbounds for i in 1:M_out
-        usum += u[i]
-        u[i]  = usum
+        #usum += u[i]
+        #u[i]  = usum
         # sample descending sequence of sorted random numbers
         # r[M_in] >= ... >= r[2] >= r[1]
         # Algorithm by:
@@ -28,8 +28,9 @@ function kernel_outer_indices!(idx, u, r, randstates)
     return nothing
 end
 
-function outer_indices(u)
+function outer_indices!(u)
     M_out       = length(u)
+    u          .= cumsum(u)
     idx         = CuArray{Int}(undef, M_out)
     r           = CuArray{Float32}(undef, M_out)
 
@@ -44,7 +45,7 @@ function outer_indices(u)
 end
 
 function outer_resample!(state::BinomialState, model::BinomialGridModel, u)
-    idx = outer_indices(u)
+    idx = outer_indices!(u)
     state.n .= state.n[idx,:]
     state.k .= state.k[idx,:]
     model.Nind .= model.Nind[idx]
