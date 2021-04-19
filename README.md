@@ -13,23 +13,20 @@ To install this package in Julia 1.5 or 1.6, type
 
 ## Usage
 
-User API is work in progress. This is a minimal working example for a basic setup and performing a single update of the nested particle filter:
+User API is work in progress. This is a minimal working example for running the nested particle filter on synthetic data:
 ```julia
-using BinomialSynapses, CUDA
+using BinomialSynapses
 
-state = BinomialState(128, 1024, 1024)
-model = BinomialGridModel(
-    1024,
-    1:5,
-    LinRange(0.05,0.95,5),
-    LinRange(0.1,2,5),
-    LinRange(0.05,2,5),
-    LinRange(0.05,2,5)
-)
-
-fstate = NestedParticleState(state, model)
+hidden = ScalarBinomialState(125, 62)
+hmodel = ScalarBinomialModel(128, 0.1, 0.2, 0.3, 0.4)
+fstate = NestedParticleState(16, 16, 1:5, LinRange(0.05,0.95,5), LinRange(0.1,2,5), LinRange(0.05,2,5), LinRange(0.05,2,5))
 filter = NestedParticleFilter(12)
-obs    = BinomialObservation(0.3f0, 0.1f0)
 
-update!(fstate, obs, filter)
+T = 1000
+for i in 1:T
+    println("t= ", i)
+    obs = propagate_emit!(hidden, hmodel)
+    update!(fstate, obs, filter)
+    # add output
+end
 ```
