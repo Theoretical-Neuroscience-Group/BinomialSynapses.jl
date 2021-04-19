@@ -41,20 +41,32 @@ function posterior_plot(
     truestate = nothing,
     showstates = false
 )
+    Nrng     = Array(fstate.model.Nrng)
+    prng     = Array(fstate.model.prng)
+    qrng     = Array(fstate.model.qrng)
+    sigmarng = Array(fstate.model.sigmarng)
+    taurng   = Array(fstate.model.taurng)
+
+    Nind     = Array(fstate.model.Nind)
+    pind     = Array(fstate.model.pind)
+    qind     = Array(fstate.model.qind)
+    sigmaind = Array(fstate.model.sigmaind)
+    tauind   = Array(fstate.model.tauind)
+
     pE     = show_EPSP_trace(times, epsps)
-    pN     = show_histogram(fstate.model.Nrng,     fstate.model.Nind,
+    pN     = show_histogram(Nrng, Nind,
                 xlabel = L"N [-]", ylabel = L"p(N)")
     truemodel != nothing && plot!([truemodel.N[1]], seriestype="vline",legend=false)
-    pp     = show_histogram(fstate.model.prng,     fstate.model.pind,
+    pp     = show_histogram(prng, pind,
                 xlabel = L"p [-]", ylabel = L"p(p)")
     truemodel != nothing && plot!([truemodel.p[1]], seriestype="vline",legend=false)
-    pq     = show_histogram(fstate.model.qrng,     fstate.model.qind,
+    pq     = show_histogram(qrng, qind,
                 xlabel = L"q [A]", ylabel = L"p(q)")
     truemodel != nothing && plot!([truemodel.q[1]], seriestype="vline",legend=false)
-    psigma = show_histogram(fstate.model.sigmarng, fstate.model.sigmaind,
+    psigma = show_histogram(sigmarng, sigmaind,
                 xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
     truemodel != nothing && plot!([truemodel.sigma[1]], seriestype="vline",legend=false)
-    ptau   = show_histogram(fstate.model.taurng,   fstate.model.tauind,
+    ptau   = show_histogram(taurng, tauind,
                 xlabel = L"\tau [s]", ylabel = L"p(\tau)")
     truemodel != nothing && plot!([truemodel.tau[1]], seriestype="vline",legend=false)
     if showstates
