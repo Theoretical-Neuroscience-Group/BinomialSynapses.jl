@@ -23,6 +23,12 @@
         @test maximum(idx) <= m_in
         @test minimum(idx) >= 1
 
+        idx = Array(idx)
+        println(size(idx))
+        for r in eachrow(idx)
+            @test issorted(r)
+        end
+
         println("")
         println("Benchmarking function likelihood!: should take about 300μs")
         display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
