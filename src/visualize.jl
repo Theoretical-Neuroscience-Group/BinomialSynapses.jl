@@ -64,10 +64,10 @@ function posterior_plot(
             xlabel = L"q [A]", ylabel = L"p(q)")
     truemodel != nothing && plot!([truemodel.q[1]], seriestype="vline",legend=false)
     pσ = show_histogram(σrng, σind,
-            xlabel = L"\σ [A]", ylabel = L"p(\σ)")
+            xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
     truemodel != nothing && plot!([truemodel.σ[1]], seriestype="vline",legend=false)
     pτ = show_histogram(τrng, τind,
-            xlabel = L"\τ [s]", ylabel = L"p(\τ)")
+            xlabel = L"\tau [s]", ylabel = L"p(\tau)")
     truemodel != nothing && plot!([truemodel.τ[1]], seriestype="vline",legend=false)
     if showstates
         pn = histogram(flatten(Array(fstate.state.n)), bins=1:20,
