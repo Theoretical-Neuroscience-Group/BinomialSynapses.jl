@@ -18,14 +18,14 @@ User API is work in progress. This is a minimal working example for running the 
 using BinomialSynapses
 
 sim = NestedFilterSimulation(
-        10, 0.85, 1.0, 0.2, 0.2,  # ground truth parameters
-        1:20,                     # parameter ranges for filter
-        LinRange(0.05, 0.95, 25), # .
-        LinRange(0.10, 2.00, 25), # .
-        LinRange(0.05, 2.00, 25), # .
-        LinRange(0.05, 2.00, 25), # .
-        2048, 256,                # outer and inner number of particles
-        12                        # jittering kernel width
+        10, 0.85, 1.0, 0.2, 0.2,   # ground truth parameters
+        1:20,                      # parameter ranges for filter
+        LinRange(0.05, 0.95, 100), # .
+        LinRange(0.10, 2.00, 100), # .
+        LinRange(0.05, 2.00, 100), # .
+        LinRange(0.05, 2.00, 100), # .
+        2048, 512,                 # outer and inner number of particles
+        12                         # jittering kernel width
       )
 
 times, epsps = run!(sim, T = 1000)
