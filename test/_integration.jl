@@ -1,4 +1,5 @@
 @testset "integration tests" begin
+    println("             > INTEGRATION TESTS")
     @testset "convergence" begin
         N = 10
         p = 0.85

@@ -1,4 +1,5 @@
 @testset "statistics" begin
+    println("             > statistics.jl")
     @testset "MAP" begin
         model = BinomialModel(
                     [1, 2, 2, 2, 4, 4],

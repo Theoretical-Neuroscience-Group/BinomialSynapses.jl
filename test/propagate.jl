@@ -1,4 +1,5 @@
-@testset "propagate!" begin
+@testset "propagate" begin
+    println("             > propagate.jl")
     @testset "GPU" begin
         m_out = 1024
         m_in  = 1024
@@ -14,10 +15,12 @@
             @test minimum(state.n .- state.n) >= 0
         end
 
-        println("")
-        println("Benchmarking function propagate!: should take about 4ms")
-        display(@benchmark CUDA.@sync propagate!($state, $model, 0.1f0))
-        println("")
+        if RUN_BENCHMARKS
+            println("")
+            println("Benchmarking function propagate!: should take about 4ms")
+            display(@benchmark CUDA.@sync propagate!($state, $model, 0.1f0))
+            println("")
+        end
 
         dt    = 0.1f0
         m_out = 4

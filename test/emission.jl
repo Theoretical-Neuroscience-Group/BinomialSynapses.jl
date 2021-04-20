@@ -1,4 +1,5 @@
-@testset "propagate_emit!" begin
+@testset "emission" begin
+    println("             > emission.jl")
     m_out  = 16
     m_in   = 16
 

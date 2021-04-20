@@ -4,6 +4,8 @@ using CUDA
 using BenchmarkTools
 using Test
 
+const RUN_BENCHMARKS = false # optional intermediate benchmarks
+
 @testset "BinomialSynapses.jl" begin
     include("models.jl")
     include("propagate.jl")

@@ -1,4 +1,5 @@
 @testset "likelihood" begin
+    println("             > likelihood.jl")
     @testset "consistency" begin
         using BinomialSynapses: likelihood_indices
 
@@ -24,21 +25,22 @@
         @test minimum(idx) >= 1
 
         idx = Array(idx)
-        println(size(idx))
         for r in eachrow(idx)
             @test issorted(r)
         end
 
-        println("")
-        println("Benchmarking function likelihood!: should take about 300μs")
-        display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
-        println("")
-        println("")
-        println("Benchmarking function likelihood_resample!: should take about 4ms")
-        state = BinomialState(ns, ks)
-        obs   = BinomialObservation(0.3f0, 0.1f0)
-        display(@benchmark CUDA.@sync likelihood_resample!($state, $model, $obs))
-        println("")
+        if RUN_BENCHMARKS
+            println("")
+            println("Benchmarking function likelihood!: should take about 300μs")
+            display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
+            println("")
+            println("")
+            println("Benchmarking function likelihood_resample!: should take about 4ms")
+            state = BinomialState(ns, ks)
+            obs   = BinomialObservation(0.3f0, 0.1f0)
+            display(@benchmark CUDA.@sync likelihood_resample!($state, $model, $obs))
+            println("")
+        end
     end
     @testset "correctness of values" begin
         observation = 3.0

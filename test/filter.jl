@@ -1,4 +1,5 @@
 @testset "high-level filtering logic" begin
+    println("             > filter.jl")
     m_out  = 1024
     m_in   = 1024
 
@@ -16,8 +17,11 @@
     filter = NestedParticleFilter(12)
     obs    = BinomialObservation(0.3f0, 0.1f0)
 
-    println("")
-    println("Benchmarking one filter update step: should take less than 10ms")
-    display(@benchmark CUDA.@sync update!($fstate, $obs, $filter))
-    println("")
+    if true
+        println("")
+        println("Benchmarking one filter update step: should take less than 10ms")
+        display(@benchmark CUDA.@sync update!($fstate, $obs, $filter))
+        println("")
+        println("")
+    end
 end

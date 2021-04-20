@@ -1,4 +1,5 @@
-@testset "outer_resample!" begin
+@testset "resample" begin
+    println("             > resample.jl")
     @testset "benchmark" begin
         m_out = 1024
         m_in  = 1024
@@ -14,10 +15,12 @@
 
         u = CUDA.rand(m_out)
 
-        println("")
-        println("Benchmarking function outer_resample!: should take about 300μs")
-        display(@benchmark outer_resample!($state, $model, $u))
-        println("")
+        if RUN_BENCHMARKS
+            println("")
+            println("Benchmarking function outer_resample!: should take about 300μs")
+            display(@benchmark outer_resample!($state, $model, $u))
+            println("")
+        end
     end
 
     @testset "correctness of values" begin

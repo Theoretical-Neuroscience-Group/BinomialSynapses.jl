@@ -1,4 +1,5 @@
 @testset "jitter!" begin
+    println("             > jitter.jl")
     m_out = 5
     model = BinomialGridModel(
         m_out,
@@ -38,8 +39,10 @@
         LinRange(0.05,2,5)
     )
 
-    println("")
-    println("Benchmarking function jitter!: should take about 80μs")
-    display(@benchmark CUDA.@sync jitter!($model, 12))
-    println("")
+    if RUN_BENCHMARKS
+        println("")
+        println("Benchmarking function jitter!: should take about 80μs")
+        display(@benchmark CUDA.@sync jitter!($model, 12))
+        println("")
+    end
 end
