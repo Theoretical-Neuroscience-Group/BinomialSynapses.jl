@@ -6,8 +6,9 @@ end
 
 function outer_indices!(u::Vector)
     M_out  = length(u)
-    usum   = 0f0
-    # overwrite u with cumulative sum
+    usum   = zero(eltype(u))
+
+    # compute cumulative sum, overwriting u
     @inbounds for i in 1:M_out
         usum += u[i]
         u[i] = usum
@@ -27,7 +28,7 @@ function outer_indices!(u::Vector)
     idx = zeros(Int, M_out)
     bindex = M_out # bin index
     @inbounds for i in M_out:-1:1
-        CurMax *= exp(log(rand()) / i)
+        CurMax *= exp(log(rand(eltype(u))) / i)
         # scale random numbers (this is equivalent to normalizing u)
         rsample = CurMax * usum
         # checking bindex >= 1 is redundant since
