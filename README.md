@@ -14,6 +14,10 @@ To install this package in Julia 1.5 or 1.6, type
 ## Usage
 
 User API is work in progress. This is a minimal working example for running the nested particle filter on synthetic data and producing a plot of the observation trace and the posterior histograms.
+
+References:
+- On the nested particle filter: Crisan, Dan, and Joaquin Miguez. "Nested particle filters for online parameter estimation in discrete-time state-space Markov models." Bernoulli 24.4A (2018): 3039-3086.
+- On the model of stochastic synapse: Gontier, Camille, and Jean-Pascal Pfister. "Identifiability of a Binomial Synapse." Frontiers in computational neuroscience 14 (2020): 86.
 ```julia
 using BinomialSynapses
 
