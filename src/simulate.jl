@@ -12,7 +12,7 @@ function NestedFilterSimulation(
     λ = 0.121,
     dt = nothing
 )
-    hmodel = ScalarBinomialModel(10, 0.85, 1.0, 0.2, 0.2)
+    hmodel = ScalarBinomialModel(N, p, q, σ, τ)
     filter = NestedParticleFilter(width)
     hstate = ScalarBinomialState(N, 0)
     fstate = NestedParticleState(
