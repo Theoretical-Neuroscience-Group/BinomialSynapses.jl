@@ -1,62 +1,105 @@
-@testset "propagate!" begin
-    m_out  = 1024
-    m_in   = 1024
-    Ns     = CuArray(rand(1:128, m_out))
-    ps     = CUDA.rand(m_out)
-    qs     = CUDA.rand(m_out)
-    sigmas = CUDA.rand(m_out)
-    taus   = CUDA.rand(m_out)
-    model  = BinomialModel(Ns, ps, qs, sigmas, taus);
+@testset "propagate" begin
+    println("             > propagate.jl")
+    @testset "GPU" begin
+        m_out = 1024
+        m_in  = 1024
 
-    ns = CuArray(rand(1:128, m_out, m_in))
-    ks = CUDA.zeros(Int, m_out, m_in);
+        state = BinomialState(128, m_out, m_in)
+        model = BinomialModel(128, m_out)
 
-    for i in 1:100
-        propagate!(ns, ks, model, 0.1f0)
-        @test minimum(ns) >= 0
-        @test minimum(ks) >= 0
-        @test minimum(ns .- ks) >= 0
-        @test minimum(Ns .- ns) >= 0
-    end
+        for i in 1:100
+            propagate!(state, model, 0.1f0)
+            @test minimum(state.n) >= 0
+            @test minimum(state.k) >= 0
+            @test minimum(state.n .- state.k) >= 0
+            @test minimum(state.n .- state.n) >= 0
+        end
 
-    println("")
-    println("Benchmarking function propagate!: should take about 4ms")
-    display(@benchmark CUDA.@sync propagate!($ns, $ks, $model, 0.1f0))
-    println("")
+        if RUN_BENCHMARKS
+            println("")
+            println("Benchmarking function propagate!: should take about 4ms")
+            display(@benchmark CUDA.@sync propagate!($state, $model, 0.1f0))
+            println("")
+        end
 
-    dt     = 0.1
-    m_out  = 4
-    m_in   = 4
-    Ns     = 10 .* CUDA.ones(Int, m_out)
-    ps     = CUDA.ones(m_out)
-    ps[1] = 0.0
-    ps[2] = 0.0
-    qs     = CUDA.rand(m_out)
-    sigmas = CUDA.rand(m_out)
-    taus   = CUDA.rand(m_out)
-    taus[1] = 1000
-    taus[2] = 0.0001
-    taus[3] = 0.0001
-    taus[4] = 1000
-    model  = BinomialModel(Ns, ps, qs, sigmas, taus);
-    ns = 5 .* CUDA.ones(Int, m_out, m_in)
-    ks = 4 .* CUDA.ones(Int, m_out, m_in)
+        dt    = 0.1f0
+        m_out = 4
+        m_in  = 4
+        N     = 10 .* CUDA.ones(Int, m_out)
+        p     = cu([0f0, 0f0, 1f0, 1f0])
+        q     = CUDA.rand(m_out)
+        σ     = CUDA.rand(m_out)
+        τ     = cu([1f3, 1f-4, 1f-4, 1f3])
+        model = BinomialModel(N, p, q, σ, τ);
+        n     = 5 .* CUDA.ones(Int, m_out, m_in)
+        k     = 4 .* CUDA.ones(Int, m_out, m_in)
 
-    propagate!(ns, ks, model, dt)
+        state = BinomialState(n, k)
 
-    # When tau is much larger than dt, no vesicle is refilled
-    @test all(ns[1,:] .== 1)
-    @test all(ns[4,:] .== 1)
-    # When tau is much shorter than dt, all vesicles are refilled
-    @test all(ns[2,:] .== 10)
-    @test all(ns[3,:] .== 10)
+        propagate!(state, model, dt)
+        n = Array(state.n)
+        k = Array(state.k)
 
-    # When the release probability is 0, no vesicle is released
-    @test all(ks[1,:] .== 0)
-    @test all(ks[2,:] .== 0)
-    # When the release probability is 1, all vesicles are released
-    @test all(ks[3,:] .== 10)
-    @test all(ks[4,:] .== 1)
+        # When τ is much larger than dt, no vesicle is refilled
+        @test all(n[1,:] .== 1)
+        @test all(n[4,:] .== 1)
+        # When τ is much shorter than dt, all vesicles are refilled
+        @test all(n[2,:] .== 10)
+        @test all(n[3,:] .== 10)
 
+        # When the release probability is 0, no vesicle is released
+        @test all(k[1,:] .== 0)
+        @test all(k[2,:] .== 0)
+        # When the release probability is 1, all vesicles are released
+        @test all(k[3,:] .== 10)
+        @test all(k[4,:] .== 1)
+    end#GPU
 
+    @testset "CPU" begin
+        m_out = 16
+        m_in  = 16
+
+        state = BinomialState(128, m_out, m_in, :cpu)
+        model = BinomialModel(128, m_out, :cpu)
+
+        for i in 1:10
+            propagate!(state, model, 0.1)
+            @test minimum(state.n) >= 0
+            @test minimum(state.k) >= 0
+            @test minimum(state.n .- state.k) >= 0
+            @test minimum(state.n .- state.n) >= 0
+        end
+
+        dt    = 0.1
+        m_out = 4
+        m_in  = 4
+        N     = 10 .* ones(Int, m_out)
+        p     = [0., 0., 1., 1.]
+        q     = rand(m_out)
+        σ     = rand(m_out)
+        τ     = [1e3, 1e-4, 1e-4, 1e3]
+        model = BinomialModel(N, p, q, σ, τ);
+        n     = 5 .* ones(Int, m_out, m_in)
+        k     = 4 .* ones(Int, m_out, m_in)
+
+        state = BinomialState(n, k)
+
+        propagate!(state, model, dt)
+        n = Array(state.n)
+        k = Array(state.k)
+
+        # When τ is much larger than dt, no vesicle is refilled
+        @test all(n[1,:] .== 1)
+        @test all(n[4,:] .== 1)
+        # When τ is much shorter than dt, all vesicles are refilled
+        @test all(n[2,:] .== 10)
+        @test all(n[3,:] .== 10)
+
+        # When the release probability is 0, no vesicle is released
+        @test all(k[1,:] .== 0)
+        @test all(k[2,:] .== 0)
+        # When the release probability is 1, all vesicles are released
+        @test all(k[3,:] .== 10)
+        @test all(k[4,:] .== 1)
+    end#CPU
 end

@@ -1,12 +1,12 @@
-function likelihood(k, model::BinomialModel, observation)
+function likelihood(k, model::AbstractBinomialModel, observation)
     return mean(
-                exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.sigma).^2)
-                ./ (sqrt(2*Float32(pi)) .* model.sigma)
+                exp.(-0.5f0 .* ((observation .- model.q .* k) ./ model.σ).^2)
+                ./ (sqrt(2*Float32(pi)) .* model.σ)
            , dims = 2
            )[:,1]
 end
 
-function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, randstates)
+function kernel_likelihood_indices!(u, v, idxT, kT, q, σ, observation, r, randstates)
     # use column-index first (gives a 3x speedup)
     # kT stands for the transpose of k
     # idxT stands for the transpose of idx
@@ -17,7 +17,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         CurMax = 1f0
         for i in 1:M_in
             # omitting normalization constant here; it is only needed for u
-            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / sigma[j])^2)
+            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / σ[j])^2)
             vsum   += vi
             v[i, j] = vsum
             # sample descending sequence of sorted random numbers
@@ -31,14 +31,14 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
         end
         # compute average likelihood across inner particles
         # (with normalization constant that was omitted from v for speed)
-        u[j] = vsum / (M_in * CUDA.sqrt(2*Float32(pi)) * sigma[j])
+        u[j] = vsum / (M_in * CUDA.sqrt(2*Float32(pi)) * σ[j])
         # O(n) binning algorithm for sorted samples
         bindex = 1 # bin index
         @inbounds for i in 1:M_in
             # scale random numbers (this is equivalent to normalizing v)
             rsample = r[i, j] * vsum
             # checking bindex <= M_in - 1 is redundant since
-            # v[M_in, j] = vsum and
+            # v[M_in, j] = vsum
             while rsample > v[bindex, j]
                 bindex += 1
             end
@@ -48,7 +48,7 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, sigma, observation, r, ra
     return nothing
 end
 
-function likelihood_indices(k, model::BinomialModel, observation)
+function likelihood_indices(k, model::AbstractBinomialModel, observation)
     M_out, M_in = size(k)
     r           = CuArray{Float32}(undef, M_in, M_out)
     u           = CuArray{Float32}(undef, M_out)
@@ -60,7 +60,7 @@ function likelihood_indices(k, model::BinomialModel, observation)
     kernel  = @cuda launch=false kernel_likelihood_indices!(
                 u, v,
                 idx', k',
-                model.q, model.sigma,
+                model.q, model.σ,
                 Float32(observation),
                 r,
                 rng.state
@@ -71,7 +71,7 @@ function likelihood_indices(k, model::BinomialModel, observation)
     kernel(
         u, v,
         idx', k', # pass transposes for column-major indexing (gives a 3x speedup)
-        model.q, model.sigma,
+        model.q, model.σ,
         observation,
         r,
         rng.state
@@ -81,12 +81,35 @@ function likelihood_indices(k, model::BinomialModel, observation)
     return u, idx
 end
 
-function likelihood_resample!(state::BinomialState, model, observation)
-    u, idx = likelihood_indices(state.k, model, observation)
-    M_out  = size(state.n, 1)
-    @inbounds for i in 1:M_out
-        state.n[i,:] .= state.n[i, idx[i,:]]
-        state.k[i,:] .= state.k[i, idx[i,:]]
+function inner_resample_helper!(in, out, idx)
+    function kernel(in, out, idx)
+        j = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+        @inbounds if j <= size(out, 2)
+            @inbounds for i in 1:size(out, 1)
+                out[i, j] = in[i, idx[i, j]]
+            end
+        end#if
+        return nothing
     end
+    kernel  = @cuda launch=false kernel(in, out, idx)
+    config  = launch_configuration(kernel.fun)
+    threads = Base.min(size(out, 2), config.threads, 256)
+    blocks  = cld(size(out, 2), threads)
+    kernel(in, out, idx; threads=threads, blocks=blocks)
+    return out
+end
+
+function inner_resample_helper!(in, idx)
+    out = similar(in)
+    inner_resample_helper!(in, out, idx)
+    in .= out
+    return in
+end
+
+function likelihood_resample!(state::BinomialState, model, observation::BinomialObservation)
+    u, idx = likelihood_indices(state.k, model, observation.EPSP)
+    M_out  = size(state.n, 1)
+    inner_resample_helper!(state.n, idx)
+    inner_resample_helper!(state.k, idx)
     return u
 end
