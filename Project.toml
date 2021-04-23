@@ -19,6 +19,9 @@ BenchmarkTools = "0.6, 0.7"
 BinomialGPU = "0.2"
 CUDA = "2, 3.0"
 StatsBase = "0.33"
+Distributions = "0.24"
+LaTeXStrings = "1.2"
+Plots = "1.12"
 julia = "1.5"
 
 [extras]
