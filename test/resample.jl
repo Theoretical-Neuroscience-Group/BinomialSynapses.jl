@@ -1,30 +1,58 @@
-@testset "outer_resample!" begin
-    @testset "internals" begin
-        using BinomialSynapses: cu_alias_sample!
-        N, K = 10, 10
+@testset "resample" begin
+    println("             > resample.jl")
+    @testset "benchmark" begin
+        m_out = 1024
+        m_in  = 1024
+        state = BinomialState(128, m_out, m_in)
+        model = BinomialGridModel(
+            m_out,
+            1:5,
+            LinRange(0.05,0.95,5),
+            LinRange(0.1,2,5),
+            LinRange(0.05,2,5),
+            LinRange(0.05,2,5)
+        )
 
-        wv = Array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        a = CuArray{Int64}(1:N)
-        x = CuArray{Int64}(zeros(Int64, K));
+        u = CUDA.rand(m_out)
 
-        cu_alias_sample!(a, wv, x)
-
-        # Resampling should only pick the second index (the only one with a non-
-        # zero likelihood)
-        @test all(x .== 2)
+        if RUN_BENCHMARKS
+            println("")
+            println("Benchmarking function outer_resample!: should take about 300μs")
+            display(@benchmark outer_resample!($state, $model, $u))
+            println("")
+        end
     end
 
-    @testset "user API" begin
-        m_out = 1024
-        m_in = 1024
-        ns = CuArray(rand(1:128, m_out, m_in))
-        ks = CUDA.zeros(Int, m_out, m_in);
+    @testset "correctness of values" begin
+        using BinomialSynapses: outer_indices!
 
-        state = BinomialState(ns, ks)
-        u = CUDA.rand(m_out)
-        println("")
-        println("Benchmarking function outer_resample!: should take about 5ms")
-        display(@benchmark CUDA.@sync outer_resample!($state, $u))
-        println("")
+        for M_out in [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+            u = rand(M_out)
+            v = cumsum(u)
+            outer_indices!(u)
+            @test u[2:M_out] ≈ v[1:M_out-1]
+        end
+
+        count = 0
+        for i in 1:100
+            u = cu([1f3, 1f0, 1f0, 1f3])
+            idx = Array(outer_indices!(u))
+            for j in 1:4
+                if idx[j] == 2 || idx[j] == 3
+                    count += 1
+                end
+            end
+        end
+        @test count / 400 < 0.05
+    end
+
+    @testset "sortedness of idx" begin
+        using BinomialSynapses: outer_indices!
+
+        for M_out in [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+            u = rand(M_out)
+            idx = outer_indices!(u)
+            @test issorted(idx)
+        end
     end
 end

@@ -2,27 +2,48 @@ module BinomialSynapses
 
 using BinomialGPU
 using CUDA
+using Distributions: Binomial, Exponential, Normal
 using GPUArrays
+using LaTeXStrings
+using Plots
 using Statistics: mean
+using StatsBase: mode
 
-# data structures and types
-include("types.jl")
-
+include("models.jl")
 export
+       AbstractBinomialModel,
        BinomialModel,
        BinomialGridModel,
-       BinomialState
+       ScalarBinomialModel,
+       BinomialState,
+       ScalarBinomialState,
+       BinomialObservation
 
-# filtering part
 include("propagate.jl")
+export propagate!
+
+include("emission.jl")
+export propagate_emit!
+
 include("likelihood.jl")
-include("update_parameters.jl")
+export likelihood, likelihood_resample!
+
+include("jitter.jl")
+export jitter!
+
 include("resample.jl")
-export
-        likelihood,
-        likelihood_resample!,
-        propagate!,
-        update!,
-        outer_resample!
+export outer_resample!
+
+include("filter.jl")
+export NestedParticleFilter, NestedParticleState, update!
+
+include("statistics.jl")
+export MAP
+
+include("simulate.jl")
+export NestedFilterSimulation, run!
+
+include("visualize.jl")
+export posterior_plot
 
 end#module

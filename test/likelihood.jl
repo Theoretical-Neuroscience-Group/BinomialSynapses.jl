@@ -1,15 +1,16 @@
 @testset "likelihood" begin
+    println("             > likelihood.jl")
     @testset "consistency" begin
         using BinomialSynapses: likelihood_indices
 
-        m_out  = 1024
-        m_in   = 1024
-        Ns     = CuArray(rand(1:128, m_out))
-        ps     = CUDA.rand(m_out)
-        qs     = CUDA.rand(m_out)
-        sigmas = CUDA.rand(m_out)
-        taus   = CUDA.rand(m_out)
-        model  = BinomialModel(Ns, ps, qs, sigmas, taus);
+        m_out = 1024
+        m_in  = 1024
+        Ns = CuArray(rand(1:128, m_out))
+        ps = CUDA.rand(m_out)
+        qs = CUDA.rand(m_out)
+        σs = CUDA.rand(m_out)
+        τs = CUDA.rand(m_out)
+        model = BinomialModel(Ns, ps, qs, σs, τs);
 
         ns = CuArray(rand(1:128, m_out, m_in))
         ks = CUDA.zeros(Int, m_out, m_in);
@@ -23,14 +24,23 @@
         @test maximum(idx) <= m_in
         @test minimum(idx) >= 1
 
-        println("")
-        println("Benchmarking function likelihood!: should take about 300μs")
-        display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
-        println("")
-        println("")
-        println("Benchmarking function likelihood_indices: should take about 4ms")
-        display(@benchmark CUDA.@sync likelihood_indices($ks, $model, 0.3f0))
-        println("")
+        idx = Array(idx)
+        for r in eachrow(idx)
+            @test issorted(r)
+        end
+
+        if RUN_BENCHMARKS
+            println("")
+            println("Benchmarking function likelihood!: should take about 300μs")
+            display(@benchmark CUDA.@sync likelihood($ks, $model, 0.3f0))
+            println("")
+            println("")
+            println("Benchmarking function likelihood_resample!: should take about 4ms")
+            state = BinomialState(ns, ks)
+            obs   = BinomialObservation(0.3f0, 0.1f0)
+            display(@benchmark CUDA.@sync likelihood_resample!($state, $model, $obs))
+            println("")
+        end
     end
     @testset "correctness of values" begin
         observation = 3.0
@@ -38,23 +48,16 @@
         M_in = 4
         Ns = 10 .* CUDA.ones(Int, M_out)
         ps = CUDA.rand(M_out)
-        qs = CUDA.ones(M_out)
-        println("")
-        println("Scalar operations warning expected here:")
-        qs[3] = 3.0
-        qs[4] = 3.0
-        qs[6] = 3.0
-        sigmas = Float32(0.1) .* CUDA.ones(M_out)
-        taus = CUDA.rand(M_out)
-        model = BinomialModel(Ns, ps, qs, sigmas, taus);
+        qs = cu([1f0, 1f0, 3f0, 3f0, 1f0, 3f0])
+        σs = Float32(0.1) .* CUDA.ones(M_out)
+        τs = CUDA.rand(M_out)
+        model = BinomialModel(Ns, ps, qs, σs, τs);
 
-        ks = CUDA.ones(Int, M_out, M_in)
-        ks[1,:] = [3,3,3,3]
-        ks[4,:] = [3,3,3,3]
-        ks[5,1] = 3
-        ks[6,2:4] = [3,3,3]
+        ks = cu([3 3 3 3; 1 1 1 1; 1 1 1 1; 3 3 3 3; 3 1 1 1; 1 3 3 3])
 
-        u,idx = likelihood_indices(ks, model, observation)
+        u, idx = likelihood_indices(ks, model, observation)
+        u = Array(u)
+        idx = Array(idx)
 
         # Combinations of q and k that correspond to the observation should have
         # a high likelihood
@@ -68,7 +71,5 @@
 
         # Resampling should pick the particles that match q and the observation
         @test all(idx[5:6,:].==1)
-        println("Scalar operations over")
-        println("-------------------------------------------------------------------------")
     end
 end

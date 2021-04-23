@@ -13,16 +13,31 @@ To install this package in Julia 1.5 or 1.6, type
 
 ## Usage
 
-User API is work in progress. This is a sketch for the function performing a single update of the nested particle filter:
-```julia
-function update!(filterstate, observation, filter)
-    state = filterstate.state
-    model = filterstate.model
+User API is work in progress. This is a minimal working example for running the nested particle filter on synthetic data and producing a plot of the observation trace and the posterior histograms.
 
-    update!(model, filter.jittering_width)
-    propagate!(state, model, observation.dt)
-    u = likelihood_resample!(state, model, observation)
-    outer_resample!(state, u)
-    return filterstate
-end
+```julia
+using BinomialSynapses
+
+sim = NestedFilterSimulation(
+        10, 0.85, 1.0, 0.2, 0.2,   # ground truth parameters
+        1:20,                      # parameter ranges for filter
+        LinRange(0.05, 0.95, 100), # .
+        LinRange(0.10, 2.00, 100), # .
+        LinRange(0.05, 2.00, 100), # .
+        LinRange(0.05, 2.00, 100), # .
+        2048, 512,                 # outer and inner number of particles
+        12                         # jittering kernel width
+      )
+
+times, epsps = run!(sim, T = 1000)
+
+posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
 ```
+
+![](posteriors.png)
+
+
+## References
+
+- On the nested particle filter: Crisan, Dan, and Joaquin Miguez. "Nested particle filters for online parameter estimation in discrete-time state-space Markov models." Bernoulli 24.4A (2018): 3039-3086.
+- On the model of stochastic synapse: Gontier, Camille, and Jean-Pascal Pfister. "Identifiability of a Binomial Synapse." Frontiers in computational neuroscience 14 (2020): 86.
