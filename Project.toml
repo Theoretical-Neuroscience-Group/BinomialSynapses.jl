@@ -18,6 +18,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 BenchmarkTools = "0.6, 0.7"
 BinomialGPU = "0.2"
 CUDA = "2, 3.0"
+LaTeXStrings = "1.2"
 Plots = "1.12"
 julia = "1.5"
 
