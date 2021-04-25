@@ -8,7 +8,7 @@
 To install this package in Julia 1.5 or 1.6, type
 
 ```julia
-]add https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl
+]add BinomialSynapses
 ```
 
 ## Usage
