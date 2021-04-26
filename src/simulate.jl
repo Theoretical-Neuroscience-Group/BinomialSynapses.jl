@@ -9,7 +9,7 @@ function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    λ = 1.121,
+    λ = 0.121,
     dt = nothing
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
