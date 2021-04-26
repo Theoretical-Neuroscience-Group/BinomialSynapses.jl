@@ -36,13 +36,29 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false)
         @time begin
             obs = propagate!(sim)
         end
+        print(obs.dt)
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         if plot_each_timestep
             posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
         end
-        v = variance(sim)
-        print(v[:p])
+    end
+    return times, epsps
+end
+
+function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false)
+    times = zeros(0)
+    epsps = zeros(0)
+    time = 0.
+    for i in 1:T
+        @time begin
+            obs = propagate!(sim)
+        end
+        push!(times, time += obs.dt)
+        push!(epsps, obs.EPSP)
+        if plot_each_timestep
+            posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
+        end
     end
     return times, epsps
 end
