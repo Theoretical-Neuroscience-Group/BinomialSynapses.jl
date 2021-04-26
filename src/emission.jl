@@ -1,4 +1,4 @@
-function propagate_emit!(state::BinomialState{<:Array}, model::AbstractBinomialModel; dt = nothing, λ = 1.121)
+function propagate_emit!(state::BinomialState{<:Array}, model::AbstractBinomialModel; dt = nothing, λ = 0.121)
     if maximum(size(state.n)) > 1
         error("Emission not supported for non-scalar states")
         return nothing
