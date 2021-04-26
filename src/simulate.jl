@@ -41,8 +41,11 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false)
         if plot_each_timestep
             posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
         end
+        v = variance(sim)
+        print(v[:p])
     end
     return times, epsps
 end
 
 MAP(sim::NestedFilterSimulation) = MAP(sim.fstate.model)
+variance(sim::NestedFilterSimulation) = variance(sim.fstate.model)
