@@ -14,7 +14,7 @@ function show_histogram(
             ylabel=ylabel,
             legend=false
            )
-    if truevalue != nothing
+    if !isnothing(truevalue)
         plot!([truevalue], seriestype="vline",legend=false)
     end
     return p
@@ -56,28 +56,28 @@ function posterior_plot(
     pE = show_EPSP_trace(times, epsps)
     pN = show_histogram(Nrng, Nind,
             xlabel = L"N [-]", ylabel = L"p(N)")
-    truemodel != nothing && plot!([truemodel.N[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false)
     pp = show_histogram(prng, pind,
             xlabel = L"p [-]", ylabel = L"p(p)")
-    truemodel != nothing && plot!([truemodel.p[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false)
     pq = show_histogram(qrng, qind,
             xlabel = L"q [A]", ylabel = L"p(q)")
-    truemodel != nothing && plot!([truemodel.q[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel)g && plot!([truemodel.q[1]], seriestype="vline",legend=false)
     pσ = show_histogram(σrng, σind,
             xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
-    truemodel != nothing && plot!([truemodel.σ[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false)
     pτ = show_histogram(τrng, τind,
             xlabel = L"\tau [s]", ylabel = L"p(\tau)")
-    truemodel != nothing && plot!([truemodel.τ[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false)
     if showstates
         pn = histogram(flatten(Array(fstate.state.n)), bins=1:20,
                 normalize = :probability,
                 xlabel = L"n", ylabel = L"p(n)")
-        truestate != nothing && plot!([truestate.n[1,1]], seriestype="vline",legend=false)
+        !isnothing(truestate) && plot!([truestate.n[1,1]], seriestype="vline",legend=false)
         pk = histogram(flatten(Array(fstate.state.k)), bins=1:20,
                 normalize = :probability,
                 xlabel = L"k", ylabel = L"p(k)")
-        truestate != nothing && plot!([truestate.k[1,1]], seriestype="vline",legend=false)
+        !isnothing(truestate) && plot!([truestate.k[1,1]], seriestype="vline",legend=false)
         display(plot(pE, pN, pp, pq, pσ, pτ, pn, pk, layout = (4, 2)))
         return
     end

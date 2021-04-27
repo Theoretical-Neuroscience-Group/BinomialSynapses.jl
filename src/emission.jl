@@ -3,7 +3,7 @@ function propagate_emit!(state::BinomialState{<:Array}, model::AbstractBinomialM
         error("Emission not supported for non-scalar states")
         return nothing
     else
-        if dt == nothing
+        if isnothing(dt)
             δ = rand(Exponential(λ))
         else
             δ = dt
