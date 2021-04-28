@@ -33,6 +33,15 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false)
     epsps = zeros(0)
     time = 0.
     for i in 1:T
+        state = sim.hstate
+        model = sim.hmodel
+        q = model.q[1]
+        σ = model.σ[1]
+        k = state.k[1,1]
+        print(q)
+        print("\n")
+        print(k)
+        print("\n")
         @time begin
             obs = propagate!(sim)
         end
