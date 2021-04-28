@@ -93,7 +93,8 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
                 v = variance(sim_local)
                 h[kk] = v[:τ]
             end
-            delta = delta_candidates[argmin(h)]      
+            #delta = delta_candidates[argmin(h)]   
+            delta = rand(Exponential(λ))
         end       
     end
     return times, epsps
