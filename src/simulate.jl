@@ -60,7 +60,11 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
         k = state.k[1,1]
         EPSP = rand(Normal(q*k, σ))
         obs = BinomialObservation(EPSP, delta)
-        print(obs.dt)
+        print(q)
+        print("\n")
+        print(k)
+        print("\n")
+        print(EPSP)
         print("\n")
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)        
@@ -97,11 +101,9 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
             end
             #delta = delta_candidates[argmin(h)]   
             delta = rand(Exponential(0.121))
-            print(delta)
-            print("\n")
+
         end       
     end
-    print(times)
     return times, epsps
 end
 
