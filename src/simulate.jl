@@ -28,22 +28,22 @@ function propagate!(sim::NestedFilterSimulation)
     return obs
 end
 
+function propagate_OED!(sim::NestedFilterSimulation, dt)
+    obs = propagate_emit!(sim.hstate, sim.hmodel, dt=dt)
+    update!(sim.fstate, obs, sim.filter)
+    return obs
+end
+
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false)
     times = zeros(0)
     epsps = zeros(0)
     time = 0.
-    print(sim.hmodel.q[1])
-    print("\n")
-    print(sim.hstate.k[1,1])
-    print("\n")
+
     for i in 1:T
         @time begin
             obs = propagate!(sim)
         end
-        print(sim.hmodel.q[1])
-        print("\n")   
-        print(sim.hstate.k[1,1])
-        print("\n")
+
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         if plot_each_timestep
@@ -58,21 +58,11 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
     epsps = zeros(0)
     time = 0.
     delta = 0.
+    
     for i in 1:T
         
-        state = sim.hstate
-        model = sim.hmodel
-        q = model.q[1]
-        σ = model.σ[1]
-        k = state.k[1,1]
-        EPSP = rand(Normal(q*k, σ))
-        obs = BinomialObservation(EPSP, delta)
-        print(q)
-        print("\n")
-        print(k)
-        print("\n")
-        print(EPSP)
-        print("\n")
+        obs = propagate_OED!(sim,delta)
+
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)        
         update!(sim.fstate, obs, sim.filter)
