@@ -34,12 +34,16 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false)
     time = 0.
     print(sim.hmodel.q[1])
     print("\n")
+    print(sim.hstate.k[1,1])
+    print("\n")
     for i in 1:T
         @time begin
             obs = propagate!(sim)
         end
         print(sim.hmodel.q[1])
-        print("\n")        
+        print("\n")   
+        print(sim.hstate.k[1,1])
+        print("\n")
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         if plot_each_timestep
