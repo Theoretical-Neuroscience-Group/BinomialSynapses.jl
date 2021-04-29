@@ -74,7 +74,18 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
             q_star = map[:q]
             sigma_star = map[:σ]
             tau_star = map[:τ]
-#
+            
+            print(N_star)
+            print("\n")
+            print(p_star)
+            print("\n")
+            print(q_star)
+            print("\n")
+            print(sigma_star)
+            print("\n")
+            print(tau_star)
+            print("\n")
+        #
  #           delta_candidates = LinRange(0.05,1,25)
 #
  #           x = 1
@@ -100,16 +111,7 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
 
         end       
     end
-    print(N_star)
-    print("\n")
-    print(p_star)
-    print("\n")
-    print(q_star)
-    print("\n")
-    print(sigma_star)
-    print("\n")
-    print(tau_star)
-    print("\n")
+
     return times, epsps
 end
 
