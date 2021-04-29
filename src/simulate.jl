@@ -88,19 +88,19 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
                 x_temp = 1-(1-(1-p_star)*x)*exp(-delta_candidates[kk]/tau_star)
                 e_temp[kk] = x_temp*N_star*p_star*q_star
             end
-            print(e_temp)
-            print("\n")
-            print(times)
-            print("\n")            
-#
-       #     h = zeros(25)
-      #      for kk in 1:25
-     #           sim_local = sim
-    #            obs = BinomialObservation(e_temp[kk], delta_candidates[kk])
-   #             update!(sim_local.fstate, obs, sim_local.filter)
-  #              v = variance(sim_local)
- #               h[kk] = v[:τ]
-#            end
+         
+
+            h = zeros(25)
+            for kk in 1:25
+                print(sim.fstate)
+                print("\n")
+                sim_local = sim
+                obs = BinomialObservation(e_temp[kk], delta_candidates[kk])
+                update!(sim_local.fstate, obs, sim_local.filter)
+                v = variance(sim_local)
+                h[kk] = v[:τ]
+            end
+            
             #delta = delta_candidates[argmin(h)]   
             delta = rand(Exponential(0.121))
 
