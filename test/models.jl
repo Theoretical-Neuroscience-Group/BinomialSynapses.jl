@@ -1,3 +1,3 @@
-@testset "data structures" begin
+@testset "models.jl" begin
     println("             > models.jl")
 end

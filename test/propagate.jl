@@ -1,4 +1,4 @@
-@testset "propagate" begin
+@testset "propagate.jl" begin
     println("             > propagate.jl")
     @testset "GPU" begin
         m_out = 1024

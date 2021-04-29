@@ -1,4 +1,4 @@
-@testset "jitter!" begin
+@testset "jitter.jl" begin
     println("             > jitter.jl")
     m_out = 5
     model = BinomialGridModel(

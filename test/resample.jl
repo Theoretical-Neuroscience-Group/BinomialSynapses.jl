@@ -1,4 +1,4 @@
-@testset "resample" begin
+@testset "resample.jl" begin
     println("             > resample.jl")
     @testset "benchmark" begin
         m_out = 1024

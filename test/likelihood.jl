@@ -1,4 +1,4 @@
-@testset "likelihood" begin
+@testset "likelihood.jl" begin
     println("             > likelihood.jl")
     @testset "consistency" begin
         using BinomialSynapses: likelihood_indices

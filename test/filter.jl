@@ -1,4 +1,4 @@
-@testset "high-level filtering logic" begin
+@testset "filter.jl" begin
     println("             > filter.jl")
     m_out  = 1024
     m_in   = 1024
