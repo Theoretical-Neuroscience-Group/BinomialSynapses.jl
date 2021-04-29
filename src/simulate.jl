@@ -75,28 +75,23 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
             sigma_star = map[:σ]
             tau_star = map[:τ]
             
-            print(N_star)
+
+        
+            delta_candidates = LinRange(0.05,1,25)
+
+            x = 1
+            for ii in 1:i
+                x = 1-(1-(1-p_star)*x)*exp(-times[ii]/tau_star)
+            end
+            e_temp = zeros(25)
+            for kk in 1:25
+                x_temp = 1-(1-(1-p_star)*x)*exp(-delta_candidates[kk]/tau_star)
+                e_temp[kk] = x_temp*N_star*p_star*q_star
+            end
+            print(e_temp)
             print("\n")
-            print(p_star)
-            print("\n")
-            print(q_star)
-            print("\n")
-            print(sigma_star)
-            print("\n")
-            print(tau_star)
-            print("\n")
-        #
- #           delta_candidates = LinRange(0.05,1,25)
-#
- #           x = 1
-        #    for ii in 1:i
-       #         x = 1-(1-(1-p_star)*x)*exp(-times[ii]/tau_star)
-      #      end
-     #       e_temp = zeros(25)
-    #        for kk in 1:25
-   #             x_temp = 1-(1-(1-p_star)*x)*exp(-delta_candidates[kk]/tau_star)
-  #              e_temp[kk] = x_temp*N_star*p_star*q_star
- #           end
+            print(times)
+            print("\n")            
 #
        #     h = zeros(25)
       #      for kk in 1:25
