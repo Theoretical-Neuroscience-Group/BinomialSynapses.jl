@@ -23,7 +23,7 @@ function NestedFilterSimulation(
 end
 
 function propagate!(sim::NestedFilterSimulation; dt = nothing)
-    obs = propagate_emit!(sim.hstate, sim.hmodel, dt=dt)
+    obs = propagate_emit!(sim.hstate, sim.hmodel, dt = dt)
     update!(sim.fstate, obs, sim.filter)
     return obs
 end
@@ -38,16 +38,21 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, O
     times = zeros(0)
     epsps = zeros(0)
     time = 0.
-
+    delta = 0.
+    
     for i in 1:T
         @time begin
-            obs = propagate!(sim)
-        end
+            if OED == true
+                obs = propagate!(sim, delta)
+            else
+                obs = propagate!(sim)
+            end
+            
+        end        
         
         if i < T && OED == true
             delta = OED(sim, LinRange(0.05,1,25), times, i)
         end
-
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         if plot_each_timestep
