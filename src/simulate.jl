@@ -68,33 +68,33 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
         
         if i < T
                 
-            map = MAP(sim)
-            N_star = map[:N]
-            p_star = map[:p]
-            q_star = map[:q]
-            sigma_star = map[:σ]
-            tau_star = map[:τ]
-
-            delta_candidates = LinRange(0.05,1,25)
-
-            x = 1
-            for ii in 1:i
-                x = 1-(1-(1-p_star)*x)*exp(-times[ii]/tau_star)
-            end
-            e_temp = zeros(25)
-            for kk in 1:25
-                x_temp = 1-(1-(1-p_star)*x)*exp(-delta_candidates[kk]/tau_star)
-                e_temp[kk] = x_temp*N_star*p_star*q_star
-            end
-
-            h = zeros(25)
-            for kk in 1:25
-                sim_local = sim
-                obs = BinomialObservation(e_temp[kk], delta_candidates[kk])
-                update!(sim_local.fstate, obs, sim_local.filter)
-                v = variance(sim_local)
-                h[kk] = v[:τ]
-            end
+      #      map = MAP(sim)
+     #       N_star = map[:N]
+    #        p_star = map[:p]
+   #         q_star = map[:q]
+  #          sigma_star = map[:σ]
+ #           tau_star = map[:τ]
+#
+ #           delta_candidates = LinRange(0.05,1,25)
+#
+ #           x = 1
+        #    for ii in 1:i
+       #         x = 1-(1-(1-p_star)*x)*exp(-times[ii]/tau_star)
+      #      end
+     #       e_temp = zeros(25)
+    #        for kk in 1:25
+   #             x_temp = 1-(1-(1-p_star)*x)*exp(-delta_candidates[kk]/tau_star)
+  #              e_temp[kk] = x_temp*N_star*p_star*q_star
+ #           end
+#
+       #     h = zeros(25)
+      #      for kk in 1:25
+     #           sim_local = sim
+    #            obs = BinomialObservation(e_temp[kk], delta_candidates[kk])
+   #             update!(sim_local.fstate, obs, sim_local.filter)
+  #              v = variance(sim_local)
+ #               h[kk] = v[:τ]
+#            end
             #delta = delta_candidates[argmin(h)]   
             delta = rand(Exponential(0.121))
 
