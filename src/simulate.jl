@@ -99,8 +99,10 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
                 h[kk] = v[:τ]
             end
             
-            #delta = delta_candidates[argmin(h)]   
-            delta = rand(Exponential(0.121))
+            delta = delta_candidates[argmin(h)]   
+            #delta = rand(Exponential(0.121))
+            print(delta)
+            print("\n")
 
         end       
     end
