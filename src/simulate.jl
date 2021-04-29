@@ -65,7 +65,6 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
 
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)        
-        update!(sim.fstate, obs, sim.filter)
         
         if i < T
                 
