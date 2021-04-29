@@ -92,8 +92,6 @@ function run_OED!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = fals
 
             h = zeros(25)
             for kk in 1:25
-                print(sim.fstate.state.n[1,1])
-                print("\n")
                 sim_local = deepcopy(sim)
                 obs = BinomialObservation(e_temp[kk], delta_candidates[kk])
                 update!(sim_local.fstate, obs, sim_local.filter)
