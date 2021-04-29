@@ -30,11 +30,11 @@ function BinomialGridModel(
     Nind, pind, qind, σind, τind,
     Nrng, prng, qrng, σrng, τrng
 )
-    N     = Nrng[Nind]
-    p     = prng[pind]
-    q     = qrng[qind]
+    N = Nrng[Nind]
+    p = prng[pind]
+    q = qrng[qind]
     σ = σrng[σind]
-    τ   = τrng[τind]
+    τ = τrng[τind]
 
     return BinomialGridModel(
         Nind, pind, qind, σind, τind,
@@ -141,11 +141,11 @@ end
 
 function ScalarBinomialState(n::Int, k::Int, device = :cpu)
     if device == :cpu
-        ns     = n .* ones(Int, 1, 1)
-        ks     = k .* ones(Int, 1, 1)
+        ns = n .* ones(Int, 1, 1)
+        ks = k .* ones(Int, 1, 1)
     elseif device == :gpu
-        ns     = n .* CUDA.ones(Int, 1, 1)
-        ks     = k .* CUDA.ones(Int, 1, 1)
+        ns = n .* CUDA.ones(Int, 1, 1)
+        ks = k .* CUDA.ones(Int, 1, 1)
     end
     return BinomialState(ns, ks)
 end
