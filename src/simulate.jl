@@ -48,13 +48,14 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, o
                 obs = propagate!(sim)
             end
             
-        end        
+        end   
+        push!(times, time += obs.dt)
+        push!(epsps, obs.EPSP)
         
         if i < T && optimal_experiment_design == true
             delta = OED(sim, LinRange(0.05,1,25), times, i)
         end
-        push!(times, time += obs.dt)
-        push!(epsps, obs.EPSP)
+
         if plot_each_timestep
             posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
         end
