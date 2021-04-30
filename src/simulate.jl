@@ -34,7 +34,7 @@ end
 #    return obs
 #end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, OED = false)
+function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, optimal_experiment_design = false)
     times = zeros(0)
     epsps = zeros(0)
     time = 0.
@@ -42,7 +42,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, O
     
     for i in 1:T
         @time begin
-            if OED == true
+            if optimal_experiment_design == true
                 obs = propagate!(sim, dt = delta)
             else
                 obs = propagate!(sim)
@@ -50,7 +50,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, O
             
         end        
         
-        if i < T && OED == true
+        if i < T && optimal_experiment_design == true
             delta = OED(sim, LinRange(0.05,1,25), times, i)
         end
         push!(times, time += obs.dt)
