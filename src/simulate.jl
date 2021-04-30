@@ -78,20 +78,20 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     end
     e_temp = zeros(length(deltat_candidates))
     for kk in 1:length(e_temp)
-        x_temp = 1-(1-(1-p_star)*x)*exp(-delta_candidates[kk]/tau_star)
+        x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
     
     h = zeros(length(e_temp))
     for kk in 1:length(e_temp)
         sim_local = deepcopy(sim)
-        obs = BinomialObservation(e_temp[kk], delta_candidates[kk])
+        obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
         update!(sim_local.fstate, obs, sim_local.filter)
         v = variance(sim_local)
         h[kk] = v[:τ]
     end
     
-    return delta_candidates[argmin(h)] 
+    return deltat_candidates[argmin(h)] 
     
 end
 
