@@ -43,7 +43,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, O
     for i in 1:T
         @time begin
             if OED == true
-                obs = propagate!(sim, delta)
+                obs = propagate!(sim, dt = delta)
             else
                 obs = propagate!(sim)
             end
