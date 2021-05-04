@@ -28,7 +28,18 @@ function propagate!(sim::NestedFilterSimulation; dt = nothing)
     return obs
 end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, optimal_experiment_design = false)
+function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i, simulation_number)
+    save(string(i,".jld"), "e", obs.EPSP,
+        "dt", obs.dt,
+        "Nind", Array(sim.fstate.model.Nind),
+        "pind", Array(sim.fstate.model.pind),
+        "qind", Array(sim.fstate.model.qind),
+        "sigmaind", Array(sim.fstate.model.σind),
+        "tauind", Array(sim.fstate.model.τind),
+        "runtime",runtime)
+end
+
+function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, optimal_experiment_design = false, record_results = false)
     times = zeros(0)
     epsps = zeros(0)
     time = 0.
@@ -53,6 +64,11 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, o
         if plot_each_timestep
             posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
         end
+        
+        if record_results
+            save_results(sim, obs, runtime, i, ENV["SLURM_ARRAY_TASK_ID"])
+        end
+        
     end
     return times, epsps
 end
