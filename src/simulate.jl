@@ -42,8 +42,8 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
         "sigmarng", Array(sim.fstate.model.σrng),
         "taurng", Array(sim.fstate.model.τrng),
         "runtime",runtime)
-    print(isdir(simulation_number))
-    if isdir(simulation_number)==false
+    print(isdir(string(simulation_number)))
+    if isdir(string(simulation_number))==false
         mkdir(string(simulation_number))
     end
     mv(string(i,".jld"),string(simulation_number,"\\",i,".jld"))
