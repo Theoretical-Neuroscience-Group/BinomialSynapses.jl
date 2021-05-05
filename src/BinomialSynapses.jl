@@ -8,6 +8,7 @@ using LaTeXStrings
 using Plots
 using Statistics: mean
 using StatsBase: mode
+using JLD
 
 include("models.jl")
 export
