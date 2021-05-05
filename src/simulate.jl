@@ -36,6 +36,11 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
         "qind", Array(sim.fstate.model.qind),
         "sigmaind", Array(sim.fstate.model.σind),
         "tauind", Array(sim.fstate.model.τind),
+        "Nrng", Array(sim.fstate.model.Nrng),
+        "prng", Array(sim.fstate.model.prng),
+        "qrng", Array(sim.fstate.model.qrng),
+        "sigmarng", Array(sim.fstate.model.σrng),
+        "taurng", Array(sim.fstate.model.τrng),
         "runtime",runtime)
 end
 
