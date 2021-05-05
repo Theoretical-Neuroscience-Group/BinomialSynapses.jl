@@ -69,7 +69,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         
-        if i < T && optimal_experiment_design == true
+        if i < T && protocol == "OED"
             runtime2 = @elapsed delta = OED(sim, parameter, times, i)
             runtime = runtime + runtime2
         end
@@ -85,40 +85,6 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     end
     return times, epsps
 end
-
-#function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, optimal_experiment_design = false, record_results = false)
-#    times = zeros(0)
-#    epsps = zeros(0)
-#    time = 0.
-#    delta = 0.
-#    
-#    for i in 1:T
-#        @time begin
-#            if optimal_experiment_design == true
-#                time1 = @elapsed obs = propagate!(sim, dt = delta)
-#            else
-#                obs = propagate!(sim)
-#            end
-#            
-#        end   
-#        push!(times, time += obs.dt)
-#        push!(epsps, obs.EPSP)
-#        
-#        if i < T && optimal_experiment_design == true
-#            time2 = @elapsed delta = OED(sim, LinRange(0.05,1,25), times, i)
-#        end
-#
-#        if plot_each_timestep
-#            posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
-#        end
-#        
-#        if record_results
-#            save_results(sim, obs, time1+time2, i, Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]))
-#        end
-#        
-#    end
-#    return times, epsps
-#end
 
 function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     
