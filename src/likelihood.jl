@@ -6,18 +6,19 @@ function likelihood(k, model::AbstractBinomialModel, observation)
            )[:,1]
 end
 
-function kernel_likelihood_indices!(u, v, idxT, kT, q, σ, observation, r, randstates)
+function kernel_likelihood_indices!(u, v, idxT, kT, q, σ, observation, r, seed::UInt32)
     # use column-index first (gives a 3x speedup)
     # kT stands for the transpose of k
     # idxT stands for the transpose of idx
     j = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+    Random.seed!(seed)
     M_in, M_out = size(kT)
     @inbounds if j <= M_out
         vsum = 0f0
         CurMax = 1f0
         for i in 1:M_in
             # omitting normalization constant here; it is only needed for u
-            vi      = CUDA.exp(-0.5f0 *((observation - q[j] * kT[i,j]) / σ[j])^2)
+            vi      = exp(-0.5f0 *((observation - q[j] * kT[i,j]) / σ[j])^2)
             vsum   += vi
             v[i, j] = vsum
             # sample descending sequence of sorted random numbers
@@ -26,12 +27,12 @@ function kernel_likelihood_indices!(u, v, idxT, kT, q, σ, observation, r, rands
             # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
             # September 1980, Pages 359--364
             mirrori = M_in - i + 1 # mirrored index i
-            CurMax *= CUDA.exp(CUDA.log(GPUArrays.gpu_rand(Float32, CUDA.CuKernelContext(), randstates)) / mirrori)
+            CurMax *= exp(log(rand(Float32)) / mirrori)
             r[mirrori, j] = CurMax
         end
         # compute average likelihood across inner particles
         # (with normalization constant that was omitted from v for speed)
-        u[j] = vsum / (M_in * CUDA.sqrt(2*Float32(pi)) * σ[j])
+        u[j] = vsum / (M_in * sqrt(2*Float32(pi)) * σ[j])
         # O(n) binning algorithm for sorted samples
         bindex = 1 # bin index
         @inbounds for i in 1:M_in
@@ -55,7 +56,7 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
     v           = CuArray{Float32}(undef, M_in, M_out)
     idx         = CuArray{Int}(undef, M_out, M_in)
 
-    rng = GPUArrays.default_rng(CuArray)
+    seed = rand(UInt32)
 
     kernel  = @cuda launch=false kernel_likelihood_indices!(
                 u, v,
@@ -63,7 +64,7 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
                 model.q, model.σ,
                 Float32(observation),
                 r,
-                rng.state
+                seed
               )
     config  = launch_configuration(kernel.fun)
     threads = Base.min(M_out, config.threads, 256)
@@ -74,7 +75,7 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
         model.q, model.σ,
         observation,
         r,
-        rng.state
+        seed
         ;
         threads=threads, blocks=blocks
     )

@@ -15,10 +15,11 @@ function jitter!(model::BinomialGridModel, width)
 end
 
 function jitter!(indices, maxindex, prob1, prob2)
-    function kernel(indices, range, prob1, prob2, randstates)
+    function kernel(indices, maxindex, prob1, prob2, seed::UInt32)
         i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+        Random.seed!(seed)
         @inbounds if i <= length(indices)
-            r   = GPUArrays.gpu_rand(Float32, CUDA.CuKernelContext(), randstates)
+            r   = rand(Float32)
             idx = indices[i]
             if idx == 1
                 r < prob2 && (idx += 1)
@@ -34,12 +35,12 @@ function jitter!(indices, maxindex, prob1, prob2)
         return nothing
     end
 
-    rng = GPUArrays.default_rng(CuArray)
+    seed = rand(UInt32)
 
-    kernel  = @cuda launch=false kernel(indices, maxindex, prob1, prob2, rng.state)
+    kernel  = @cuda launch=false kernel(indices, maxindex, prob1, prob2, seed)
     config  = launch_configuration(kernel.fun)
     threads = Base.min(length(indices), config.threads, 256)
     blocks  = cld(length(indices), threads)
-    kernel(indices, maxindex, prob1, prob2, rng.state; threads=threads, blocks=blocks)
+    kernel(indices, maxindex, prob1, prob2, seed; threads=threads, blocks=blocks)
     return indices
 end
