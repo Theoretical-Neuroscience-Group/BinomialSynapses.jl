@@ -46,7 +46,7 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
     if isdir(string(simulation_number))==false
         mkdir(string(simulation_number))
     end
-    mv(string(i,".jld"),string("\\",simulation_number,"\\",i,".jld"))
+    mv(string(i,".jld"),string(simulation_number))
 end
 
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, optimal_experiment_design = false, record_results = false)
