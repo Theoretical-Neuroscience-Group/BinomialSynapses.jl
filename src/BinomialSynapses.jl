@@ -3,9 +3,9 @@ module BinomialSynapses
 using BinomialGPU
 using CUDA
 using Distributions: Binomial, Exponential, Normal
-using GPUArrays
 using LaTeXStrings
 using Plots
+using Random
 using Statistics: mean
 using StatsBase: mode
 
