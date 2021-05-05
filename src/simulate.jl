@@ -29,6 +29,10 @@ function propagate!(sim::NestedFilterSimulation; dt = nothing)
 end
 
 function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i, simulation_number)
+    if isdir(string(simulation_number))==false
+        mkdir(string(simulation_number))
+    end
+    cd("string(simulation_number)")
     save(string(i,".jld"), "e", obs.EPSP,
         "dt", obs.dt,
         "Nind", Array(sim.fstate.model.Nind),
@@ -42,11 +46,7 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
         "sigmarng", Array(sim.fstate.model.σrng),
         "taurng", Array(sim.fstate.model.τrng),
         "runtime",runtime)
-    print(isdir(string(simulation_number)))
-    if isdir(string(simulation_number))==false
-        mkdir(string(simulation_number))
-    end
-    mv(string(i,".jld"),string("\\",simulation_number,"\\",i,".jld"))
+    cd("..")
 end
 
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, optimal_experiment_design = false, record_results = false)
