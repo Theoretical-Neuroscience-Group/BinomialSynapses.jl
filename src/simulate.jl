@@ -66,7 +66,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, o
         end
         
         if record_results
-            save_results(sim, obs, time1+time2, i, Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]))
+            save_results(sim, obs, time1+time2, i, 1)
         end
         
     end
