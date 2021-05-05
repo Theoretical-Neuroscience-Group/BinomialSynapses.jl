@@ -49,7 +49,7 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
     cd("..")
 end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, protocol = exponential, parameter = 0.121, record_results = false)
+function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, protocol = "exponential", parameter = 0.121, record_results = false)
     times = zeros(0)
     epsps = zeros(0)
     time = 0.
