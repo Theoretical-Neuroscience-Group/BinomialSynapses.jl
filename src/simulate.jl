@@ -32,7 +32,7 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
     if isdir(string(simulation_number))==false
         mkdir(string(simulation_number))
     end
-    cd("string(simulation_number)")
+    cd(string(simulation_number))
     save(string(i,".jld"), "e", obs.EPSP,
         "dt", obs.dt,
         "Nind", Array(sim.fstate.model.Nind),
