@@ -29,7 +29,7 @@ function propagate!(sim::NestedFilterSimulation; dt = nothing)
 end
 
 function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i, simulation_number)
-    save(string(i,".jld"), "e", obs.EPSP,
+    save(string("test_repo\\",i,".jld"), "e", obs.EPSP,
         "dt", obs.dt,
         "Nind", Array(sim.fstate.model.Nind),
         "pind", Array(sim.fstate.model.pind),
