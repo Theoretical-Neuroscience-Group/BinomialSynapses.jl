@@ -22,8 +22,8 @@ function NestedFilterSimulation(
     return NestedFilterSimulation(hmodel, filter, hstate, fstate)
 end
 
-function propagate!(sim::NestedFilterSimulation; dt = nothing)
-    obs = propagate_emit!(sim.hstate, sim.hmodel, dt = dt)
+function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
+    obs = propagate_emit!(sim.hstate, sim.hmodel, dt = dt, λ = λ)
     update!(sim.fstate, obs, sim.filter)
     return obs
 end
