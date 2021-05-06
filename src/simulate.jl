@@ -5,6 +5,12 @@ struct NestedFilterSimulation{T1, T2, T3, T4}
     fstate::T4
 end
 
+struct Results{T1, T2, T3}
+    entropies::T1
+    runtime::T2
+    dt::T3    
+end
+
 function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
@@ -28,7 +34,7 @@ function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
     return obs
 end
 
-function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i, simulation_number)
+function save_results!(results::Results, sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i)
    
     Nind = Array(sim.fstate.model.Nind)
     pind = Array(sim.fstate.model.pind)
@@ -63,22 +69,9 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
         τ_posterior[j] = count(i->(i==j),τind)
     end
 
-    N_entropy = entropy(N_posterior/sum(N_posterior))
-    p_entropy = entropy(p_posterior/sum(p_posterior))
-    q_entropy = entropy(q_posterior/sum(q_posterior))
-    σ_entropy = entropy(σ_posterior/sum(σ_posterior))
-    τ_entropy = entropy(τ_posterior/sum(τ_posterior))
-    
-    if isdir(string(simulation_number))==false
-        mkdir(string(simulation_number))
-    end
-    
-    cd(string(simulation_number))
-    save(string(i,".jld"), 
-        "dt", obs.dt,
-        "tau_entropy", τ_entropy,
-        "runtime",runtime)
-    cd("..")
+    results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))
+    results.runtime[i] = runtime
+    results.dt[i] = obs.dt
 end
 
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, protocol = "exponential", parameter = 0.121, record_results = false)
@@ -86,6 +79,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     epsps = zeros(0)
     time = 0.
     delta = 0.
+    results = Results(zeros(T),zeros(T),zeros(T))
     
     for i in 1:T
         if protocol == "OED"
@@ -111,7 +105,10 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         end
         
         if record_results
-            save_results(sim, obs, runtime, i, Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]))
+            save_results!(results, sim, obs, runtime, i)
+            if i == T
+                save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "runtime", results.runtime, "dt", results.dt)
+            end
         end
         
     end
