@@ -1,7 +1,9 @@
 using Statistics
+using StatsBase
 
 MAP(fstate::NestedParticleState) = MAP(fstate.model)
 variance(fstate::NestedParticleState) = variance(fstate.model)
+ent(fstate::NestedParticleState) = ent(fstate.model)
 
 function MAP(model::BinomialModel)
         Dict(
@@ -23,6 +25,16 @@ function variance(model::BinomialModel)
         )
 end
 
+function ent(model::BinomialModel)
+        Dict(
+                :N => entropy(Array(model.N)),
+                :p => entropy(Array(model.p)),
+                :q => entropy(Array(model.q)),
+                :σ => entropy(Array(model.σ)),
+                :τ => entropy(Array(model.τ))
+        )
+end
+
 function MAP(model::BinomialGridModel)
         refresh!(model)
         MAP(BinomialModel(model.N, model.p, model.q, model.σ, model.τ))
@@ -31,4 +43,9 @@ end
 function variance(model::BinomialGridModel)
         refresh!(model)
         variance(BinomialModel(model.N, model.p, model.q, model.σ, model.τ))
+end
+
+function ent(model::BinomialGridModel)
+        refresh!(model)
+        ent(BinomialModel(model.N, model.p, model.q, model.σ, model.τ))
 end
