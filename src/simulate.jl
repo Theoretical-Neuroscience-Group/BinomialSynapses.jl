@@ -139,7 +139,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         sim_local = deepcopy(sim)
         obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
         update!(sim_local.fstate, obs, sim_local.filter)
-        v = variance(sim_local)
+        v = ent(sim_local)
         h[kk] = v[:τ]
     end
     
@@ -149,3 +149,4 @@ end
 
 MAP(sim::NestedFilterSimulation) = MAP(sim.fstate.model)
 variance(sim::NestedFilterSimulation) = variance(sim.fstate.model)
+ent(sim::NestedFilterSimulation) = ent(sim.fstate.model)
