@@ -29,22 +29,58 @@ function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
 end
 
 function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i, simulation_number)
+   
+    Nind = Array(sim.fstate.model.Nind)
+    pind = Array(sim.fstate.model.pind)
+    qind = Array(sim.fstate.model.qind)
+    σind = Array(sim.fstate.model.σind)
+    τind = Array(sim.fstate.model.τind)
+    Nrng = Array(sim.fstate.model.Nrng)
+    prng = Array(sim.fstate.model.prng)
+    qrng = Array(sim.fstate.model.qrng)
+    σrng = Array(sim.fstate.model.σrng)
+    τrng = Array(sim.fstate.model.τrng)
+    
+    N_posterior = zeros(length(Nrng))
+    p_posterior = zeros(length(prng))
+    q_posterior = zeros(length(qrng))
+    σ_posterior = zeros(length(σrng))
+    τ_posterior = zeros(length(τrng))
+
+    for j in 1:length(Nrng)
+        N_posterior[j] = count(i->(i==j),Nind)
+    end
+    for j in 1:length(prng)
+        p_posterior[j] = count(i->(i==j),pind)
+    end
+    for j in 1:length(qrng)
+        q_posterior[j] = count(i->(i==j),qind)
+    end
+    for j in 1:length(σrng)
+        σ_posterior[j] = count(i->(i==j),σind)
+    end
+    for j in 1:length(τrng)
+        τ_posterior[j] = count(i->(i==j),τind)
+    end
+
+    N_entropy = entropy(N_posterior/sum(N_posterior))
+    p_entropy = entropy(p_posterior/sum(p_posterior))
+    q_entropy = entropy(q_posterior/sum(q_posterior))
+    σ_entropy = entropy(σ_posterior/sum(σ_posterior))
+    τ_entropy = entropy(τ_posterior/sum(τ_posterior))
+    
     if isdir(string(simulation_number))==false
         mkdir(string(simulation_number))
     end
+    
     cd(string(simulation_number))
     save(string(i,".jld"), "e", obs.EPSP,
         "dt", obs.dt,
-        "Nind", Array(sim.fstate.model.Nind),
-        "pind", Array(sim.fstate.model.pind),
-        "qind", Array(sim.fstate.model.qind),
-        "sigmaind", Array(sim.fstate.model.σind),
-        "tauind", Array(sim.fstate.model.τind),
-        "Nrng", Array(sim.fstate.model.Nrng),
-        "prng", Array(sim.fstate.model.prng),
-        "qrng", Array(sim.fstate.model.qrng),
-        "sigmarng", Array(sim.fstate.model.σrng),
-        "taurng", Array(sim.fstate.model.τrng),
+        "N_entropy", N_entropy,
+        "p_entropy", p_entropy,
+        "q_entropy", q_entropy,
+        "sigma_entropy", σ_entropy,
+        "tau_entropy", τ_entropy,
         "runtime",runtime)
     cd("..")
 end
