@@ -41,6 +41,7 @@ export NestedParticleFilter, NestedParticleState, update!
 
 include("statistics.jl")
 export MAP
+export ent
 
 include("simulate.jl")
 export NestedFilterSimulation, run!
