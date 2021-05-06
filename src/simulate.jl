@@ -74,12 +74,8 @@ function save_results(sim::NestedFilterSimulation, obs::BinomialObservation, run
     end
     
     cd(string(simulation_number))
-    save(string(i,".jld"), "e", obs.EPSP,
+    save(string(i,".jld"), 
         "dt", obs.dt,
-        "N_entropy", N_entropy,
-        "p_entropy", p_entropy,
-        "q_entropy", q_entropy,
-        "sigma_entropy", σ_entropy,
         "tau_entropy", τ_entropy,
         "runtime",runtime)
     cd("..")
