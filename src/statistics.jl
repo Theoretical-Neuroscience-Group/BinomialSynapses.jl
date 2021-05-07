@@ -1,5 +1,3 @@
-using Statistics
-
 MAP(fstate::NestedParticleState) = MAP(fstate.model)
 variance(fstate::NestedParticleState) = variance(fstate.model)
 ent(fstate::NestedParticleState) = ent(fstate.model)
