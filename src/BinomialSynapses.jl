@@ -10,7 +10,6 @@ using Plots
 using Statistics: mean
 using StatsBase: entropy, mode
 
-
 include("models.jl")
 export
        AbstractBinomialModel,
