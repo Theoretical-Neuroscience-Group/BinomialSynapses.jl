@@ -4,12 +4,11 @@ using BinomialGPU
 using CUDA
 using Distributions: Binomial, Exponential, Normal
 using GPUArrays
+using JLD
 using LaTeXStrings
 using Plots
 using Statistics: mean
-using StatsBase: mode
-using StatsBase: entropy
-using JLD
+using StatsBase: entropy, mode
 
 include("models.jl")
 export
