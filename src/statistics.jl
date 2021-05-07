@@ -1,5 +1,4 @@
 using Statistics
-using StatsBase
 
 MAP(fstate::NestedParticleState) = MAP(fstate.model)
 variance(fstate::NestedParticleState) = variance(fstate.model)
