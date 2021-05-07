@@ -110,7 +110,10 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
                 save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "runtime", results.runtime, "dt", results.dt)
             end
         end
-        
+        print(i)
+        print("\n")
+        print(times)
+        print("\n")
     end
     return times, epsps
 end
