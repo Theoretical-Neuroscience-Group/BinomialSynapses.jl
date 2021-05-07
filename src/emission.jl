@@ -1,4 +1,8 @@
-function propagate_emit!(state, model, timestep::Timestep = RandomTimestep(Exponential(0.121))) 
+function propagate_emit!(
+    state, 
+    model, 
+    timestep::Timestep = RandomTimestep(Exponential(0.121))
+) 
     δ = get_step(timestep)
     propagate_emit!(state, model, δ)
 end
