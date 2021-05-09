@@ -110,10 +110,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
                 save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "runtime", results.runtime, "dt", results.dt)
             end
         end
-        print(i)
-        print("\n")
-        print(times)
-        print("\n")
+
     end
     return times, epsps
 end
@@ -126,9 +123,6 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     q_star = map[:q]
     sigma_star = map[:σ]
     tau_star = map[:τ]
-    
-    print(times)
-    print("\n")
     
     x = 1
     if i>1
