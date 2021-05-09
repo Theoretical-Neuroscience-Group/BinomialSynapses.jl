@@ -131,8 +131,10 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     print("\n")
     
     x = 1
-    for ii in 1:i
-        x = 1-(1-(1-p_star)*x)*exp(-times[ii]/tau_star)
+    if i>1
+        for ii in 2:i
+            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
+        end
     end
     e_temp = zeros(length(deltat_candidates))
     for kk in 1:length(e_temp)
