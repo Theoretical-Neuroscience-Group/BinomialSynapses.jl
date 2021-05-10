@@ -85,13 +85,10 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     for i in 1:T
 
         if protocol == "OED"
-            print("a")
             runtime = @elapsed obs = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
-            print("b")
             runtime = @elapsed obs = propagate!(sim, λ = parameter)
         elseif protocol == "constant"
-            print("c")
             runtime = @elapsed obs = propagate!(sim, dt = parameter)
         elseif protocol == "uniform"
             runtime = @elapsed obs = propagate!(sim, dt = rand(parameter))
