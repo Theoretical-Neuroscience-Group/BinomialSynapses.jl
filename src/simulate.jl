@@ -82,6 +82,8 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     results = Results(zeros(T),zeros(T),zeros(T))
     
     for i in 1:T
+        print(string("delta=",delta))
+        print("\n")
         if protocol == "OED"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
@@ -154,6 +156,9 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         v = ent(sim_local)
         h[kk] = v[:τ]
     end
+    
+    print(h)
+    print("\n")
     
     return deltat_candidates[argmin(h)] 
     
