@@ -118,9 +118,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
 end
 
 function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
-    
-    print(i)
-    print("\n")
+
     
     map = MAP(sim)
     N_star = map[:N]
@@ -142,11 +140,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
-    
-    print(deltat_candidates)
-    print("\n")
-    print(e_temp)
-    print("\n")
+
     
     h = zeros(length(e_temp))
     for kk in 1:length(e_temp)
@@ -163,11 +157,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         end
         h[kk] = entropy(τ_posterior/sum(τ_posterior))
     end
-        
-    
-    
-    print(h)
-    print("\n")
+
     
     return deltat_candidates[argmin(h)] 
     
