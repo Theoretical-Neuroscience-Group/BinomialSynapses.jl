@@ -30,7 +30,11 @@ end
 
 function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
     obs = propagate_emit!(sim.hstate, sim.hmodel, dt = dt, λ = λ)
+    print(obs.dt)
+    print("\n")
     filterstate, N_max, p_max, q_max, σ_max, τ_max = update!(sim.fstate, obs, sim.filter)
+    print(obs.dt)
+    print("\n")
     return obs, N_max, p_max, q_max, σ_max, τ_max
 end
 
@@ -81,6 +85,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     delta = 0.
     results = Results(zeros(T),zeros(T),zeros(T))
     
+    print(parameter)
+    print("\n")
+    
     for i in 1:T
 
         if protocol == "OED"
@@ -93,9 +100,13 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
             print("c")
             runtime = @elapsed obs = propagate!(sim, dt = parameter)
         elseif protocol == "uniform"
-            print("d")
             runtime = @elapsed obs = propagate!(sim, dt = rand(parameter))
         end   
+        
+        print(obs)
+        print("\n")
+        print(obs.dt)
+        print("\n")
 
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
