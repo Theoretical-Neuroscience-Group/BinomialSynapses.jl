@@ -82,11 +82,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     results = Results(zeros(T),zeros(T),zeros(T))
     
     for i in 1:T
-        print(i)
-        print("\n")
+
         if protocol == "OED"
-            print(string("Used delta t = ",delta))
-            print("\n")
+
             runtime = @elapsed obs, N_max, p_max, q_max, σ_max, τ_max = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
             runtime = @elapsed obs = propagate!(sim, λ = parameter)
@@ -95,10 +93,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         elseif protocol == "uniform"
             runtime = @elapsed obs = propagate!(sim, dt = rand(parameter))
         end   
-        print(string("obs.dt = ",obs.dt))
-        print("\n")
-        print(string("times = ",times))
-        print("\n") 
+
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         
@@ -129,12 +124,10 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i, N_star, p
     if i>1
         for ii in 2:i
             x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
-            print(string("delta t = ",times[ii]-times[ii-1]))
-            print("\n")
+
         end
     end
-    print(string("x",x))
-    print("\n")    
+   
     e_temp = zeros(length(deltat_candidates))
     for kk in 1:length(e_temp)
         x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
@@ -157,8 +150,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i, N_star, p
         end
         h[kk] = entropy(τ_posterior/sum(τ_posterior))
     end
-    print(string("Next delta t = ",deltat_candidates[argmin(h)]))
-    print("\n")
+
     
     return deltat_candidates[argmin(h)] 
     
