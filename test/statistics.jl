@@ -11,11 +11,11 @@
 
         map = MAP(model, marginal = true)
 
-        @test map[:N] == 2
-        @test map[:p] == 0.5
-        @test map[:q] == 0.3
-        @test map[:σ] == 0.1
-        @test map[:τ] == 0.1
+        @test map.N == 2
+        @test map.p == 0.5
+        @test map.q == 0.3
+        @test map.σ == 0.1
+        @test map.τ == 0.1
     end
     @testset "MAP" begin
         model = BinomialModel(
@@ -28,10 +28,10 @@
 
         map = MAP(model)
 
-        @test map[:N] == 2
-        @test map[:p] == 0.3
-        @test map[:q] == 0.2
-        @test map[:σ] == 0.5
-        @test map[:τ] == 0.8
+        @test map.N == 2
+        @test map.p == 0.3
+        @test map.q == 0.2
+        @test map.σ == 0.5
+        @test map.τ == 0.8
     end
 end

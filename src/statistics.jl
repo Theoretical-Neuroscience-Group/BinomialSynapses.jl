@@ -1,13 +1,17 @@
-MAP(fstate::NestedParticleState) = MAP(fstate.model)
+MAP(fstate::NestedParticleState; kwargs...) = MAP(fstate.model, kwargs...)
+
+function MAP(model::BinomialGridModel; kwargs...)
+    MAP(BinomialModel(model), kwargs...)
+end
 
 function MAP(model::BinomialModel; marginal::Bool = false)
     if marginal
-        return Dict(
-            :N => mode(Array(model.N)),
-            :p => mode(Array(model.p)),
-            :q => mode(Array(model.q)),
-            :σ => mode(Array(model.σ)),
-            :τ => mode(Array(model.τ))
+        return BinomialModel(
+            mode(Array(model.N)),
+            mode(Array(model.p)),
+            mode(Array(model.q)),
+            mode(Array(model.σ)),
+            mode(Array(model.τ))
         )
     end
     v = hcat(
@@ -17,16 +21,5 @@ function MAP(model::BinomialModel; marginal::Bool = false)
             model.σ, 
             model.τ
         ) |> Array |> eachrow |> mode
-    return Dict(
-        :N => v[1],
-        :p => v[2],
-        :q => v[3],
-        :σ => v[4],
-        :τ => v[5]
-    )
-end
-
-function MAP(model::BinomialGridModel)
-    refresh!(model)
-    MAP(BinomialModel(model.N, model.p, model.q, model.σ, model.τ))
+    return BinomialModel(v...)
 end

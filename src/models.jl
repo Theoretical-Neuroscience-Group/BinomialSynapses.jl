@@ -73,7 +73,8 @@ end
 
 # special outer constructor to convert a BinomialGridModel into a BinomialModel
 function BinomialModel(model::BinomialGridModel)
-   return BinomialModel(model.N, model.p, model.q, model.σ, model.τ)
+    refresh!(model)
+    return BinomialModel(model.N, model.p, model.q, model.σ, model.τ)
 end
 
 function BinomialModel(nmax::Int, m_out::Int, device = :gpu)
