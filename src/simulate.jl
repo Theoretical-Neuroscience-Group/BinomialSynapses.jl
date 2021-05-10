@@ -164,7 +164,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         h[kk] = entropy(τ_posterior/sum(τ_posterior))
     end
         
-    end
+    
     
     print(h)
     print("\n")
