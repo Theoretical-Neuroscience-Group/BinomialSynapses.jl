@@ -117,6 +117,9 @@ end
 
 function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     
+    print(i)
+    print("\n")
+    
     map = MAP(sim)
     N_star = map[:N]
     p_star = map[:p]
@@ -128,6 +131,8 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     if i>1
         for ii in 2:i
             x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
+            print(times[ii]-times[ii-1])
+            print("\n")
         end
     end
     e_temp = zeros(length(deltat_candidates))
@@ -135,6 +140,11 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
+    
+    print(deltat_candidates)
+    print("\n")
+    print(e_temp)
+    print("\n")
     
     h = zeros(length(e_temp))
     for kk in 1:length(e_temp)
