@@ -30,12 +30,8 @@ end
 
 function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
     obs = propagate_emit!(sim.hstate, sim.hmodel, dt = dt, λ = λ)
-    print(obs.dt)
-    print("\n")
-    filterstate, N_max, p_max, q_max, σ_max, τ_max = update!(sim.fstate, obs, sim.filter)
-    print(obs.dt)
-    print("\n")
-    return obs, N_max, p_max, q_max, σ_max, τ_max
+    filterstate = update!(sim.fstate, obs, sim.filter)
+    return obs
 end
 
 function save_results!(results::Results, sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i)
@@ -84,15 +80,13 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     time = 0.
     delta = 0.
     results = Results(zeros(T),zeros(T),zeros(T))
-    
-    print(parameter)
-    print("\n")
+
     
     for i in 1:T
 
         if protocol == "OED"
             print("a")
-            runtime = @elapsed obs, N_max, p_max, q_max, σ_max, τ_max = propagate!(sim, dt = delta)
+            runtime = @elapsed obs = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
             print("b")
             runtime = @elapsed obs = propagate!(sim, λ = parameter)
@@ -102,17 +96,12 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         elseif protocol == "uniform"
             runtime = @elapsed obs = propagate!(sim, dt = rand(parameter))
         end   
-        
-        print(obs)
-        print("\n")
-        print(obs.dt)
-        print("\n")
 
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         
         if i < T && protocol == "OED"
-            runtime2 = @elapsed delta = OED(sim, parameter, times, i, N_max, p_max, q_max, σ_max, τ_max)
+            runtime2 = @elapsed delta = OED(sim, parameter, times, i)
             runtime = runtime + runtime2
         end
 
@@ -131,8 +120,14 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     return times, epsps
 end
 
-function OED(sim::NestedFilterSimulation, deltat_candidates, times, i, N_star, p_star, q_star, sigma_star, tau_star)
+function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
+    map = MAP(sim.fstate.model)
+    N_star = map[:N]
+    p_star = map[:p]
+    q_star = map[:q]
+    sigma_star = map[:σ]
+    tau_star = map[:τ]
     
     x = 1
     if i>1
@@ -154,8 +149,6 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i, N_star, p
         sim_local = deepcopy(sim)
         obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
         update!(sim_local.fstate, obs, sim_local.filter)
-        #v = ent(sim_local)
-        #h[kk] = v[:τ]
         τind = Array(sim_local.fstate.model.τind)
         τrng = Array(sim_local.fstate.model.τrng)
         τ_posterior = zeros(length(τrng))
