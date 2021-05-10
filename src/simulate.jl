@@ -30,8 +30,8 @@ end
 
 function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
     obs = propagate_emit!(sim.hstate, sim.hmodel, dt = dt, λ = λ)
-    update!(sim.fstate, obs, sim.filter)
-    return obs
+    filterstate, N_max, p_max, q_max, σ_max, τ_max = update!(sim.fstate, obs, sim.filter)
+    return obs, N_max, p_max, q_max, σ_max, τ_max
 end
 
 function save_results!(results::Results, sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i)
@@ -85,7 +85,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         print(string("delta=",delta))
         print("\n")
         if protocol == "OED"
-            runtime = @elapsed obs = propagate!(sim, dt = delta)
+            runtime = @elapsed obs, N_max, p_max, q_max, σ_max, τ_max = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
             runtime = @elapsed obs = propagate!(sim, λ = parameter)
         elseif protocol == "constant"
@@ -98,7 +98,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         push!(epsps, obs.EPSP)
         
         if i < T && protocol == "OED"
-            runtime2 = @elapsed delta = OED(sim, parameter, times, i)
+            runtime2 = @elapsed delta = OED(sim, parameter, times, i, N_max, p_max, q_max, σ_max, τ_max)
             runtime = runtime + runtime2
         end
 
@@ -117,15 +117,21 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     return times, epsps
 end
 
-function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
+function OED(sim::NestedFilterSimulation, deltat_candidates, times, i, N_star, p_star, q_star, sigma_star, tau_star)
 
     
-    map = MAP(sim)
-    N_star = map[:N]
-    p_star = map[:p]
-    q_star = map[:q]
-    sigma_star = map[:σ]
-    tau_star = map[:τ]
+   # map = MAP(sim)
+   # N_star = map[:N]
+   # p_star = map[:p]
+   # q_star = map[:q]
+   # sigma_star = map[:σ]
+   # tau_star = map[:τ]
+    
+   print(N_star)
+   print(p_star)
+   print(q_star)
+   print(sigma_star)
+   print(tau_star)   
     
     x = 1
     if i>1
