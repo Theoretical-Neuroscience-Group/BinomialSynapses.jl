@@ -153,8 +153,17 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         sim_local = deepcopy(sim)
         obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
         update!(sim_local.fstate, obs, sim_local.filter)
-        v = ent(sim_local)
-        h[kk] = v[:τ]
+        #v = ent(sim_local)
+        #h[kk] = v[:τ]
+        τind = Array(sim_local.fstate.model.τind)
+        τrng = Array(sim_local.fstate.model.τrng)
+        τ_posterior = zeros(length(τrng))
+        for j in 1:length(τrng)
+            τ_posterior[j] = count(i->(i==j),τind)
+        end
+        h[kk] = entropy(τ_posterior/sum(τ_posterior))
+    end
+        
     end
     
     print(h)
