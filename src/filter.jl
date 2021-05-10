@@ -30,6 +30,11 @@ function update!(
     jitter!(model, filter.jittering_width)
     propagate!(state, model, observation.dt)
     u = likelihood_resample!(state, model, observation)
+    N_max = model.N[argmax(u)]
+    p_max = model.p[argmax(u)]
+    q_max = model.q[argmax(u)]
+    σ_max = model.σ[argmax(u)]
+    τ_max = model.τ[argmax(u)]
     outer_resample!(state, model, u)
-    return filterstate
+    return filterstate, N_max, p_max, q_max, σ_max, τ_max
 end
