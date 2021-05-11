@@ -6,6 +6,12 @@ struct NestedFilterSimulation{T1, T2, T3, T4, T5}
     tsteps::T5
 end
 
+struct Results{T1, T2, T3}
+    entropies::T1
+    runtime::T2
+    dt::T3    
+end
+
 function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
