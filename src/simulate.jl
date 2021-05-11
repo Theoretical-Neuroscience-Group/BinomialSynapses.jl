@@ -1,16 +1,16 @@
-struct NestedFilterSimulation{T1, T2, T3, T4}
+struct NestedFilterSimulation{T1, T2, T3, T4, T5}
     hmodel::T1
     filter::T2
     hstate::T3
     fstate::T4
+    tsteps::T5
 end
 
 function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    λ = 0.121,
-    dt = nothing
+    timestep = RandomTimestep(Exponential(0.121))
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
     filter = NestedParticleFilter(width)
@@ -19,11 +19,11 @@ function NestedFilterSimulation(
                 m_out, m_in,
                 Nrng, prng, qrng, σrng, τrng
              )
-    return NestedFilterSimulation(hmodel, filter, hstate, fstate)
+    return NestedFilterSimulation(hmodel, filter, hstate, fstate, timestep)
 end
 
 function propagate!(sim::NestedFilterSimulation)
-    obs = propagate_emit!(sim.hstate, sim.hmodel)
+    obs = propagate_emit!(sim.hstate, sim.hmodel, sim.tsteps)
     update!(sim.fstate, obs, sim.filter)
     return obs
 end

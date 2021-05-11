@@ -22,6 +22,9 @@ export
 include("propagate.jl")
 export propagate!
 
+include("timestep.jl")
+export Timestep, FixedTimestep, RandomTimestep, get_step
+
 include("emission.jl")
 export propagate_emit!
 

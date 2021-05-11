@@ -10,6 +10,6 @@
     state = ScalarBinomialState(10, 2)
     model = ScalarBinomialModel(10, 0.85, 1.0, 0.2, 0.2)
     @test propagate_emit!(state, model).dt > 0
-    @test propagate_emit!(state, model, dt = 0.3).dt == 0.3
-    @test propagate_emit!(state, model, λ = 0.5).dt > 0
+    @test propagate_emit!(state, model, FixedTimestep(0.3)).dt == 0.3
+    @test propagate_emit!(state, model, RandomTimestep(Exponential(0.5))).dt > 0
 end
