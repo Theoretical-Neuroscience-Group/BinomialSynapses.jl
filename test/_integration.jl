@@ -18,10 +18,10 @@
         times, epsps = run!(sim, T = 1000)
         map = MAP(sim)
 
-        @test abs(map[:N] - N) <= 6
-        @test abs(map[:p] - p) <= 0.1
-        @test abs(map[:q] - q) <= 0.1
-        @test abs(map[:σ] - σ) <= 0.3
-        @test abs(map[:τ] - τ) <= 0.3
+        @test abs(map.N - N) <= 6
+        @test abs(map.p - p) <= 0.1
+        @test abs(map.q - q) <= 0.1
+        @test abs(map.σ - σ) <= 0.3
+        @test abs(map.τ - τ) <= 0.3
     end
 end
