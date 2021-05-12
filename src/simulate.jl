@@ -140,40 +140,40 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
 
-    sim_local = deepcopy(sim)
-    state = sim_local.fstate.state
-    model = sim_local.fstate.model
-    jitter!(model, sim_local.filter.jittering_width)
+    #sim_local = deepcopy(sim)
+    #state = sim_local.fstate.state
+    #model = sim_local.fstate.model
+    #jitter!(model, sim_local.filter.jittering_width)
+    #
+    #idx_candidates = sample(1:5,10)
+    #candidates = CuVector(deltat_candidates[idx_candidates])
+    #e = CuVector(e_temp[idx_candidates])
+    #
+    #print(idx_candidates)
+    #print("\n")
+    #print(candidates)
+    #print("\n")
+    #print(e)
+    #print("\n")
+    #print(e_temp)
+    #print("\n")
+    #propagate!(state, model, candidates)
+    #print("aaa")
+    #print("\n") 
     
-    idx_candidates = sample(1:5,10)
-    candidates = CuVector(deltat_candidates[idx_candidates])
-    e = CuVector(e_temp[idx_candidates])
-    
-    print(idx_candidates)
-    print("\n")
-    print(candidates)
-    print("\n")
-    print(e)
-    print("\n")
-    print(e_temp)
-    print("\n")
-    propagate!(state, model, candidates)
-    print("aaa")
-    print("\n") 
-    
-   # h = zeros(length(e_temp))
-   # for kk in 1:length(e_temp)
-   #     sim_local = deepcopy(sim)
-   #     obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
-   #     update!(sim_local.fstate, obs, sim_local.filter)
-   #     τind = Array(sim_local.fstate.model.τind)
-   #     τrng = Array(sim_local.fstate.model.τrng)
-   #     τ_posterior = zeros(length(τrng))
-   #     for j in 1:length(τrng)
-   #         τ_posterior[j] = count(i->(i==j),τind)
-   #     end
-   #     h[kk] = entropy(τ_posterior/sum(τ_posterior))
-   # end
+    h = zeros(length(e_temp))
+    for kk in 1:length(e_temp)
+        sim_local = deepcopy(sim)
+        obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
+        update!(sim_local.fstate, obs, sim_local.filter)
+        τind = Array(sim_local.fstate.model.τind)
+        τrng = Array(sim_local.fstate.model.τrng)
+        τ_posterior = zeros(length(τrng))
+        for j in 1:length(τrng)
+            τ_posterior[j] = count(i->(i==j),τind)
+        end
+        h[kk] = entropy(τ_posterior/sum(τ_posterior))
+    end
 
     
     return deltat_candidates[argmin(h)] 
