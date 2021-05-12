@@ -125,7 +125,7 @@ struct BinomialState{T}
     k::T
 end
 
-function BinomialState(nmax::Int, m_out::Int, m_in::Int, device = :gpu)
+function BinomialState(nmax::Int, m_out::Int, m_in::Int, device::Symbol = :gpu)
     if device == :gpu
         n = CuArray(rand(1:nmax, m_out, m_in))
         k = CUDA.zeros(Int, m_out, m_in)
