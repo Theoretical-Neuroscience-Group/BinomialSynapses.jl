@@ -18,6 +18,7 @@ const RUN_BENCHMARKS = false # optional intermediate benchmarks
     include("filter.jl")
     include("statistics.jl")
     include("simulate.jl")
+    include("myopic.jl")
 
     include("_integration.jl")
 end

@@ -49,4 +49,10 @@ export NestedFilterSimulation, initialize!, run!
 include("visualize.jl")
 export posterior_plot
 
+include("OED.jl")
+export OEDPolicy, policy
+
+include("myopic.jl")
+export MyopicPolicy, Myopic, MyopicFast
+
 end#module
