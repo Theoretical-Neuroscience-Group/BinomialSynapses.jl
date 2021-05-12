@@ -1,5 +1,7 @@
 abstract type Timestep end
 
+function get_step(::Timestep) end
+
 struct FixedTimestep{T} <: Timestep
     dt::T
 end
