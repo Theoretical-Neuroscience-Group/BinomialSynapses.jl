@@ -136,6 +136,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     tau_star = map[:τ]
     
     x = 1
+    x = 1-(1-(1-p_star)*x)
     if i>1
         for ii in 2:i
             x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
