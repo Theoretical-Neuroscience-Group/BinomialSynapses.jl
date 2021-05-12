@@ -140,19 +140,27 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
 
+    sim_local = deepcopy(sim)
+    state = sim_local.fstate.state
+    model = sim_local.fstate.model
+    jitter!(model, sim_local.filter.jittering_width)
+    candidates = CuVector(sample(deltat_candidates,10))
+    print(candidates)
+    print("\n")
+    propagate!(state, model, observation.dt)
     
-    h = zeros(length(e_temp))
-    for kk in 1:length(e_temp)
-        sim_local = deepcopy(sim)
-        obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
-        update!(sim_local.fstate, obs, sim_local.filter)
-        τind = Array(sim_local.fstate.model.τind)
-        τrng = Array(sim_local.fstate.model.τrng)
-        τ_posterior = zeros(length(τrng))
-        for j in 1:length(τrng)
-            τ_posterior[j] = count(i->(i==j),τind)
-        end
-        h[kk] = entropy(τ_posterior/sum(τ_posterior))
+   # h = zeros(length(e_temp))
+   # for kk in 1:length(e_temp)
+   #     sim_local = deepcopy(sim)
+   #     obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
+   #     update!(sim_local.fstate, obs, sim_local.filter)
+   #     τind = Array(sim_local.fstate.model.τind)
+   #     τrng = Array(sim_local.fstate.model.τrng)
+   #     τ_posterior = zeros(length(τrng))
+   #     for j in 1:length(τrng)
+   #         τ_posterior[j] = count(i->(i==j),τind)
+   #     end
+   #     h[kk] = entropy(τ_posterior/sum(τ_posterior))
     end
 
     
