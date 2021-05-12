@@ -149,7 +149,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     candidates = CuVector(deltat_candidates[idx_candidates])
     e = CuVector(e_temp[idx_candidates])
     
-    print(idx)
+    print(idx_candidates)
     print("\n")
     print(candidates)
     print("\n")
