@@ -144,10 +144,22 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     state = sim_local.fstate.state
     model = sim_local.fstate.model
     jitter!(model, sim_local.filter.jittering_width)
-    candidates = CuVector(sample(deltat_candidates,10))
+    
+    idx_candidates = sample(1:10,10)
+    candidates = CuVector(deltat_candidates[idx_candidates])
+    e = CuVector(e_temp[idx_candidates])
+    
+    print(idx)
+    print("\n")
     print(candidates)
     print("\n")
-    propagate!(state, model, observation.dt)
+    print(e)
+    print("\n")
+    print(e_temp)
+    print("\n")
+    propagate!(state, model, candidates)
+    print("aaa")
+    print("\n") 
     
    # h = zeros(length(e_temp))
    # for kk in 1:length(e_temp)
