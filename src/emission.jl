@@ -1,13 +1,6 @@
-function propagate_emit!(
-    state, 
-    model, 
-    timestep::Timestep = RandomTimestep(Exponential(0.121))
-) 
-    δ = get_step(timestep)
-    propagate_emit!(state, model, δ)
-end
+function emit(state, model, timestep) end
 
-function propagate_emit!(
+function emit(
     state::BinomialState{<:Array}, 
     model::AbstractBinomialModel,
     δ::Number
@@ -16,7 +9,6 @@ function propagate_emit!(
         error("Emission not supported for non-scalar states")
         return nothing
     else
-        propagate!(state, model, δ)
         q = model.q[1]
         σ = model.σ[1]
         k = state.k[1,1]

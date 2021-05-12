@@ -26,7 +26,7 @@ include("timestep.jl")
 export Timestep, FixedTimestep, RandomTimestep, get_step
 
 include("emission.jl")
-export propagate_emit!
+export emit
 
 include("likelihood.jl")
 export likelihood, likelihood_resample!

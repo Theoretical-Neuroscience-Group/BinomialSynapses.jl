@@ -83,3 +83,7 @@ function posterior_plot(
     end
     display(plot(pE, pN, pp, pq, pσ, pτ, layout = (3, 2)))
 end
+
+function posterior_plot(sim::NestedFilterSimulation)
+    return posterior_plot(sim.fstate, sim.times, sim.epsps, truemodel = sim.hmodel)
+end
