@@ -138,6 +138,22 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     sigma_star = map[:σ]
     tau_star = map[:τ]
     
+    print("N = ")
+    print(N_star)
+    print("\n")
+    print("p = ")
+    print(p_star)
+    print("\n")
+    print("q = ")
+    print(q_star)
+    print("\n")
+    print("sigma = ")
+    print(sigma_star)
+    print("\n")
+    print("tau = ")
+    print(tau_star)
+    print("\n")
+    
     x = 1
     x = 1-(1-(1-p_star)*x)
     if i>1
