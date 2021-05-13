@@ -101,14 +101,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     
     for i in 1:T
         
-        print(i)
-        print("\n")
-        print(sim.fstate.model.Nind)
-        print("\n")
-        print(sim.fstate.state.n)
-        print("\n")
-        print(sim.fstate.state.k)
-        print("\n")
+
 
         if protocol == "OED"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
