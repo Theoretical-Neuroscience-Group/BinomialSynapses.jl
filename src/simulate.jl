@@ -5,10 +5,18 @@ struct NestedFilterSimulation{T1, T2, T3, T4}
     fstate::T4
 end
 
-struct Results{T1, T2, T3}
+struct Results{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11}
     entropies::T1
     runtime::T2
     dt::T3    
+    e::T4
+    n::T5 
+    x::T6 
+    N_MAP::T7 
+    p_MAP::T8 
+    q_MAP::T9 
+    sigma_MAP::T10 
+    tau_MAP::T11 
 end
 
 function NestedFilterSimulation(
@@ -34,7 +42,7 @@ function propagate!(sim::NestedFilterSimulation; dt = nothing, λ = nothing)
     return obs
 end
 
-function save_results!(results::Results, sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i)
+function save_results!(results::Results, sim::NestedFilterSimulation, obs::BinomialObservation, runtime, i, x)
    
     Nind = Array(sim.fstate.model.Nind)
     pind = Array(sim.fstate.model.pind)
@@ -72,6 +80,15 @@ function save_results!(results::Results, sim::NestedFilterSimulation, obs::Binom
     results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))
     results.runtime[i] = runtime
     results.dt[i] = obs.dt
+    results.e[i] = obs.EPSP
+    results.n[i] = sim.hstate.n
+    results.x[i] = x
+    map = MAP(sim.fstate.model)
+    results.N_MAP[i] = map[:N]
+    results.p_MAP[i] = map[:p]
+    results.q_MAP[i] = map[:q]
+    results.sigma_MAP[i] = map[:σ]
+    results.tau_MAP[i] = map[:τ]
 end
 
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, protocol = "exponential", parameter = 0.121, record_results = false)
@@ -102,7 +119,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
 
         
         if i < T && protocol == "OED"
-            runtime2 = @elapsed delta = OED(sim, parameter, times, i)
+            runtime2 = @elapsed delta, x = OED(sim, parameter, times, i)
             runtime = runtime + runtime2
         end
 
@@ -183,7 +200,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     end
 
     
-    return deltat_candidates[argmin(h)] 
+    return deltat_candidates[argmin(h)], x
         
 end
 
