@@ -81,7 +81,7 @@ function save_results!(results::Results, sim::NestedFilterSimulation, obs::Binom
     results.runtime[i] = runtime
     results.dt[i] = obs.dt
     results.e[i] = obs.EPSP
-    results.n[i] = sim.hstate.n
+    results.n[i] = sim.hstate.n[1,1]
     results.x[i] = x
     map = MAP(sim.fstate.model)
     results.N_MAP[i] = map[:N]
