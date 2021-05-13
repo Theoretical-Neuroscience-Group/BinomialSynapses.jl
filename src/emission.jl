@@ -8,13 +8,9 @@ function propagate_emit!(state::BinomialState{<:Array}, model::AbstractBinomialM
         else
             δ = dt
         end
-        print("n =")
-        print(state.n)
-        print("\n")
+
         propagate!(state, model, δ)
-        print("n =")
-        print(state.n)
-        print("\n") 
+
         q = model.q[1]
         σ = model.σ[1]
         k = state.k[1,1]
