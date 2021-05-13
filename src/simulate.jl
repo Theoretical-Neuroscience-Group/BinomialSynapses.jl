@@ -117,7 +117,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         
 
 
-        
+        x = 1
         if i < T && protocol == "OED"
             runtime2 = @elapsed delta, x = OED(sim, parameter, times, i)
             runtime = runtime + runtime2
