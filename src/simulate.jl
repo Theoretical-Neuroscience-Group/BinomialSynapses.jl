@@ -96,7 +96,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     epsps = zeros(0)
     time = 0.
     delta = 0.
-    results = Results(zeros(T),zeros(T),zeros(T))
+    results = Results(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
 
     
     for i in 1:T
