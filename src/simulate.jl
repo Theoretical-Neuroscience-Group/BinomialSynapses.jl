@@ -99,12 +99,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         
         print(i)
         print("\n")
-        print(obs.dt)
-        print("\n")
-        print(obs.EPSP)
-        print("\n")
-        print(times)
-        print("\n")
+
         
         if i < T && protocol == "OED"
             runtime2 = @elapsed delta = OED(sim, parameter, times, i)
@@ -143,6 +138,8 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
         end
     end
+    print(x)
+    print("\n")
    
     e_temp = zeros(length(deltat_candidates))
     for kk in 1:length(e_temp)
