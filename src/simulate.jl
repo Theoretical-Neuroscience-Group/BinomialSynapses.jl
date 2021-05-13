@@ -132,11 +132,17 @@ end
 function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
     map = MAP(sim.fstate.model)
-    N_star = map[:N]
-    p_star = map[:p]
-    q_star = map[:q]
-    sigma_star = map[:σ]
-    tau_star = map[:τ]
+    #N_star = map[:N]
+    #p_star = map[:p]
+    #q_star = map[:q]
+    #sigma_star = map[:σ]
+    #tau_star = map[:τ]
+    
+    N_star = 5
+    p_star = 0.7
+    q_star = 1
+    sigma_star = 0.2
+    tau_star = 0.2   
     
     print("N = ")
     print(N_star)
