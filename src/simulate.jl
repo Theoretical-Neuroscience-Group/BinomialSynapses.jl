@@ -83,13 +83,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
 
     
     for i in 1:T
-        
-        print(i)
-        print("\n")
-        
-        print("n =")
-        print(sim.hstate.n)
-        print("\n")
+
 
         if protocol == "OED"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
@@ -104,9 +98,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         
-        print("n =")
-        print(sim.hstate.n)
-        print("\n")
+
 
         
         if i < T && protocol == "OED"
@@ -132,33 +124,12 @@ end
 function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
     map = MAP(sim.fstate.model)
-    #N_star = map[:N]
-    #p_star = map[:p]
-    #q_star = map[:q]
-    #sigma_star = map[:σ]
-    #tau_star = map[:τ]
-    
-    N_star = 5
-    p_star = 0.7
-    q_star = 1
-    sigma_star = 0.2
-    tau_star = 0.2   
-    
-    print("N = ")
-    print(N_star)
-    print("\n")
-    print("p = ")
-    print(p_star)
-    print("\n")
-    print("q = ")
-    print(q_star)
-    print("\n")
-    print("sigma = ")
-    print(sigma_star)
-    print("\n")
-    print("tau = ")
-    print(tau_star)
-    print("\n")
+    N_star = map[:N]
+    p_star = map[:p]
+    q_star = map[:q]
+    sigma_star = map[:σ]
+    tau_star = map[:τ]
+
     
     x = 1
     x = 1-(1-(1-p_star)*x)
@@ -168,9 +139,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
         end
     end
-    print("x=")
-    print(x)
-    print("\n")
+
    
     e_temp = zeros(length(deltat_candidates))
     for kk in 1:length(e_temp)
