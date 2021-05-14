@@ -97,11 +97,8 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
     time = 0.
     delta = 0.
     results = Results(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
-
     
     for i in 1:T
-        
-
 
         if protocol == "OED"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
@@ -116,8 +113,6 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         push!(times, time += obs.dt)
         push!(epsps, obs.EPSP)
         
-
-
         x = 1
         if i < T && protocol == "OED"
             runtime2 = @elapsed delta, x = OED(sim, parameter, times, i)
@@ -133,17 +128,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
             if i == T
                 save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "runtime", results.runtime, "dt", results.dt)
              #   "e", results.e, "n", results.n, "x", results.x, "N_MAP", results.N_MAP, "p_MAP", results.p_MAP, "q_MAP", results.q_MAP, "sigma_MAP", results.sigma_MAP, 
-             #       "tau_MAP", results.tau_MAP)
-                
-                
-
-                
-                
-                
-                
+             #       "tau_MAP", results.tau_MAP)                          
             end
         end
-
     end
     return times, epsps
 end
@@ -156,8 +143,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     q_star = map[:q]
     sigma_star = map[:σ]
     tau_star = map[:τ]
-
-    
+   
     x = 1
     x = 1-(1-(1-p_star)*x)
     if i>1
@@ -166,7 +152,6 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
         end
     end
-
    
     e_temp = zeros(length(deltat_candidates))
     for kk in 1:length(e_temp)
@@ -178,23 +163,11 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     #state = sim_local.fstate.state
     #model = sim_local.fstate.model
     #jitter!(model, sim_local.filter.jittering_width)
-    #
     #idx_candidates = sample(1:5,10)
     #candidates = CuVector(deltat_candidates[idx_candidates])
     #e = CuVector(e_temp[idx_candidates])
-    #
-    #print(idx_candidates)
-    #print("\n")
-    #print(candidates)
-    #print("\n")
-    #print(e)
-    #print("\n")
-    #print(e_temp)
-    #print("\n")
     #propagate!(state, model, candidates)
-    #print("aaa")
-    #print("\n") 
-    
+   
     h = zeros(length(e_temp))
     for kk in 1:length(e_temp)
         sim_local = deepcopy(sim)
@@ -207,9 +180,7 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
             τ_posterior[j] = count(i->(i==j),τind)
         end
         h[kk] = entropy(τ_posterior/sum(τ_posterior))
-    end
-
-    
+    end    
     return deltat_candidates[argmin(h)], x
         
 end
