@@ -102,6 +102,8 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
 
         if protocol == "OED"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
+        elseif protocol == "OED_exact"
+            runtime = @elapsed obs = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
             runtime = @elapsed obs = propagate!(sim, λ = parameter)
         elseif protocol == "constant"
@@ -116,6 +118,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         x = 1
         if i < T && protocol == "OED"
             runtime2 = @elapsed delta, x = OED(sim, parameter, times, i)
+            runtime = runtime + runtime2
+        elseif i < T && protocol == "OED_exact"
+            runtime2 = @elapsed delta, x = OED_exact(sim, parameter, times, i)
             runtime = runtime + runtime2
         end
 
@@ -183,6 +188,62 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
     end    
     return deltat_candidates[argmin(h)], x
         
+end
+
+function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
+    
+    h = zeros(length(deltat_candidates))
+     
+    Nind = Array(sim.fstate.model.Nind)
+    Nrng = Array(sim.fstate.model.Nrng)
+    pind = Array(sim.fstate.model.pind)
+    prng = Array(sim.fstate.model.prng)
+    qind = Array(sim.fstate.model.qind)
+    qrng = Array(sim.fstate.model.qrng)
+    σind = Array(sim.fstate.model.σind)
+    σrng = Array(sim.fstate.model.σrng)
+    τind = Array(sim.fstate.model.τind)
+    τrng = Array(sim.fstate.model.τrng)
+    
+    M_out = length(Nind)
+    
+    for kk in 1:length(deltat_candidates)
+        
+        h_values = zeros(M_out)
+    
+        for m in 1:M_out
+            N_star = Nrng[Nind[m]]
+            p_star = prng[pind[m]]
+            q_star = qrng[qind[m]]
+            sigma_star = σrng[σind[m]]
+            tau_star = τrng[τind[m]]
+
+            x = 1
+            x = 1-(1-(1-p_star)*x)
+            if i>1
+                for ii in 2:i
+                    x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
+                end
+            end
+
+            x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
+            e_temp = x_temp*N_star*p_star*q_star
+            
+            sim_local = deepcopy(sim)
+            obs = BinomialObservation(e_temp, deltat_candidates[kk])
+            update!(sim_local.fstate, obs, sim_local.filter)
+            τind = Array(sim_local.fstate.model.τind)
+            τrng = Array(sim_local.fstate.model.τrng)
+            τ_posterior = zeros(length(τrng))
+            for j in 1:length(τrng)
+                τ_posterior[j] = count(i->(i==j),τind)
+            end
+            h_values[m] = entropy(τ_posterior/sum(τ_posterior))
+        end
+        h[kk] = mean(h_values)
+    end
+    
+    return deltat_candidates[argmin(h)], x
 end
 
 MAP(sim::NestedFilterSimulation) = MAP(sim.fstate.model)
