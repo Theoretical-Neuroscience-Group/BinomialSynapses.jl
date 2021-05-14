@@ -91,7 +91,7 @@ function save_results!(results::Results, sim::NestedFilterSimulation, obs::Binom
     results.tau_MAP[i] = map[:τ]
 end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, protocol = "exponential", parameter = 0.121, record_results = false)
+function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, protocol = "exponential", parameter = 0.121, record_results = false, penalty = 0)
     times = zeros(0)
     epsps = zeros(0)
     time = 0.
@@ -103,6 +103,8 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         if protocol == "OED"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
         elseif protocol == "OED_exact"
+            runtime = @elapsed obs = propagate!(sim, dt = delta)
+        elseif protocol == "OED_penalty"
             runtime = @elapsed obs = propagate!(sim, dt = delta)
         elseif protocol == "exponential"
             runtime = @elapsed obs = propagate!(sim, λ = parameter)
@@ -121,6 +123,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
             runtime = runtime + runtime2
         elseif i < T && protocol == "OED_exact"
             runtime2 = @elapsed delta = OED_exact(sim, parameter, times, i)
+            runtime = runtime + runtime2
+         elseif i < T && protocol == "OED_penalty"
+            runtime2 = @elapsed delta = OED_penalty(sim, parameter, times, i, penalty)
             runtime = runtime + runtime2
         end
 
@@ -229,7 +234,7 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
         
 end
 
-function OED_penalty(sim::NestedFilterSimulation, deltat_candidates, times, i)
+function OED_penalty(sim::NestedFilterSimulation, deltat_candidates, times, i, penalty)
 
     map = MAP(sim.fstate.model)
     N_star = map[:N]
@@ -264,7 +269,7 @@ function OED_penalty(sim::NestedFilterSimulation, deltat_candidates, times, i)
         for j in 1:length(τrng)
             τ_posterior[j] = count(i->(i==j),τind)
         end
-        h[kk] = entropy(τ_posterior/sum(τ_posterior)) + 0.1*deltat_candidates[kk]
+        h[kk] = entropy(τ_posterior/sum(τ_posterior)) + penalty*deltat_candidates[kk]
     end    
     return deltat_candidates[argmin(h)], x
         
