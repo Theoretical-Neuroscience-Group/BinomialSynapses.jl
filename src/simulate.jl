@@ -120,7 +120,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
             runtime2 = @elapsed delta, x = OED(sim, parameter, times, i)
             runtime = runtime + runtime2
         elseif i < T && protocol == "OED_exact"
-            runtime2 = @elapsed delta, x = OED_exact(sim, parameter, times, i)
+            runtime2 = @elapsed delta = OED_exact(sim, parameter, times, i)
             runtime = runtime + runtime2
         end
 
@@ -255,7 +255,7 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
         h[kk] = mean(h_values)
     end
     
-    return deltat_candidates[argmin(h)], x
+    return deltat_candidates[argmin(h)]
 end
 
 MAP(sim::NestedFilterSimulation) = MAP(sim.fstate.model)
