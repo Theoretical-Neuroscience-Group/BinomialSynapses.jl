@@ -197,11 +197,11 @@ end
 
 function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
 
-    N_star = sim.hmodel.N
-    p_star = sim.hmodel.p
-    q_star = sim.hmodel.q
-    sigma_star = sim.hmodel.σ
-    tau_star = sim.hmodel.τ
+    N_star = sim.hmodel.N[1]
+    p_star = sim.hmodel.p[1]
+    q_star = sim.hmodel.q[1]
+    sigma_star = sim.hmodel.σ[1]
+    tau_star = sim.hmodel.τ[1]
    
     x = 1
     x = 1-(1-(1-p_star)*x)
