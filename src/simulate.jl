@@ -209,14 +209,14 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
     
     for kk in 1:length(deltat_candidates)
         
-        h_values = zeros(M_out)
+        h_values = zeros(200)
     
-        for m in 1:M_out
-            N_star = Nrng[Nind[m]]
-            p_star = prng[pind[m]]
-            q_star = qrng[qind[m]]
-            sigma_star = σrng[σind[m]]
-            tau_star = τrng[τind[m]]
+        for m in 1:200
+            N_star = Nrng[Nind[rand(1:M_out)]]
+            p_star = prng[pind[rand(1:M_out)]]
+            q_star = qrng[qind[rand(1:M_out)]]
+            sigma_star = σrng[σind[rand(1:M_out)]]
+            tau_star = τrng[τind[rand(1:M_out)]]
 
             x = 1
             x = 1-(1-(1-p_star)*x)
