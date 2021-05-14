@@ -190,6 +190,86 @@ function OED(sim::NestedFilterSimulation, deltat_candidates, times, i)
         
 end
 
+function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
+
+    N_star = sim.hmodel.N
+    p_star = sim.hmodel.p
+    q_star = sim.hmodel.q
+    sigma_star = sim.hmodel.σ
+    tau_star = sim.hmodel.τ
+   
+    x = 1
+    x = 1-(1-(1-p_star)*x)
+    if i>1
+        for ii in 2:i
+            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
+        end
+    end
+   
+    e_temp = zeros(length(deltat_candidates))
+    for kk in 1:length(e_temp)
+        x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
+        e_temp[kk] = x_temp*N_star*p_star*q_star
+    end
+   
+    h = zeros(length(e_temp))
+    for kk in 1:length(e_temp)
+        sim_local = deepcopy(sim)
+        obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
+        update!(sim_local.fstate, obs, sim_local.filter)
+        τind = Array(sim_local.fstate.model.τind)
+        τrng = Array(sim_local.fstate.model.τrng)
+        τ_posterior = zeros(length(τrng))
+        for j in 1:length(τrng)
+            τ_posterior[j] = count(i->(i==j),τind)
+        end
+        h[kk] = entropy(τ_posterior/sum(τ_posterior))
+    end    
+    return deltat_candidates[argmin(h)], x
+        
+end
+
+function OED_penalty(sim::NestedFilterSimulation, deltat_candidates, times, i)
+
+    map = MAP(sim.fstate.model)
+    N_star = map[:N]
+    p_star = map[:p]
+    q_star = map[:q]
+    sigma_star = map[:σ]
+    tau_star = map[:τ]
+   
+    x = 1
+    x = 1-(1-(1-p_star)*x)
+    if i>1
+        for ii in 2:i
+            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/tau_star)
+
+        end
+    end
+   
+    e_temp = zeros(length(deltat_candidates))
+    for kk in 1:length(e_temp)
+        x_temp = 1-(1-(1-p_star)*x)*exp(-deltat_candidates[kk]/tau_star)
+        e_temp[kk] = x_temp*N_star*p_star*q_star
+    end
+   
+    h = zeros(length(e_temp))
+    for kk in 1:length(e_temp)
+        sim_local = deepcopy(sim)
+        obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
+        update!(sim_local.fstate, obs, sim_local.filter)
+        τind = Array(sim_local.fstate.model.τind)
+        τrng = Array(sim_local.fstate.model.τrng)
+        τ_posterior = zeros(length(τrng))
+        for j in 1:length(τrng)
+            τ_posterior[j] = count(i->(i==j),τind)
+        end
+        h[kk] = entropy(τ_posterior/sum(τ_posterior)) + 0.1*deltat_candidates[kk]
+    end    
+    return deltat_candidates[argmin(h)], x
+        
+end
+
 
 
 MAP(sim::NestedFilterSimulation) = MAP(sim.fstate.model)
