@@ -231,8 +231,6 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
     h = zeros(length(e_temp))
     for kk in 1:length(e_temp)
         sim_local = deepcopy(sim)
-        print(deltat_candidates[kk])
-        print("\n")
         obs = BinomialObservation(e_temp[kk], deltat_candidates[kk])
         update!(sim_local.fstate, obs, sim_local.filter)
         τind = Array(sim_local.fstate.model.τind)
@@ -243,6 +241,8 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
         end
         h[kk] = entropy(τ_posterior/sum(τ_posterior))
     end    
+    print(deltat_candidates[argmin(h)])
+    print("\n")
     return deltat_candidates[argmin(h)], x
         
 end
