@@ -122,10 +122,10 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
             runtime2 = @elapsed delta, x = OED(sim, parameter, times, i)
             runtime = runtime + runtime2
         elseif i < T && protocol == "OED_exact"
-            runtime2 = @elapsed delta = OED_exact(sim, parameter, times, i)
+            runtime2 = @elapsed delta, x = OED_exact(sim, parameter, times, i)
             runtime = runtime + runtime2
          elseif i < T && protocol == "OED_penalty"
-            runtime2 = @elapsed delta = OED_penalty(sim, parameter, times, i, penalty)
+            runtime2 = @elapsed delta, x = OED_penalty(sim, parameter, times, i, penalty)
             runtime = runtime + runtime2
         end
 
@@ -202,17 +202,7 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
     q_star = sim.hmodel.q[1]
     sigma_star = sim.hmodel.σ[1]
     tau_star = sim.hmodel.τ[1]
-    
-    print(N_star)
-    print("\n")
-    print(p_star)
-    print("\n")
-    print(q_star)
-    print("\n")
-    print(sigma_star)
-    print("\n")
-    print(tau_star)
-    print("\n")
+
    
     x = 1
     x = 1-(1-(1-p_star)*x)
@@ -241,8 +231,7 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
         end
         h[kk] = entropy(τ_posterior/sum(τ_posterior))
     end    
-    print(deltat_candidates[argmin(h)])
-    print("\n")
+
     return deltat_candidates[argmin(h)], x
         
 end
