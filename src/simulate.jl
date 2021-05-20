@@ -136,11 +136,12 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep = false, p
         if record_results
             save_results!(results, sim, obs, runtime, i,x)
             if i == T
-                if protocol == "uniform"
-                    save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),"_",string(round(parameter[end],digits=5)),".jld"), "entropies", results.entropies, "dt", results.dt)
-                else
-                    save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),"_",string(parameter),".jld"), "entropies", results.entropies, "dt", results.dt)
-                end                                         
+                #if protocol == "uniform"
+                #    save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),"_",string(round(parameter[end],digits=5)),".jld"), "entropies", results.entropies, "dt", results.dt)
+                #else
+                #    save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),"_",string(parameter),".jld"), "entropies", results.entropies, "dt", results.dt)
+                #end      
+                save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "dt", results.dt)
             end
         end
     end
