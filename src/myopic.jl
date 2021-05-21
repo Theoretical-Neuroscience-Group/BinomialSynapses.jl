@@ -35,7 +35,7 @@ end
 
 _temp_state(sim, ::Myopic) = _repeat(sim.fstate, length(sim.tsteps.dts))
 
-function _repeat(fstate, m)
+function _repeat(fstate::NestedParticleState, m)
 # return a new NestedParticleState which repeats `fstate.state` along a third dimension,
 # `m` times, and `fstate.model` along a second dimension,
 # the first dimension of each of them represents the different entries of `dt_vector`
@@ -43,20 +43,27 @@ function _repeat(fstate, m)
     state = fstate.state
     model = fstate.model
 
-    n = permutedims(repeat(state.n, 1, 1, m), [3, 1, 2])
-    k = permutedims(repeat(state.k, 1, 1, m), [3, 1, 2])
+    n = _repeat(state.n, m)
+    k = _repeat(state.k, m)
 
     state = BinomialState(n, k)
 
-    N = repeat(model.N, 1, m)'
-    p = repeat(model.p, 1, m)'
-    q = repeat(model.q, 1, m)'
-    σ = repeat(model.σ, 1, m)'
-    τ = repeat(model.τ, 1, m)'
+    N = _repeat(model.N, m)
+    p = _repeat(model.p, m)
+    q = _repeat(model.q, m)
+    σ = _repeat(model.σ, m)
+    τ = _repeat(model.τ, m)
 
     model = BinomialModel(N, p, q, σ, τ)
 
     return NestedParticleState(state, model)
+end
+
+
+function _repeat(A::AbstractArray, m)
+    B = similar(A, size(A)..., m)
+    B .= A
+    return PermutedDimsArray(B, circshift(1:ndims(B), 1))
 end
 
 
@@ -87,7 +94,7 @@ function _temp_epsps(sim)
 
     # TODO: this can be made more efficient by storing the previous value of `x`
     # as part of the policy data structure
-    x = 1
+    x = 1.
     L = length(times)
     if L > 1
         for ii in 2:L
