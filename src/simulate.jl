@@ -263,7 +263,7 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
         h[kk] = mean(h_1)
     end
 
-    return deltat_candidates[argmin(h)], x
+    return deltat_candidates[argmin(h)], 1
         
 end
 
