@@ -44,7 +44,7 @@ include("statistics.jl")
 export MAP
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, run!
+export NestedFilterSimulation, initialize!, m_out, run!
 
 include("visualize.jl")
 export posterior_plot

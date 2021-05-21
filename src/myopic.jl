@@ -73,7 +73,7 @@ function _entropy(model, policy::MyopicFast)
 end
 
 _temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
-_temp_dts(sim, ::MyopicFast) = cu(rand(sim.tsteps.dts), m_out(sim.fstate))
+_temp_dts(sim, ::MyopicFast) = cu(rand(sim.tsteps.dts), m_out(sim))
 
 function _temp_epsps(sim)
     dts = sim.tsteps.dts

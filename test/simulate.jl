@@ -18,6 +18,8 @@
     
     @test length(sim.times) == 0
     @test length(sim.epsps) == 0
+
+    @test m_out(sim) == 2048
     
     initialize!(sim)
     @test sim.times == [0.]

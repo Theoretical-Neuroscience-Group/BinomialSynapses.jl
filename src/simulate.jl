@@ -26,6 +26,10 @@ function NestedFilterSimulation(
     return NestedFilterSimulation(hmodel, filter, hstate, fstate, timestep, times, epsps)
 end
 
+function m_out(sim::NestedFilterSimulation)
+    return size(sim.fstate.state.n, 1)
+end
+
 function propagate_hidden!(sim, dt)
     return propagate!(sim.hstate, sim.hmodel, dt)
 end

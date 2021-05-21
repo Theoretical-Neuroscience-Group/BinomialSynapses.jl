@@ -1,4 +1,5 @@
 abstract type AbstractBinomialModel end
+abstract type AbstractBinomialState end
 
 struct BinomialModel{T1,T2} <: AbstractBinomialModel
     N::T1
@@ -120,7 +121,7 @@ function ScalarBinomialModel(N::Int, p, q, σ, τ, device = :cpu)
     return BinomialModel(Ns, ps, qs, σs, τs)
 end
 
-struct BinomialState{T}
+struct BinomialState{T} <: AbstractBinomialState
     n::T
     k::T
 end
