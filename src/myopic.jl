@@ -72,8 +72,8 @@ function _entropy(model, policy::MyopicFast)
     # this may be faster and easier to implement on the CPU than on the GPU
 end
 
-_temp_dts(sim, ::Myopic) = cu(rand(sim.tsteps.dts), m_out(sim.fstate))
-_temp_dts(sim, ::MyopicFast) = collect(sim.tsteps.dts)
+_temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
+_temp_dts(sim, ::MyopicFast) = cu(rand(sim.tsteps.dts), m_out(sim.fstate))
 
 function _temp_epsps(sim)
     dts = sim.tsteps.dts
