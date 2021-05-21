@@ -50,7 +50,7 @@ include("visualize.jl")
 export posterior_plot
 
 include("OED.jl")
-export OEDPolicy, policy
+export OEDPolicy, policy, Uniform
 
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast
