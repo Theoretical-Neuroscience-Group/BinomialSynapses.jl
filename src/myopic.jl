@@ -88,8 +88,9 @@ function _temp_epsps(sim)
     # TODO: this can be made more efficient by storing the previous value of `x`
     # as part of the policy data structure
     x = 1
-    if i>1
-        for ii in 2:i
+    L = length(times)
+    if L > 1
+        for ii in 2:L
             x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
         end
     end
@@ -98,7 +99,7 @@ function _temp_epsps(sim)
     # allocating as part of the policy data structure
     e_temp = zeros(length(dts))
     for kk in 1:length(e_temp)
-        x_temp = 1-(1-(1-p_star)*x)*exp(-policy.dts[kk]/τ_star)
+        x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
     return e_temp
