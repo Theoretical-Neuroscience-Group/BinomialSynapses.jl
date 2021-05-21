@@ -202,17 +202,17 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
     
     h = zeros(length(deltat_candidates))
         
-    Nind = Array(sim_local.fstate.model.Nind)
-    pind = Array(sim_local.fstate.model.pind)
-    qind = Array(sim_local.fstate.model.qind)
-    σind = Array(sim_local.fstate.model.σind)
-    τind = Array(sim_local.fstate.model.τind)
+    Nind = Array(sim.fstate.model.Nind)
+    pind = Array(sim.fstate.model.pind)
+    qind = Array(sim.fstate.model.qind)
+    σind = Array(sim.fstate.model.σind)
+    τind = Array(sim.fstate.model.τind)
     
-    Nrng = Array(sim_local.fstate.model.Nrng)
-    prng = Array(sim_local.fstate.model.prng)
-    qrng = Array(sim_local.fstate.model.qrng)
-    σrng = Array(sim_local.fstate.model.σrng)
-    τrng = Array(sim_local.fstate.model.τrng)
+    Nrng = Array(sim.fstate.model.Nrng)
+    prng = Array(sim.fstate.model.prng)
+    qrng = Array(sim.fstate.model.qrng)
+    σrng = Array(sim.fstate.model.σrng)
+    τrng = Array(sim.fstate.model.τrng)
     
     for kk in 1:length(deltat_candidates)
     
