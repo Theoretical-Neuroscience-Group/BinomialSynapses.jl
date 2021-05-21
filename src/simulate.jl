@@ -12,7 +12,7 @@ function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    timestep = RandomTimestep(Exponential(0.121))
+    timestep::Timestep = RandomTimestep(Exponential(0.121))
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
     filter = NestedParticleFilter(width)
