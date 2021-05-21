@@ -83,4 +83,4 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
     return sim.times, sim.epsps
 end
 
-MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model, kwargs...)
+MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
