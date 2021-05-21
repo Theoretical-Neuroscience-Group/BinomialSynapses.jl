@@ -216,8 +216,8 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
     
     for kk in 1:length(deltat_candidates)
     
-        h_1 = zeros(5)
-        for l in 1:5
+        h_1 = zeros(10)
+        for l in 1:10
             idx = rand(1:length(Nind))
 
             N_star = Nrng[Nind[idx]]
@@ -243,9 +243,9 @@ function OED_exact(sim::NestedFilterSimulation, deltat_candidates, times, i)
             e_temp = x_temp*N_star*p_star*q_star
             var_e = sigma_star^2 + q_star^2*(N_star*x_temp*p_star*(1-p_star)+var_n*p_star^2)
 
-            h_2 = zeros(5)
+            h_2 = zeros(10)
             
-            for m in 1:5
+            for m in 1:10
                 e_next = rand(Normal(e_temp, sqrt(var_e)))
                 sim_local = deepcopy(sim)
                 obs = BinomialObservation(e_next, deltat_candidates[kk])
