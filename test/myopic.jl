@@ -67,7 +67,6 @@
         @test _entropy(model, policy) ≈ [0., log(2), 1/3*log(3)+2/3*log(3/2), log(3)]
 
         # test parameters on GPU
-
         Nrng = CuArray(Int.(Nrng))
         prng = CuArray(Float32.(prng))
         qrng = CuArray(Float32.(qrng))
