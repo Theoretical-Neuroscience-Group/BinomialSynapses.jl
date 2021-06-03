@@ -1,15 +1,22 @@
 abstract type MyopicPolicy <: OEDPolicy end
 
-struct Myopic{T} <: MyopicPolicy
-    dts::T
+# parallel implementation of the myopic policy, in which multiple copies of the particles 
+# are propagated in parallel
+struct Myopic{T1, T2} <: MyopicPolicy
+    dts::T1
+    costfun::T2
 end
 
 # `MyopicFast` is the same as `Myopic`, except that instead of expanding states and
 # parameters along another dimension, and propagating each parameter with each dt,
 # `dts` are randomly assigned to parameters
-struct MyopicFast{T} <: MyopicPolicy
-    dts::T
+struct MyopicFast{T1, T2} <: MyopicPolicy
+    dts::T1
+    costfun::T2
 end
+
+Myopic(dts) = Myopic(dts, _entropy)
+MyopicFast(dts) = MyopicFast(dts, _entropy)
 
 function _oed!(sim, ::MyopicPolicy)
     policy = sim.tsteps
@@ -22,8 +29,8 @@ function _oed!(sim, ::MyopicPolicy)
     # vectors
     update!(temp_state, obs, sim.filter)
 
-    entropies = _entropy(temp_state.model, policy) 
-    return policy.dts[argmax(entropies)]
+    costs = policy.costfun(temp_state.model, policy) 
+    return policy.dts[argmin(costs)]
 end
 
 function _synthetic_obs(sim, policy)
@@ -67,20 +74,10 @@ function _repeat(A::AbstractArray, m)
 end
 
 
-_temp_state(sim, ::MyopicFast) = copy(sim.fstate)
-
-
-function _entropy(model, ::Myopic) 
-    # TODO: simply compute entropy for each i in the first dimension of the parameter arrays
-end
-
-function _entropy(model, policy::MyopicFast) 
-    # TODO: aggregate entropies of each dt by looping over the parameter arrays
-    # this may be faster and easier to implement on the CPU than on the GPU
-end
+_temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 
 _temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
-_temp_dts(sim, ::MyopicFast) = cu(rand(sim.tsteps.dts), m_out(sim))
+_temp_dts(sim, ::MyopicFast) = rand(sim.tsteps.dts, m_out(sim))
 
 function _temp_epsps(sim)
     dts = sim.tsteps.dts
