@@ -72,4 +72,37 @@
         # Resampling should pick the particles that match q and the observation
         @test all(idx[5:6,:].==1)
     end
+    @testset "inner_resample_helper!" begin
+        using BinomialSynapses: inner_resample_helper!
+
+        # two dimensions
+        new = CUDA.rand(2, 3)
+        old = copy(new)
+        idx = cu(rand(1:3, 2, 3))
+
+        inner_resample_helper!(new, idx)
+
+        new = Array(new)
+        old = Array(old)
+        idx = Array(idx)
+        
+        for i in 1:size(new, 1), j in 1:size(new, 2)
+            @test new[i, j] == old[i, idx[i, j]]
+        end
+
+        # three dimensions
+        new = CUDA.rand(2, 3, 4)
+        old = copy(new)
+        idx = cu(rand(1:4, 2, 3, 4))
+
+        inner_resample_helper!(new, idx)
+
+        new = Array(new)
+        old = Array(old)
+        idx = Array(idx)
+        
+        for i in 1:size(new, 1), j in 1:size(new, 2), k in 1:size(new, 3)
+            @test new[i, j, k] == old[i, j, idx[i, j, k]]
+        end
+    end
 end

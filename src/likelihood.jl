@@ -82,21 +82,26 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
 end
 
 function inner_resample_helper!(in, out, idx)
-    function kernel(in, out, idx, R)
+    function kernel(in, out, idx, Ra, R1, R2)
         i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
         @inbounds if i <= length(in)
-            I = R[i]
-            out[I] = in[I[1], idx[I]]
+            I = Ra[i]
+            I1 = R1[I[1]]
+            I2 = R2[I[2]]
+            out[I1, I2] = in[I1, idx[I1, I2]]
         end#if
         return nothing
     end
-    R = CartesianIndices(size(in))
+    R1 = CartesianIndices(size(in)[1:end-1])
+    R2 = CartesianIndices((last(size(in)),))
 
-    kernel  = @cuda launch=false kernel(in, out, idx, R)
+    Ra = CartesianIndices((length(R1), length(R2)))
+
+    kernel  = @cuda launch=false kernel(in, out, idx, Ra, R1, R2)
     config  = launch_configuration(kernel.fun)
     threads = Base.min(length(out), config.threads, 256)
     blocks  = cld(length(out), threads)
-    kernel(in, out, idx, R; threads=threads, blocks=blocks)
+    kernel(in, out, idx, Ra, R1, R2; threads=threads, blocks=blocks)
     return out
 end
 
