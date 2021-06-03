@@ -82,24 +82,26 @@ function likelihood_indices(k, model::AbstractBinomialModel, observation)
 end
 
 function inner_resample_helper!(in, out, idx)
-    function kernel(in, out, idx)
-        j = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-        @inbounds if j <= size(out, 2)
-            @inbounds for i in 1:size(out, 1)
-                out[i, j] = in[i, idx[i, j]]
-            end
+    function kernel(in, out, idx, R)
+        i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+        @inbounds if i <= length(in)
+            I = R[i]
+            out[I] = in[I[1], idx[I]]
         end#if
         return nothing
     end
-    kernel  = @cuda launch=false kernel(in, out, idx)
+    R = CartesianIndices(size(in))
+
+    kernel  = @cuda launch=false kernel(in, out, idx, R)
     config  = launch_configuration(kernel.fun)
-    threads = Base.min(size(out, 2), config.threads, 256)
-    blocks  = cld(size(out, 2), threads)
-    kernel(in, out, idx; threads=threads, blocks=blocks)
+    threads = Base.min(length(out), config.threads, 256)
+    blocks  = cld(length(out), threads)
+    kernel(in, out, idx, R; threads=threads, blocks=blocks)
     return out
 end
 
 function inner_resample_helper!(in, idx)
+    size(in) == size(idx) || throw(DimensionMismatch("input and index array must have the same size"))
     out = similar(in)
     inner_resample_helper!(in, out, idx)
     in .= out
@@ -108,7 +110,6 @@ end
 
 function likelihood_resample!(state::BinomialState, model, observation::BinomialObservation)
     u, idx = likelihood_indices(state.k, model, observation.EPSP)
-    M_out  = size(state.n, 1)
     inner_resample_helper!(state.n, idx)
     inner_resample_helper!(state.k, idx)
     return u
