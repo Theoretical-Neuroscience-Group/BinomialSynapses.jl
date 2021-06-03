@@ -85,17 +85,17 @@ function inner_resample_helper!(in, out, idx)
     function kernel(in, out, idx, Ra, R1, R2)
         i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
         @inbounds if i <= length(in)
-            I = Ra[i]
-            I1 = R1[I[1]]
-            I2 = R2[I[2]]
+            I = Ra[i]     # choose high-level index
+            I1 = R1[I[1]] # choose index for first n-1 dimensions
+            I2 = R2[I[2]] # choose index for last dimension
             out[I1, I2] = in[I1, idx[I1, I2]]
         end#if
         return nothing
     end
-    R1 = CartesianIndices(size(in)[1:end-1])
-    R2 = CartesianIndices((last(size(in)),))
+    R1 = CartesianIndices(size(in)[1:end-1]) # indices for first n-1 dimensions
+    R2 = CartesianIndices((last(size(in)),)) # indices for last dimension
 
-    Ra = CartesianIndices((length(R1), length(R2)))
+    Ra = CartesianIndices((length(R1), length(R2))) # high-level indices
 
     kernel  = @cuda launch=false kernel(in, out, idx, Ra, R1, R2)
     config  = launch_configuration(kernel.fun)
