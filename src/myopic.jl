@@ -121,3 +121,40 @@ function _temp_epsps(sim)
     end
     return e_temp
 end
+
+
+function _entropy(model::BinomialGridModel, ::Myopic)
+    ents = zeros(size(model.Nind, 1))
+
+    # CPU algorithm: move index arrays to CPU
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    @inbounds Threads.@threads for i in 1:size(Nind, 1)
+        dict = Dict{NTuple{5, Int64}, Int}()
+        @inbounds for j in 1:size(Nind, 2)
+            iN = Nind[i, j]
+            ip = pind[i, j]
+            iq = qind[i, j]
+            iσ = σind[i, j]
+            iτ = τind[i, j]
+            key = (iN, ip, iq, iσ, iτ)
+            dict[key] = get!(dict, key, 0) + 1
+        end
+        ent = 0.
+        for value in values(dict)
+            p = value/size(Nind, 2)
+            ent -= p * log(p)
+        end
+        ents[i] = ent
+    end
+    return ents
+end
+
+function _entropy(model::BinomialGridModel, policy::MyopicFast) 
+    # TODO: aggregate entropies of each dt by looping over the parameter arrays
+    # this may be faster and easier to implement on the CPU than on the GPU
+end

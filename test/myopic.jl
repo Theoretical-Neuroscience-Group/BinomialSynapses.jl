@@ -39,5 +39,45 @@
         end
     end
 
+    @testset "_entropy" begin
+        using BinomialSynapses: _entropy
+
+        Nrng = 1:5
+        prng = 0.1:0.2:0.9
+        qrng = 0.1:0.2:0.9
+        σrng = 0.5:0.5:2.5
+        τrng = 0.1:0.1:0.5
+
+        Nind = [
+            1 1 1 1 1 1;
+            1 1 1 2 2 2;
+            1 1 2 2 2 2;
+            1 1 2 2 3 3;
+        ]
+
+        pind = qind = σind = τind = Nind
+
+        model = BinomialGridModel(
+            Nind, pind, qind, σind, τind,
+            Nrng, prng, qrng, σrng, τrng
+        )
+        
+        policy = Myopic([1.])
+
+        @test _entropy(model, policy) ≈ [0., log(2), 1/3*log(3)+2/3*log(3/2), log(3)]
+
+        # test parameters on GPU
+        Nind = cu(Nind)
+
+        pind = qind = σind = τind = Nind
+
+        model = BinomialGridModel(
+            Nind, pind, qind, σind, τind,
+            Nrng, prng, qrng, σrng, τrng
+        )
+        
+        policy = Myopic([1.])
+
+        @test _entropy(model, policy) ≈ [0., log(2), 1/3*log(3)+2/3*log(3/2), log(3)]
     end
 end
