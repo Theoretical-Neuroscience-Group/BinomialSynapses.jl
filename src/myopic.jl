@@ -43,29 +43,42 @@ end
 _temp_state(sim, ::Myopic) = _repeat(sim.fstate, length(sim.tsteps.dts))
 
 function _repeat(fstate::NestedParticleState, m)
-# return a new NestedParticleState which repeats `fstate.state` along a third dimension,
-# `m` times, and `fstate.model` along a second dimension,
-# the first dimension of each of them represents the different entries of `dt_vector`
-# this can be implemented using `repeat`
-    state = fstate.state
-    model = fstate.model
+    # return a new NestedParticleState which repeats `fstate.state` along a third dimension,
+    # `m` times, and `fstate.model` along a second dimension,
+    # the first dimension of each of them represents the different entries of `dt_vector`
+    # this can be implemented using `repeat`
+    state = _repeat(fstate.state, m)
+    model = _repeat(fstate.model, m)
 
+    return NestedParticleState(state, model)
+end
+
+function _repeat(state::BinomialState, m)
     n = _repeat(state.n, m)
     k = _repeat(state.k, m)
+    return BinomialState(n, k)
+end
 
-    state = BinomialState(n, k)
-
+function _repeat(model::BinomialModel, m)
     N = _repeat(model.N, m)
     p = _repeat(model.p, m)
     q = _repeat(model.q, m)
     σ = _repeat(model.σ, m)
     τ = _repeat(model.τ, m)
-
-    model = BinomialModel(N, p, q, σ, τ)
-
-    return NestedParticleState(state, model)
+    return BinomialModel(N, p, q, σ, τ)
 end
 
+function _repeat(model::BinomialGridModel, m)
+    Nind = _repeat(model.Nind, m)
+    pind = _repeat(model.pind, m)
+    qind = _repeat(model.qind, m)
+    σind = _repeat(model.σind, m)
+    τind = _repeat(model.τind, m)
+    return BinomialGridModel(
+        Nind,       pind,       qind,       σind,       τind, 
+        model.Nrng, model.prng, model.qrng, model.σrng, model.τrng
+    )
+end
 
 function _repeat(A::AbstractArray, m)
     B = similar(A, size(A)..., m)
