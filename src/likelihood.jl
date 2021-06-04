@@ -12,7 +12,7 @@ function kernel_likelihood_indices!(
     r, randstates, 
     Rout, M_in
 )
-    id = (blockIdx().x - 1) * blockDim().x + threadIdx().x #
+    id = (blockIdx().x - 1) * blockDim().x + threadIdx().x # physical index
     M_out = length(Rout)
     @inbounds if id <= M_out
         i = Rout[id]

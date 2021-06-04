@@ -176,8 +176,6 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
     end
-    foreach(println, counts)
-    foreach(println, totals)
 
     entropies = Dict{Float64, Float64}()
     @inbounds for (key, count) in counts
@@ -185,6 +183,6 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
         p = count/totals[dt]
         entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
     end
-    foreach(println, entropies)
+    
     return argmin(entropies)
 end
