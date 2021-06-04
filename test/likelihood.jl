@@ -105,4 +105,49 @@
             @test new[i, j, k] == old[i, j, idx[i, j, k]]
         end
     end
+    @testset "three dimensions" begin
+        using BinomialSynapses: likelihood_indices
+        observation = cu([1.0f0 1.0f0 1.0f0; 3.0f0 3.0f0 3.0f0])
+        M_dt = 2
+        M_out = 3
+        M_in = 4
+        Ns = 10 .* CUDA.ones(Int, M_dt, M_out)
+        ps = CUDA.rand(M_dt, M_out)
+        qs = cu([1f0 1f0 3f0; 3f0 1f0 3f0])
+        σs = Float32(0.1) .* CUDA.ones(M_dt, M_out)
+        τs = CUDA.rand(M_dt, M_out)
+        model = BinomialModel(Ns, ps, qs, σs, τs);
+
+        ks = cu(permutedims(
+            cat(
+                [3 3 3 1; 1 1 1 1; 1 1 1 3], 
+                [1 1 1 1; 1 1 3 1; 1 3 3 3], 
+                dims = 3
+            ), 
+            (3,1,2)
+        ))
+
+        u, idx = likelihood_indices(ks, model, observation)
+
+        @test size(u) == (2, 3)
+        @test size(idx) == (2, 3, 4)
+
+        u = Array(u)
+        idx = Array(idx)
+
+        # Combinations of q and k that correspond to the observation should have
+        # a high likelihood
+        @test u[1, 2] > 3.9894
+        @test u[2, 1] > 3.9894
+
+        # Combinations of q and k that do not match the observation should have
+        # a low likelihood
+        @test u[1, 3] < 1.0
+        @test u[2, 3] < 1.0
+
+        # Resampling should pick the particles that match q and the observation
+        @test all(idx[1, 1, :] .== 4)
+        @test all(idx[2, 2, :] .== 3)
+        @test all(idx[:, 3, :] .== 1)
+    end
 end

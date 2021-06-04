@@ -20,7 +20,7 @@ function kernel_likelihood_indices!(
         CurMax = 1f0
         for j in 1:M_in
             # omitting normalization constant here; it is only needed for u
-            vj      = CUDA.exp(-0.5f0 *((obs[i] - q[i] * k[i, j]) / σ[i])^2)
+            vj      = CUDA.exp(-0.5f0 * ((obs[i] - q[i] * k[i, j]) / σ[i])^2)
             vsum   += vj
             v[j, i] = vsum
             # sample descending sequence of sorted random numbers
@@ -51,17 +51,13 @@ function kernel_likelihood_indices!(
     return nothing
 end
 
-function likelihood_indices(
-    k::AnyCuMatrix, 
-    model::AbstractBinomialModel, 
-    obs::Number
-)
+function likelihood_indices(k, model, obs::Number)
     obs_array = CUDA.fill(Float32(obs), size(k)[1:end-1]...)
     return likelihood_indices(k, model, obs_array)
 end
 
 function likelihood_indices(
-    k::AnyCuMatrix,
+    k::AnyCuArray,
     model::AbstractBinomialModel, 
     obs::AnyCuArray
 )
