@@ -98,41 +98,9 @@ function likelihood_indices(
     return u, idx
 end
 
-function inner_resample_helper!(in, out, idx)
-    function kernel(in, out, idx, Ra, R1, R2)
-        i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-        @inbounds if i <= length(in)
-            I = Ra[i]     # choose high-level index
-            I1 = R1[I[1]] # choose index for first n-1 dimensions
-            I2 = R2[I[2]] # choose index for last dimension
-            out[I1, I2] = in[I1, idx[I1, I2]]
-        end#if
-        return nothing
-    end
-    R1 = CartesianIndices(size(in)[1:end-1]) # indices for first n-1 dimensions
-    R2 = CartesianIndices((last(size(in)),)) # indices for last dimension
-
-    Ra = CartesianIndices((length(R1), length(R2))) # high-level indices
-
-    kernel  = @cuda launch=false kernel(in, out, idx, Ra, R1, R2)
-    config  = launch_configuration(kernel.fun)
-    threads = Base.min(length(out), config.threads, 256)
-    blocks  = cld(length(out), threads)
-    kernel(in, out, idx, Ra, R1, R2; threads=threads, blocks=blocks)
-    return out
-end
-
-function inner_resample_helper!(in, idx)
-    size(in) == size(idx) || throw(DimensionMismatch("input and index array must have the same size"))
-    out = similar(in)
-    inner_resample_helper!(in, out, idx)
-    in .= out
-    return in
-end
-
 function likelihood_resample!(state::BinomialState, model, observation::BinomialObservation)
     u, idx = likelihood_indices(state.k, model, observation.EPSP)
-    inner_resample_helper!(state.n, idx)
-    inner_resample_helper!(state.k, idx)
+    resample!(state.n, idx)
+    resample!(state.k, idx)
     return u
 end

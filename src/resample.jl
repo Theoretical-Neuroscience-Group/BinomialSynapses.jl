@@ -160,7 +160,7 @@ end
 function resample!(in, idx)
     size(in)[1:ndims(idx)] == size(idx) || throw(DimensionMismatch("input and index array must have matching size"))
     out = similar(in)
-    resample_helper!(in, out, idx)
+    resample!(in, out, idx)
     in .= out
     return in
 end
