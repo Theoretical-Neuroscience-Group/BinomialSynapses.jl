@@ -40,9 +40,10 @@
             obs   = BinomialObservation(0.3f0, 0.1f0)
             display(@benchmark CUDA.@sync likelihood_resample!($state, $model, $obs))
             println("")
+            println("")
         end
     end
-    
+
     @testset "correctness of values" begin
         observation = 3.0
         M_out = 6

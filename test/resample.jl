@@ -1,31 +1,23 @@
 @testset "resample.jl" begin
     println("             > resample.jl")
-    @testset "benchmark" begin
-        m_out = 1024
-        m_in  = 1024
-        state = BinomialState(128, m_out, m_in)
-        model = BinomialGridModel(
-            m_out,
-            1:5,
-            LinRange(0.05,0.95,5),
-            LinRange(0.1,2,5),
-            LinRange(0.05,2,5),
-            LinRange(0.05,2,5)
-        )
-
-        u = CUDA.rand(m_out)
-
+    @testset "indices!" begin
         if RUN_BENCHMARKS
-            println("")
-            println("Benchmarking function outer_resample!: should take about 300μs")
-            display(@benchmark outer_resample!($state, $model, $u))
-            println("")
+            @testset "benchmark" begin
+                println("")
+                println("Benchmarking function indices!, 1D: should take about 90μs")
+                v = CUDA.rand(2048)
+                display(@benchmark CUDA.@sync indices!($v))
+                println("")
+                println("")
+                println("Benchmarking function indices!, 1D: should take about 550μs")
+                v = CUDA.rand(2048, 512)
+                display(@benchmark CUDA.@sync indices!($v))
+                println("")
+                println("")
+            end
         end
-    end
-
-    @testset "indices" begin
         @testset "1D" begin
-            v = cu([1f0, 1f2, 1f0, 0f0])
+            v = cu([1f0, 1f3, 1f0, 0f0])
             vold = copy(v)
             u, idx = indices!(v)
 
@@ -44,7 +36,7 @@
             end
         end
         @testset "2D" begin
-            v = cu([1f0 1f2 1f0 0f0;
+            v = cu([1f0 1f3 1f0 0f0;
                     1f0 1f0 1f3 1f0])
             vold = copy(v)
             u, idx = indices!(v)
@@ -173,6 +165,30 @@
             for i in 1:size(A, 1), j in 1:size(A, 2), k in 1:size(A, 3)
                 @test B[i, j, k] == A[i, idx[i, j], k]
             end
+        end
+    end
+
+    @testset "outer_resample!" begin
+        if RUN_BENCHMARKS
+            m_out = 1024
+            m_in  = 1024
+            state = BinomialState(128, m_out, m_in)
+            model = BinomialGridModel(
+                m_out,
+                1:5,
+                LinRange(0.05,0.95,5),
+                LinRange(0.1,2,5),
+                LinRange(0.05,2,5),
+                LinRange(0.05,2,5)
+            )
+
+            u = CUDA.rand(m_out)
+
+            println("")
+            println("Benchmarking function outer_resample!: should take about 300μs")
+            display(@benchmark outer_resample!($state, $model, $u))
+            println("")
+            println("")
         end
     end
 end
