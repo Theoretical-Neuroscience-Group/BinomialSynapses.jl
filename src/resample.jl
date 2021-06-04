@@ -41,15 +41,10 @@ function outer_indices!(u::Vector)
     return usum, idx
 end
 
-function outer_resample!(state::BinomialState, model::BinomialGridModel, u)
+function outer_resample!(state, model, u)
     usum, idx = outer_indices!(u)
-    state.n .= state.n[idx,:]
-    state.k .= state.k[idx,:]
-    model.Nind .= model.Nind[idx]
-    model.pind .= model.pind[idx]
-    model.qind .= model.qind[idx]
-    model.σind .= model.σind[idx]
-    model.τind .= model.τind[idx]
+    resample!(state, idx)
+    resample!(model, idx)
     return state, model
 end
 
@@ -165,3 +160,17 @@ function resample!(in, idx)
     return in
 end
 
+function resample!(state::BinomialState, idx)
+    resample!(state.n, idx)
+    resample!(state.k, idx)
+    return state
+end
+
+function resample!(model::BinomialGridModel, idx)
+    resample!(model.Nind, idx)
+    resample!(model.pind, idx)
+    resample!(model.qind, idx)
+    resample!(model.σind, idx)
+    resample!(model.τind, idx)
+    return model
+end
