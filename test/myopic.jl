@@ -49,9 +49,9 @@
         τrng = 0.1:0.1:0.5
 
         Nind = [
-            1 1 1 1 1 1;
             1 1 1 2 2 2;
             1 1 2 2 2 2;
+            1 1 1 1 1 1;
             1 1 2 2 3 3;
         ]
 
@@ -63,8 +63,9 @@
         )
         
         policy = Myopic([1.])
+        obs = BinomialObservation(zeros(4), [0.1, 0.2, 0.3, 0.4])
 
-        @test _entropy(model, policy) ≈ [0., log(2), 1/3*log(3)+2/3*log(3/2), log(3)]
+        @test _entropy(model, obs, policy) ≈ 0.3
 
         # test parameters on GPU
         Nrng = CuArray(Int.(Nrng))
@@ -73,7 +74,12 @@
         σrng = CuArray(Float32.(σrng))
         τrng = CuArray(Float32.(τrng))
 
-        Nind = cu(Nind)
+        Nind = cu([
+            1 1 1 2 2 2;
+            1 1 1 1 1 1;
+            1 1 2 2 2 2;
+            1 1 2 2 3 3;
+        ])
         pind = qind = σind = τind = Nind
 
         model = BinomialGridModel(
@@ -82,7 +88,8 @@
         )
         
         policy = Myopic([1.])
+        obs = BinomialObservation(zeros(4), [0.1, 0.2, 0.3, 0.4])
 
-        @test _entropy(model, policy) ≈ [0., log(2), 1/3*log(3)+2/3*log(3/2), log(3)]
+        @test _entropy(model, obs, policy) ≈ 0.2
     end
 end

@@ -4,7 +4,7 @@ abstract type MyopicPolicy <: OEDPolicy end
 # are propagated in parallel
 struct Myopic{T1, T2} <: MyopicPolicy
     dts::T1
-    costfun::T2
+    target::T2
 end
 
 # `MyopicFast` is the same as `Myopic`, except that instead of expanding states and
@@ -12,7 +12,7 @@ end
 # `dts` are randomly assigned to parameters
 struct MyopicFast{T1, T2} <: MyopicPolicy
     dts::T1
-    costfun::T2
+    target::T2
 end
 
 Myopic(dts) = Myopic(dts, _entropy)
@@ -29,8 +29,7 @@ function _oed!(sim, ::MyopicPolicy)
     # vectors
     update!(temp_state, obs, sim.filter)
 
-    costs = policy.costfun(temp_state.model, policy) 
-    return policy.dts[argmin(costs)]
+    return policy.target(temp_state.model, obs, policy) 
 end
 
 function _synthetic_obs(sim, policy)
@@ -123,9 +122,7 @@ function _temp_epsps(sim)
 end
 
 
-function _entropy(model::BinomialGridModel, ::Myopic)
-    ents = zeros(size(model.Nind, 1))
-
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
@@ -133,7 +130,9 @@ function _entropy(model::BinomialGridModel, ::Myopic)
     σind = Array(model.σind)
     τind = Array(model.τind)
 
-    @inbounds Threads.@threads for i in 1:size(Nind, 1)
+    minent = Inf
+    imin = 0
+    @inbounds for i in 1:size(Nind, 1)
         dict = Dict{NTuple{5, Int64}, Int}()
         @inbounds for j in 1:size(Nind, 2)
             iN = Nind[i, j]
@@ -149,12 +148,15 @@ function _entropy(model::BinomialGridModel, ::Myopic)
             p = value/size(Nind, 2)
             ent -= p * log(p)
         end
-        ents[i] = ent
+        if ent < minent
+            minent = ent
+            imin = i 
+        end
     end
-    return ents
+    return obs.dt[imin]
 end
 
-function _entropy(model::BinomialGridModel, policy::MyopicFast) 
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # TODO: aggregate entropies of each dt by looping over the parameter arrays
     # this may be faster and easier to implement on the CPU than on the GPU
 end
