@@ -156,7 +156,38 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
     return obs.dt[imin]
 end
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
-    # TODO: aggregate entropies of each dt by looping over the parameter arrays
-    # this may be faster and easier to implement on the CPU than on the GPU
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+    # CPU algorithm: move index arrays to CPU
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    dts = obs.dt
+
+    counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
+    totals = Dict{Float64, Int}() # total counts per dt
+    @inbounds for i in 1:length(Nind)
+        iN = Nind[i]
+        ip = pind[i]
+        iq = qind[i]
+        iσ = σind[i]
+        iτ = τind[i]
+        dt = dts[i]
+        key = (dt, iN, ip, iq, iσ, iτ)
+        counts[key] = get!(counts, key, 0) + 1
+        totals[dt] = get!(totals, dt, 0.) + 1
+    end
+    foreach(println, counts)
+    foreach(println, totals)
+
+    entropies = Dict{Float64, Float64}()
+    @inbounds for (key, count) in counts
+        dt = key[1]
+        p = count/totals[dt]
+        entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
+    end
+    foreach(println, entropies)
+    return argmin(entropies)
 end
