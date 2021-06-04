@@ -6,23 +6,19 @@ function likelihood(k, model::AbstractBinomialModel, obs)
            )[:,1]
 end
 
-function likelihood_indices(k, model, obs::Number)
-    obs_array = CUDA.fill(Float32(obs), size(k)[1:end-1]...)
-    return likelihood_indices(k, model, obs_array)
-end
-
 gauss(x, μ, σ) = exp(-((x-μ)/σ)^2/2)
 
 function likelihood_indices(
     k::AnyCuArray,
     model::AbstractBinomialModel, 
-    obs::AnyCuArray
+    obs
 )
     v = gauss.(obs, model.q .* k, model.σ)
     u, idx = indices!(v)
     
     # normalization of u
-    u ./= (last(size(k)) .* sqrt(2*Float32(pi)) .* model.σ)
+    α = last(size(k)) * sqrt(2*Float32(pi))
+    u ./= (α .* model.σ)
     return u, idx
 end
 
