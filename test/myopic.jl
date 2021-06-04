@@ -94,7 +94,6 @@
     end
 
     @testset "_entropy: MyopicFast" begin
-        using BinomialSynapses
         using BinomialSynapses: _entropy
 
         Nrng = 1:5

@@ -15,6 +15,7 @@ struct MyopicFast{T1, T2} <: MyopicPolicy
     target::T2
 end
 
+# default target is miniminum entropy
 Myopic(dts) = Myopic(dts, _entropy)
 MyopicFast(dts) = MyopicFast(dts, _entropy)
 
@@ -24,9 +25,6 @@ function _oed!(sim, ::MyopicPolicy)
     obs = _synthetic_obs(sim, policy)
     temp_state = _temp_state(sim, policy)
 
-    # `propagate!(temp_state.state, temp_state.model, obs.dt)` should work out of the box
-    # the likelihood kernel will need to be rewritten to take BinomialObservation with 
-    # vectors
     update!(temp_state, obs, sim.filter)
 
     return policy.target(temp_state.model, obs, policy) 
@@ -35,7 +33,7 @@ end
 function _synthetic_obs(sim, policy)
     epsp_vector = _temp_epsps(sim)
     dt_vector = _temp_dts(sim, policy)
-    return BinomialObservation(epsp_vector, dt_vector)
+    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
 end
 
 
@@ -45,7 +43,6 @@ function _repeat(fstate::NestedParticleState, m)
     # return a new NestedParticleState which repeats `fstate.state` along a third dimension,
     # `m` times, and `fstate.model` along a second dimension,
     # the first dimension of each of them represents the different entries of `dt_vector`
-    # this can be implemented using `repeat`
     state = _repeat(fstate.state, m)
     model = _repeat(fstate.model, m)
 
@@ -88,7 +85,7 @@ end
 
 _temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 
-_temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
+_temp_dts(sim, ::Myopic) = repeat(collect(sim.tsteps.dts), 1, m_out(sim))
 _temp_dts(sim, ::MyopicFast) = rand(sim.tsteps.dts, m_out(sim))
 
 function _temp_epsps(sim)

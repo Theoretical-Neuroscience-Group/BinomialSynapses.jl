@@ -107,10 +107,10 @@
     end
     @testset "three dimensions" begin
         using BinomialSynapses: likelihood_indices
-        observation = cu([1.0f0 1.0f0 1.0f0; 3.0f0 3.0f0 3.0f0])
         M_dt = 2
         M_out = 3
         M_in = 4
+        observation = cu(repeat([1.0f0, 3.0f0], 1, M_out))
         Ns = 10 .* CUDA.ones(Int, M_dt, M_out)
         ps = CUDA.rand(M_dt, M_out)
         qs = cu([1f0 1f0 3f0; 3f0 1f0 3f0])
