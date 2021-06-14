@@ -62,7 +62,7 @@ function posterior_plot(
     !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false)
     pq = show_histogram(qrng, qind,
             xlabel = L"q [A]", ylabel = L"p(q)")
-    !isnothing(truemodel)g && plot!([truemodel.q[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false)
     pσ = show_histogram(σrng, σind,
             xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
     !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false)
@@ -82,4 +82,8 @@ function posterior_plot(
         return
     end
     display(plot(pE, pN, pp, pq, pσ, pτ, layout = (3, 2)))
+end
+
+function posterior_plot(sim::NestedFilterSimulation)
+    return posterior_plot(sim.fstate, sim.times, sim.epsps, truemodel = sim.hmodel)
 end

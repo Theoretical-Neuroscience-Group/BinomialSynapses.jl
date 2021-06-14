@@ -20,6 +20,7 @@
             println("Benchmarking function propagate!: should take about 4ms")
             display(@benchmark CUDA.@sync propagate!($state, $model, 0.1f0))
             println("")
+            println("")
         end
 
         dt    = 0.1f0

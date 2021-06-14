@@ -1,4 +1,5 @@
 abstract type AbstractBinomialModel end
+abstract type AbstractBinomialState end
 
 struct BinomialModel{T1,T2} <: AbstractBinomialModel
     N::T1
@@ -120,12 +121,12 @@ function ScalarBinomialModel(N::Int, p, q, σ, τ, device = :cpu)
     return BinomialModel(Ns, ps, qs, σs, τs)
 end
 
-struct BinomialState{T}
+struct BinomialState{T} <: AbstractBinomialState
     n::T
     k::T
 end
 
-function BinomialState(nmax::Int, m_out::Int, m_in::Int, device = :gpu)
+function BinomialState(nmax::Int, m_out::Int, m_in::Int, device::Symbol = :gpu)
     if device == :gpu
         n = CuArray(rand(1:nmax, m_out, m_in))
         k = CUDA.zeros(Int, m_out, m_in)
