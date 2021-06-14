@@ -86,7 +86,7 @@ end
 _temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 
 _temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
-_temp_dts(sim, ::MyopicFast) = rand(sim.tsteps.dts, m_out(sim))
+_temp_dts(sim, ::MyopicFast) = repeat(sim.tsteps.dts, m_out(sim) ÷ length(sim.tsteps.dts))
 
 function _temp_epsps(sim)
     dts = sim.tsteps.dts
@@ -106,14 +106,16 @@ function _temp_epsps(sim)
         end
     end
 
-    e_temp = zeros(length(dts))
+    e_temp = zeros(Float32, length(dts))
     for kk in 1:length(e_temp)
         x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
-    return e_temp
+    return _shape_epsps(e_temp, sim, sim.tsteps)
 end
 
+_shape_epsps(e_temp, sim, ::Myopic) = e_temp
+_shape_epsps(e_temp, sim, ::MyopicFast) = repeat(e_temp, m_out(sim)÷length(sim.tsteps.dts))
 
 function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
     # CPU algorithm: move index arrays to CPU
@@ -159,7 +161,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
     σind = Array(model.σind)
     τind = Array(model.τind)
 
-    dts = obs.dt
+    dts = Array(obs.dt)
 
     counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
