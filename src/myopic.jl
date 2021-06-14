@@ -85,7 +85,7 @@ end
 
 _temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 
-_temp_dts(sim, ::Myopic) = repeat(collect(sim.tsteps.dts), 1, m_out(sim))
+_temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
 _temp_dts(sim, ::MyopicFast) = rand(sim.tsteps.dts, m_out(sim))
 
 function _temp_epsps(sim)
@@ -98,8 +98,6 @@ function _temp_epsps(sim)
     q_star = map.q
     τ_star = map.τ
 
-    # TODO: this can be made more efficient by storing the previous value of `x`
-    # as part of the policy data structure
     x = 1.
     L = length(times)
     if L > 1
@@ -108,8 +106,6 @@ function _temp_epsps(sim)
         end
     end
 
-    # TODO: this can be made more efficient by not reallocating `e_temp`, but
-    # allocating as part of the policy data structure
     e_temp = zeros(length(dts))
     for kk in 1:length(e_temp)
         x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
@@ -126,6 +122,8 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
     qind = Array(model.qind)
     σind = Array(model.σind)
     τind = Array(model.τind)
+
+    dts = Array(obs.dt)
 
     minent = Inf
     imin = 0
@@ -150,7 +148,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
             imin = i 
         end
     end
-    return obs.dt[imin]
+    return dts[imin]
 end
 
 function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 

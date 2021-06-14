@@ -42,7 +42,7 @@ function outer_indices!(u::Vector)
 end
 
 function outer_resample!(state, model, u)
-    usum, idx = outer_indices!(u)
+    usum, idx = indices!(u)
     resample!(state, idx)
     resample!(model, idx)
     return state, model
