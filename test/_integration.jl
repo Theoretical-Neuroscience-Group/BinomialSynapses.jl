@@ -21,8 +21,8 @@
         mapmodel = MAP(sim)
 
         @test abs(mapmodel.N - N) <= 6
-        @test abs(mapmodel.p - p) <= 0.1
-        @test abs(mapmodel.q - q) <= 0.1
+        @test abs(mapmodel.p - p) <= 0.15
+        @test abs(mapmodel.q - q) <= 0.15
         @test abs(mapmodel.σ - σ) <= 0.3
         @test abs(mapmodel.τ - τ) <= 0.3
     end
@@ -33,7 +33,7 @@
 
     # OED tests
     @testset "convergence of OED" begin
-        candidates = LinRange(0.005, 2, 16)
+        candidates = LinRange(0.005, 2, 8)
         T = 1000
         @testset "OEDPolicy: Uniform" begin
             test_convergence(Uniform(candidates), T)
