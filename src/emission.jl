@@ -12,7 +12,7 @@ function emit(
         q = model.q[1]
         σ = model.σ[1]
         k = state.k[1,1]
-        EPSP = rand(Normal(q*k, σ))
+        EPSP = Float32(rand(Normal(q*k, σ)))
         return BinomialObservation(EPSP, δ)
     end
 end
