@@ -33,7 +33,7 @@
 
     # OED tests
     @testset "convergence of OED" begin
-        candidates = LinRange(0.005, 2, 60)
+        candidates = LinRange(0.005, 2, 16)
         T = 1000
         @testset "OEDPolicy: Uniform" begin
             test_convergence(Uniform(candidates), T)
