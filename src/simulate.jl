@@ -94,7 +94,8 @@ function save_results!(results::Results, sim::NestedFilterSimulation, i)
     for j in 1:length(τrng)
         τ_posterior[j] = count(i->(i==j),τind)
     end
-    results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))    
+    #results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))    
+    results.entropies[i] = 1.0
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
