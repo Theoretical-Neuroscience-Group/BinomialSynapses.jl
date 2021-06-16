@@ -73,6 +73,7 @@ function propagate!(sim::NestedFilterSimulation, dt)
 end
 
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = false)
+    results = Results(zeros(T))
     if length(sim.times) == 0
         initialize!(sim)
     end
