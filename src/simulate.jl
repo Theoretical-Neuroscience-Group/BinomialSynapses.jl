@@ -79,23 +79,22 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
         if plot_each_timestep
             posterior_plot(sim)
         end
-        save_results!(results, sim, i)
-        if i == T
-            save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies)
-        end
+        #save_results!(results, sim, i)
+        #if i == T
+        #    save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies)
+        #end
     end
     return sim.times, sim.epsps
 end
 
-function save_results!(results::Results, sim::NestedFilterSimulation, i)
-    τind = Array(sim.fstate.model.τind)
-    τrng = Array(sim.fstate.model.τrng)
-    τ_posterior = zeros(length(τrng))
-    for j in 1:length(τrng)
-        τ_posterior[j] = count(i->(i==j),τind)
-    end
-    #results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))    
-    results.entropies[i] = 1.0
-end
+#function save_results!(results::Results, sim::NestedFilterSimulation, i)
+#    τind = Array(sim.fstate.model.τind)
+#    τrng = Array(sim.fstate.model.τrng)
+#    τ_posterior = zeros(length(τrng))
+#    for j in 1:length(τrng)
+#        τ_posterior[j] = count(i->(i==j),τind)
+#    end
+#    results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))    
+#end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
