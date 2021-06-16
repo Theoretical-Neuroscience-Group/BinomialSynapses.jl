@@ -7,7 +7,8 @@ using GPUArrays
 using LaTeXStrings
 using Plots
 using Statistics: mean
-using StatsBase: mode
+using StatsBase: mode, entropy
+
 
 include("models.jl")
 export
