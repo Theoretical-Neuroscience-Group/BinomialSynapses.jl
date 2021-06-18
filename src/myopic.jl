@@ -18,6 +18,8 @@ end
 # default target is miniminum entropy
 Myopic(dts) = Myopic(dts, _entropy)
 MyopicFast(dts) = MyopicFast(dts, _entropy)
+Myopic_tau(dts) = Myopic(dts, _tauentropy)
+MyopicFast_tau(dts) = MyopicFast(dts, _tauentropy)
 
 function _oed!(sim, ::MyopicPolicy)
     policy = sim.tsteps
