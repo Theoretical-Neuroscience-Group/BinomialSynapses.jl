@@ -202,6 +202,14 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopi
         @inbounds for j in 1:size(τind, 2)
             iτ = τind[i, j]
             key = (iτ)
+            print(key)
+            print('\n')
+            print(dict)
+            print('\n')
+            print(dict[key])
+            print('\n')
+            print(get!(dict, key, 0))
+            print('\n')
             dict[key] = get!(dict, key, 0) + 1
         end
         ent = 0.
