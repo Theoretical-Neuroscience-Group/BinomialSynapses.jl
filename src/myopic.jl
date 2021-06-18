@@ -201,15 +201,7 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopi
         dict = Dict{NTuple{1, Int64}, Int}()
         @inbounds for j in 1:size(τind, 2)
             iτ = τind[i, j]
-            key = iτ
-            print(key)
-            print('\n')
-            print(dict)
-            print('\n')
-            print(dict[key])
-            print('\n')
-            print(get!(dict, key, 0))
-            print('\n')
+            key = (iτ,)
             dict[key] = get!(dict, key, 0) + 1
         end
         ent = 0.
