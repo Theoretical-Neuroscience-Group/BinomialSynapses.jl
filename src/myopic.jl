@@ -186,3 +186,58 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
     
     return argmin(entropies)
 end
+
+function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
+    # CPU algorithm: move index arrays to CPU
+    τind = Array(model.τind)
+
+    dts = Array(obs.dt)
+
+    minent = Inf
+    imin = 0
+    @inbounds for i in 1:size(τind, 1)
+        dict = Dict{NTuple{1, Int64}, Int}()
+        @inbounds for j in 1:size(τind, 2)
+            iτ = τind[i, j]
+            key = (iτ)
+            dict[key] = get!(dict, key, 0) + 1
+        end
+        ent = 0.
+        for value in values(dict)
+            p = value/size(τind, 2)
+            ent -= p * log(p)
+        end
+        if ent < minent
+            minent = ent
+            imin = i 
+        end
+    end
+    return dts[imin]
+end
+
+function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+    # CPU algorithm: move index arrays to CPU
+    τind = Array(model.τind)
+
+    dts = Array(obs.dt)
+
+    counts = Dict{Tuple{Float64, Int}, Int}()
+    totals = Dict{Float64, Int}() # total counts per dt
+    @inbounds for i in 1:length(τind)
+        iτ = τind[i]
+        dt = dts[i]
+        key = (dt, iτ)
+        counts[key] = get!(counts, key, 0) + 1
+        totals[dt] = get!(totals, dt, 0.) + 1
+    end
+
+    entropies = Dict{Float64, Float64}()
+    @inbounds for (key, count) in counts
+        dt = key[1]
+        p = count/totals[dt]
+        entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
+    end
+    
+    return argmin(entropies)
+end
+
