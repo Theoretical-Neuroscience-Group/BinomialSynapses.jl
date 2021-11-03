@@ -107,7 +107,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
         end
         save_results!(results, sim, i)
         if i == T
-            if isdefined(ENV["SLURM_ARRAY_TASK_ID"])
+            if @isdefined ENV["SLURM_ARRAY_TASK_ID"]
                 save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "ISI", sim.times, "MAP", results.map)
             end
         end
