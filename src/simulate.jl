@@ -8,8 +8,25 @@ struct NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}
     epsps::T7
 end
 
-struct Results{T1}
+struct Map{T1, T2, T3, T4, T5}
+    map_N::T1
+    map_p::T2
+    map_q::T3
+    map_σ::T4
+    map_τ::T5
+end
+
+struct Entropies{T1, T2, T3, T4, T5}
+    entropy_N::T1
+    entropy_p::T2
+    entropy_q::T3
+    entropy_σ::T4
+    entropy_τ::T5
+end
+
+struct Results{T1, T2}
     entropies::T1
+    map::T2
 end
 
 function NestedFilterSimulation(
@@ -73,7 +90,11 @@ function propagate!(sim::NestedFilterSimulation, dt)
 end
 
 function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = false)
-    results = Results(zeros(T))
+    entropies = Entropies(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
+    Maps = Map(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
+            
+    results = Results(entropies,Maps)
+    
     if length(sim.times) == 0
         initialize!(sim)
     end
@@ -87,7 +108,7 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
         save_results!(results, sim, i)
         if i == T
             if isdefined(ENV["SLURM_ARRAY_TASK_ID"])
-                save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "ISI", sim.times)
+                save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "ISI", sim.times, "MAP", results.map)
             end
         end
     end
@@ -95,13 +116,54 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
 end
 
 function save_results!(results::Results, sim::NestedFilterSimulation, i)
+    
+    Nind = Array(sim.fstate.model.Nind)
+    Nrng = Array(sim.fstate.model.Nrng)
+    N_posterior = zeros(length(Nrng))
+    for j in 1:length(Nrng)
+        N_posterior[j] = count(i->(i==j),Nind)
+    end
+    results.entropies.entropy_N[i] = entropy(N_posterior/sum(N_posterior))  
+
+    pind = Array(sim.fstate.model.pind)
+    prng = Array(sim.fstate.model.prng)
+    p_posterior = zeros(length(prng))
+    for j in 1:length(prng)
+        p_posterior[j] = count(i->(i==j),pind)
+    end
+    results.entropies.entropy_p[i] = entropy(p_posterior/sum(p_posterior))  
+
+    qind = Array(sim.fstate.model.qind)
+    qrng = Array(sim.fstate.model.qrng)
+    q_posterior = zeros(length(qrng))
+    for j in 1:length(qrng)
+        q_posterior[j] = count(i->(i==j),qind)
+    end
+    results.entropies.entropy_q[i] = entropy(q_posterior/sum(q_posterior))  
+
+    σind = Array(sim.fstate.model.σind)
+    σrng = Array(sim.fstate.model.σrng)
+    σ_posterior = zeros(length(σrng))
+    for j in 1:length(σrng)
+        σ_posterior[j] = count(i->(i==j),σind)
+    end
+    results.entropies.entropy_σ[i] = entropy(σ_posterior/sum(σ_posterior))  
+  
     τind = Array(sim.fstate.model.τind)
     τrng = Array(sim.fstate.model.τrng)
     τ_posterior = zeros(length(τrng))
     for j in 1:length(τrng)
         τ_posterior[j] = count(i->(i==j),τind)
     end
-    results.entropies[i] = entropy(τ_posterior/sum(τ_posterior))    
+    results.entropies.entropy_τ[i] = entropy(τ_posterior/sum(τ_posterior))    
+
+    map = MAP(sim.fstate.model)
+    results.map.map_N[i] = map.N
+    results.map.map_p[i] = map.p
+    results.map.map_q[i] = map.q
+    results.map.map_σ[i] = map.σ
+    results.map.map_τ[i] = map.τ
+
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
