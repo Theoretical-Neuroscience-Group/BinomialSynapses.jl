@@ -86,7 +86,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
         end
         save_results!(results, sim, i)
         if i == T
-            save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies)
+            if isdefined(ENV["SLURM_ARRAY_TASK_ID"])
+                save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies)
+            end
         end
     end
     return sim.times, sim.epsps
