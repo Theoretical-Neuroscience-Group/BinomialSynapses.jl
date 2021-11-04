@@ -56,4 +56,7 @@ export OEDPolicy, policy, Uniform
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
 
+include("record.jl")
+export Recording, update!, save
+
 end#module
