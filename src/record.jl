@@ -10,8 +10,8 @@ function Recording(f1, f2, sim::NestedFilterSimulation)
     return Recording(f1, f2, data)
 end
 
-function update!(rec::Recording, sim)
-    push!(rec.data, rec.f1(sim))
+function update!(rec::Recording, sim, i, time)
+    push!(rec.data, rec.f1(sim, time, i))
     return rec
 end
 
