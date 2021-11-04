@@ -24,9 +24,10 @@ struct Entropies{T1, T2, T3, T4, T5}
     entropy_τ::T5
 end
 
-struct Results{T1, T2}
+struct Results{T1, T2, T3}
     entropies::T1
     map::T2
+    time::T3
 end
 
 function NestedFilterSimulation(
@@ -93,19 +94,19 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
     entropies = Entropies(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
     Maps = Map(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
             
-    results = Results(entropies,Maps)
+    results = Results(entropies,Maps,zeros(T))
     
     if length(sim.times) == 0
         initialize!(sim)
     end
     for i in 1:T
         begin
-            propagate!(sim)
+            time = @timed propagate!(sim)
         end
         if plot_each_timestep
             posterior_plot(sim)
         end
-        save_results!(results, sim, i)
+        save_results!(results, sim, i, time)
         if i == T
             save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "ISI", sim.times, "MAP", results.map)
         end
@@ -113,7 +114,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
     return sim.times, sim.epsps
 end
 
-function save_results!(results::Results, sim::NestedFilterSimulation, i)
+function save_results!(results::Results, sim::NestedFilterSimulation, i, time)
+    
+    results.time[i] = time
     
     Nind = Array(sim.fstate.model.Nind)
     Nrng = Array(sim.fstate.model.Nrng)
