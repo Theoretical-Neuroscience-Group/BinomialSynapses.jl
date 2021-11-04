@@ -1,3 +1,5 @@
+const NoRecording = Recording(x -> nothing, x -> nothing, Nothing[])
+
 struct NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}
     hmodel::T1
     filter::T2
