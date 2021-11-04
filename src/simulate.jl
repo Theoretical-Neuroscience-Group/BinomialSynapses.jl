@@ -92,12 +92,8 @@ function propagate!(sim::NestedFilterSimulation, dt)
     return sim
 end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = false)
-    entropies = Entropies(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
-    Maps = Map(zeros(T),zeros(T),zeros(T),zeros(T),zeros(T))
-            
-    results = Results(entropies,Maps,zeros(T))
-    
+function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = false, recording::Recording = NoRecording)
+
     if length(sim.times) == 0
         initialize!(sim)
     end
@@ -108,11 +104,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
         if plot_each_timestep
             posterior_plot(sim)
         end
-        save_results!(results, sim, i, time)
-        if i == T
-            save(string(Base.parse(Int, ENV["SLURM_ARRAY_TASK_ID"]),".jld"), "entropies", results.entropies, "ISI", sim.times, "MAP", results.map)
-        end
+        update!(recording, sim, i, time) 
     end
+    save(recording)
     return sim.times, sim.epsps
 end
 
