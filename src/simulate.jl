@@ -165,6 +165,8 @@ function save_results!(results::Results, sim::NestedFilterSimulation, i, time)
     results.map.map_σ[i] = map.σ
     results.map.map_τ[i] = map.τ
 
+    return results
+
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
