@@ -10,9 +10,7 @@ function update!(rec::Recording, sim, time)
 end
 
 update_data!(data, f1, sim, time) = push!(data, f1(sim, time))
-update_data!(::Nothing, _, _, _) = nothing
 update_data!(_, ::Nothing, _, _) = nothing
-update_data!(::Nothing, ::Nothing, _, _) = nothing
 
 function save(rec::Recording)
     save_data(rec.data, rec.f2)
