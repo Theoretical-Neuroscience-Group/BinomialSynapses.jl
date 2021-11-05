@@ -72,7 +72,7 @@ function run!(
     sim::NestedFilterSimulation; 
     T::Int, 
     plot_each_timestep::Bool = false, 
-    recording::Union{Recording, NoRecording} = NoRecording()
+    recording::Recording = NoRecording
 )
     if length(sim.times) == 0
         initialize!(sim)
