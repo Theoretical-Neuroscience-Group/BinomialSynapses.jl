@@ -93,7 +93,10 @@ end
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
 
 function Recording(f1, f2, sim::NestedFilterSimulation)
-    res = f1(sim)
+    begin
+        time = @timed nothing
+    end
+    res = f1(sim, time)
     data = [res]
     return Recording(f1, f2, data)
 end
