@@ -8,7 +8,6 @@ using LaTeXStrings
 using Plots
 using Statistics: mean
 using StatsBase: mode, entropy
-using JLD
 
 include("models.jl")
 export
