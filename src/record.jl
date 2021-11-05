@@ -4,11 +4,17 @@ struct Recording{T1, T2, T3}
     data::T3
 end
 
-function update!(rec::Recording, sim, i, time)
-    push!(rec.data, rec.f1(sim, time, i))
+struct NoRecording end
+
+function update!(rec::Recording, sim, time)
+    push!(rec.data, rec.f1(sim, time))
     return rec
 end
+
+update!(::NoRecording, _, _) = nothing
 
 function save(rec::Recording)
     rec.f2(rec.data)
 end
+
+save(::NoRecording) = nothing
