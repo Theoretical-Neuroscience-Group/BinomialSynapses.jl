@@ -89,3 +89,9 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
+
+function Recording(f1, f2, sim::NestedFilterSimulation)
+    res = f1(sim)
+    data = [res]
+    return Recording(f1, f2, data)
+end

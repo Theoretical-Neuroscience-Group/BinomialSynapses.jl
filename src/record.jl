@@ -4,12 +4,6 @@ struct Recording{T1, T2, T3}
     data::T3
 end
 
-function Recording(f1, f2, sim::NestedFilterSimulation)
-    res = f1(sim)
-    data = [res]
-    return Recording(f1, f2, data)
-end
-
 function update!(rec::Recording, sim, i, time)
     push!(rec.data, rec.f1(sim, time, i))
     return rec
