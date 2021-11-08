@@ -1,5 +1,3 @@
-const NoRecording = Recording(x -> nothing, x -> nothing, Nothing[])
-
 struct NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}
     hmodel::T1
     filter::T2
@@ -70,8 +68,12 @@ function propagate!(sim::NestedFilterSimulation, dt)
     return sim
 end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = false, recording::Recording = NoRecording)
-
+function run!(
+    sim::NestedFilterSimulation; 
+    T::Int, 
+    plot_each_timestep::Bool = false, 
+    recording::Recording = NoRecording
+)
     if length(sim.times) == 0
         initialize!(sim)
     end
@@ -82,10 +84,19 @@ function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = fa
         if plot_each_timestep
             posterior_plot(sim)
         end
-        update!(recording, sim, i, time) 
+        update!(recording, sim, time) 
     end
     save(recording)
     return sim.times, sim.epsps
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
+
+function Recording(f1, f2, sim::NestedFilterSimulation)
+    begin
+        time = @timed nothing
+    end
+    res = f1(sim, time)
+    data = [res]
+    return Recording(f1, f2, data)
+end

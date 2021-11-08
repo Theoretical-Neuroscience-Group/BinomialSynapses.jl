@@ -8,7 +8,6 @@ using LaTeXStrings
 using Plots
 using Statistics: mean
 using StatsBase: mode, entropy
-using JLD
 
 include("models.jl")
 export
@@ -44,6 +43,9 @@ export NestedParticleFilter, NestedParticleState, update!
 include("statistics.jl")
 export MAP
 
+include("record.jl")
+export Recording
+
 include("simulate.jl")
 export NestedFilterSimulation, initialize!, m_out, run!
 
@@ -55,8 +57,5 @@ export OEDPolicy, policy, Uniform
 
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
-
-include("record.jl")
-export Recording, update!, save
 
 end#module
