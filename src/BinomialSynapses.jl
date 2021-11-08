@@ -7,7 +7,7 @@ using GPUArrays
 using LaTeXStrings
 using Plots
 using Statistics: mean
-using StatsBase: mode
+using StatsBase: mode, entropy
 
 include("models.jl")
 export
@@ -43,6 +43,9 @@ export NestedParticleFilter, NestedParticleState, update!
 include("statistics.jl")
 export MAP
 
+include("record.jl")
+export Recording
+
 include("simulate.jl")
 export NestedFilterSimulation, initialize!, m_out, run!
 
@@ -53,6 +56,6 @@ include("OED.jl")
 export OEDPolicy, policy, Uniform
 
 include("myopic.jl")
-export MyopicPolicy, Myopic, MyopicFast
+export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
 
 end#module

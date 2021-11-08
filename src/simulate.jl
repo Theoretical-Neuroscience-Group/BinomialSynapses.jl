@@ -68,19 +68,35 @@ function propagate!(sim::NestedFilterSimulation, dt)
     return sim
 end
 
-function run!(sim::NestedFilterSimulation; T::Int, plot_each_timestep::Bool = false)
+function run!(
+    sim::NestedFilterSimulation; 
+    T::Int, 
+    plot_each_timestep::Bool = false, 
+    recording::Recording = NoRecording
+)
     if length(sim.times) == 0
         initialize!(sim)
     end
     for i in 1:T
         begin
-            propagate!(sim)
+            time = @timed propagate!(sim)
         end
         if plot_each_timestep
             posterior_plot(sim)
         end
+        update!(recording, sim, time) 
     end
+    save(recording)
     return sim.times, sim.epsps
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
+
+function Recording(f1, f2, sim::NestedFilterSimulation)
+    begin
+        time = @timed nothing
+    end
+    res = f1(sim, time)
+    data = [res]
+    return Recording(f1, f2, data)
+end
