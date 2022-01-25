@@ -4,7 +4,6 @@ using BinomialGPU
 using CUDA
 using CUDA: i32
 using Distributions: Binomial, Exponential, Normal
-using GPUArrays
 using LaTeXStrings
 using Plots
 using Statistics: mean
