@@ -56,41 +56,53 @@ indices!(v::AnyCuVector) = outer_indices!(v)
 function indices!(v::AnyCuArray)
     function kernel!(
         u, v, idx, r, 
-        randstates, 
         Rout, M_out, M_in
     )
-        id = (blockIdx().x - 1) * blockDim().x + threadIdx().x # physical index
-        @inbounds if id <= M_out
-            i = Rout[id]
+        # grid-stride loop
+        tid    = threadIdx().x
+        window = (blockDim().x - 1i32) * gridDim().x
+        offset = (blockIdx().x - 1i32) * blockDim().x
+        while offset < M_out
+            id = tid + offset
+            # sample descending sequence of sorted random numbers
+            # r[i,M_in] >= ... >= r[i,2] >= r[i,1]
+            # Algorithm by:
+            # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
+            # September 1980, Pages 359--364
             vsum = 0f0
             CurMax = 1f0
-            @inbounds for j in 1:M_in
-                # compute cumulative sums
-                vsum = v[i, j] += vsum
-                # sample descending sequence of sorted random numbers
-                # r[M_in,i] >= ... >= r[2,i] >= r[1,i]
-                # Algorithm by:
-                # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
-                # September 1980, Pages 359--364
+            for j in 1:M_in
                 mirrorj = M_in - j + 1 # mirrored index i
-                CurMax *= CUDA.exp(CUDA.log(GPUArrays.gpu_rand(Float32, CUDA.CuKernelContext(), randstates)) / mirrorj)
-                r[i, mirrorj] = CurMax
-            end
-            # compute average likelihood across inner particles
-            # (with normalization constant that was omitted from v for speed)
-            u[i] = vsum 
-            # O(n) binning algorithm for sorted samples
-            bindex = 1 # bin index
-            @inbounds for j in 1:M_in
-                # scale random numbers (this is equivalent to normalizing v)
-                rsample = r[i, j] * vsum
-                # checking bindex <= M_in - 1 is redundant since
-                # v[M_in, j] = vsum
-                while rsample > v[i, bindex]
-                    bindex += 1
+                CurMax *= CUDA.exp(CUDA.log(rand(Float32)) / mirrorj)
+                if id <= M_out
+                    @inbounds i = Rout[id]
+                    # compute cumulative sums
+                    @inbounds vsum = v[i, j] += vsum
+                    @inbounds r[i, mirrorj] = CurMax
                 end
-                idx[i, j] = bindex
             end
+            if id <= M_out
+                @inbounds i = Rout[id]
+
+                # compute average likelihood across inner particles
+                # (with normalization constant that was omitted from v for speed)
+                @inbounds u[i] = vsum
+
+                # O(n) binning algorithm for sorted samples
+                bindex = 1 # bin index
+                for j in 1:M_in
+                    # scale random numbers (this is equivalent to normalizing v)
+                    @inbounds rsample = r[i, j] * vsum
+                    # checking bindex <= M_in - 1 not necessary since
+                    # v[i, M_in] = vsum
+                    @inbounds while rsample > v[i, bindex]
+                        bindex += 1
+                    end
+                    @inbounds idx[i, j] = bindex
+                end
+            end
+
+            offset += window
         end
         return nothing
     end
@@ -103,21 +115,17 @@ function indices!(v::AnyCuArray)
     M_out = length(u)
     M_in  = last(size(v))
 
-    rng = GPUArrays.default_rng(CuArray)
-
     kernel  = @cuda launch=false kernel!(
                 u, v, idx, r,
-                rng.state,
                 Rout, M_out, M_in
               )
     config  = launch_configuration(kernel.fun)
-    threads = Base.min(M_out, config.threads, 256)
+    threads = max(32, min(config.threads, M_out))
     blocks  = cld(M_out, threads)
     kernel(
         u, v,
         idx, 
         r,
-        rng.state,
         Rout, M_out, M_in
         ;
         threads=threads, blocks=blocks
@@ -127,7 +135,7 @@ end
 
 function resample!(in, out, idx)
     function kernel(in, out, idx, Ra, R1, R2, R3)
-        i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+        i = (blockIdx().x - 1i32) * blockDim().x + threadIdx().x
         @inbounds if i <= length(in)
             I = Ra[i]     # choose high-level index
             I1 = R1[I[1]] # choose index before resampling dimension
@@ -146,7 +154,7 @@ function resample!(in, out, idx)
 
     kernel  = @cuda launch=false kernel(in, out, idx, Ra, R1, R2, R3)
     config  = launch_configuration(kernel.fun)
-    threads = Base.min(length(out), config.threads, 256)
+    threads = max(32, min(config.threads, length(out)))
     blocks  = cld(length(out), threads)
     kernel(in, out, idx, Ra, R1, R2, R3; threads=threads, blocks=blocks)
     return out

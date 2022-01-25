@@ -15,31 +15,36 @@ function jitter!(model::BinomialGridModel, width)
 end
 
 function jitter!(indices, maxindex, prob1, prob2)
-    function kernel(indices, range, prob1, prob2, randstates)
-        i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-        @inbounds if i <= length(indices)
-            r   = GPUArrays.gpu_rand(Float32, CUDA.CuKernelContext(), randstates)
-            idx = indices[i]
-            if idx == 1
-                r < prob2 && (idx += 1)
-            elseif idx == maxindex
-                r < prob2 && (idx -= 1)
-            elseif r < prob1
-                idx += 1
-            elseif r > 1-prob1
-                idx -= 1
-            end
-            indices[i] = idx
-        end#if
+    function kernel(indices, maxindex, prob1, prob2)
+        # grid-stride loop
+        tid    = threadIdx().x
+        window = (blockDim().x - 1i32) * gridDim().x
+        offset = (blockIdx().x - 1i32) * blockDim().x
+        while offset < length(indices)
+            i = tid + offset
+            r = rand(Float32)
+            if i <= length(indices)
+                @inbounds idx = indices[i]
+                if idx == 1
+                    r < prob2 && (idx += 1)
+                elseif idx == maxindex
+                    r < prob2 && (idx -= 1)
+                elseif r < prob1
+                    idx += 1
+                elseif r > 1-prob1
+                    idx -= 1
+                end
+                @inbounds indices[i] = idx
+            end#if
+            offset += window
+        end
         return nothing
     end
 
-    rng = GPUArrays.default_rng(CuArray)
-
-    kernel  = @cuda launch=false kernel(indices, maxindex, prob1, prob2, rng.state)
+    kernel  = @cuda launch=false kernel(indices, maxindex, prob1, prob2)
     config  = launch_configuration(kernel.fun)
-    threads = Base.min(length(indices), config.threads, 256)
+    threads = max(32, min(config.threads, length(indices)))
     blocks  = cld(length(indices), threads)
-    kernel(indices, maxindex, prob1, prob2, rng.state; threads=threads, blocks=blocks)
+    kernel(indices, maxindex, prob1, prob2; threads=threads, blocks=blocks)
     return indices
 end
