@@ -5,6 +5,8 @@ using Distributions: Exponential
 using BenchmarkTools
 using Test
 
+CUDA.versioninfo()
+
 const RUN_BENCHMARKS = false # optional intermediate benchmarks
 
 @testset "BinomialSynapses.jl" begin
