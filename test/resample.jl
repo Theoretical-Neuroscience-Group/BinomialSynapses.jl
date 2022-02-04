@@ -23,15 +23,22 @@
 
             @test size(u) == ()
             @test size(idx) == (4,)
-            @test u == sum(vold)
+            @test u ≈ sum(vold)
 
             idx = Array(idx)
 
             @test idx == [2, 2, 2, 2]
 
-            for M_out in [4, 8, 16, 32, 64, 128, 256, 512, 1024]
-                u = CUDA.rand(M_out)
-                idx = Array(indices!(u)[2])
+            @testset "v of dim ($M_out,)" for M_out in [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                v = CUDA.rand(M_out)
+                vold = copy(v)
+                u, idx = indices!(v)
+
+                @test size(u) == ()
+                @test size(idx) == (M_out,)
+                @test u ≈ sum(vold)
+
+                idx = Array(idx)
                 @test issorted(idx)
             end
         end
@@ -43,17 +50,26 @@
 
             @test size(u) == (2,)
             @test size(idx) == (2, 4)
-            @test v == cumsum(vold, dims = 2)
-            @test u == sum(vold, dims = 2)
+            @test v ≈ cumsum(vold, dims = 2)
+            @test u ≈ sum(vold, dims = 2)
 
             idx = Array(idx)
 
             @test idx == [2 2 2 2;
                           3 3 3 3]
 
-            for M_out in [4, 64, 1024], M_in in [4, 64, 1024]
-                u = CUDA.rand(M_out, M_in)
-                idx = Array(indices!(u)[2])
+            @testset "v of dim ($M_out, $M_in)" for M_out in [4, 16, 64, 256, 1024], 
+                M_in in [4, 16, 64, 256, 1024]
+                v = CUDA.rand(M_out, M_in)
+                vold = copy(v)
+                u, idx = indices!(v)
+
+                @test size(u) == (M_out,)
+                @test size(idx) == (M_out, M_in)
+                @test v ≈ cumsum(vold, dims = 2)
+                @test u ≈ sum(vold, dims = 2)
+
+                idx = Array(idx)
                 for idxrow in eachrow(idx)
                     @test issorted(idxrow)
                 end
@@ -71,8 +87,8 @@
 
             @test size(u) == (2, 3)
             @test size(idx) == (2, 3, 4)
-            @test v == cumsum(vold, dims = 3)
-            @test u == sum(vold, dims = 3)
+            @test v ≈ cumsum(vold, dims = 3)
+            @test u ≈ sum(vold, dims = 3)
 
             idx = Array(idx)
 
@@ -80,9 +96,17 @@
                 @test idx[i, j, k] == trueidx[i, j]
             end
 
-            for M_dt in [4, 16], M_out in [4, 64, 1024], M_in in [4, 64, 1024]
-                u = CUDA.rand(M_dt, M_out, M_in)
-                idx = Array(indices!(u)[2])
+            @testset "v of dim ($M_dt, $M_out, $M_in)" for M_dt in [4, 16], M_out in [4, 64, 1024], M_in in [4, 64, 1024]
+                v = CUDA.rand(M_dt, M_out, M_in)
+                vold = copy(v)
+                u, idx = indices!(v)
+
+                @test size(u) == (M_dt, M_out)
+                @test size(idx) == (M_dt, M_out, M_in)
+                @test v ≈ cumsum(vold, dims = 3)
+                @test u ≈ sum(vold, dims = 3)
+
+                idx = Array(idx)
                 for i in 1:M_dt, j in 1:M_out
                     @test issorted(idx[i, j, :])
                 end
