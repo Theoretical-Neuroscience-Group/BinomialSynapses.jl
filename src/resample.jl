@@ -72,33 +72,37 @@ function indices!(v::AnyCuArray)
             vsum = 0f0
             CurMax = 1f0
             for j in 1:M_in
-                mirrorj = M_in - j + 1 # mirrored index i
+                mirrorj = M_in - j + 1 # mirrored index j
                 CurMax *= CUDA.exp(CUDA.log(rand(Float32)) / mirrorj)
                 if id <= M_out
                     @inbounds i = Rout[id]
-                    # compute cumulative sums
-                    @inbounds vsum = v[i, j] += vsum
-                    @inbounds r[i, mirrorj] = CurMax
+                    if u[i] < 0 # prevents revisiting same `i'
+                        # compute cumulative sums
+                        @inbounds vsum = v[i, j] += vsum
+                        @inbounds r[i, mirrorj] = CurMax
+                    end
                 end
             end
             if id <= M_out
                 @inbounds i = Rout[id]
 
-                # compute average likelihood across inner particles
-                # (with normalization constant that was omitted from v for speed)
-                @inbounds u[i] = vsum
+                if u[i] < 0 # prevents revisiting same `i'
+                    # compute average likelihood across inner particles
+                    # (with normalization constant that was omitted from v for speed)
+                    @inbounds u[i] = vsum
 
-                # O(n) binning algorithm for sorted samples
-                bindex = 1 # bin index
-                for j in 1:M_in
-                    # scale random numbers (this is equivalent to normalizing v)
-                    @inbounds rsample = r[i, j] * vsum
-                    # checking bindex <= M_in - 1 not necessary since
-                    # v[i, M_in] = vsum
-                    @inbounds while rsample > v[i, bindex]
-                        bindex += 1
+                    # O(n) binning algorithm for sorted samples
+                    bindex = 1 # bin index
+                    for j in 1:M_in
+                        # scale random numbers (this is equivalent to normalizing v)
+                        @inbounds rsample = r[i, j] * vsum
+                        # checking bindex <= M_in - 1 not necessary since
+                        # v[i, M_in] = vsum
+                        @inbounds while rsample > v[i, bindex]
+                            bindex += 1
+                        end
+                        @inbounds idx[i, j] = bindex
                     end
-                    @inbounds idx[i, j] = bindex
                 end
             end
 
@@ -107,9 +111,18 @@ function indices!(v::AnyCuArray)
         return nothing
     end
 
-    idx = CuArray{Int}(undef, size(v)...)              # indices
-    u   = CuArray{Float32}(undef, size(v)[1:end-1]...) # outer likelihoods
-    r   = CuArray{Float32}(undef, size(v)...)          # random numbers
+    # initializations:
+
+    # indices
+    idx = CuArray{Int}(undef, size(v)...)   
+
+    # outer likelihoods
+    # Initialize to -1 in order to track which elements have been written to.
+    # Since likelihoods are nonnegative, negative elements have never been visited.
+    u   = -CUDA.ones(Float32, size(v)[1:end-1]...)     
+
+    # random numbers
+    r   = CuArray{Float32}(undef, size(v)...)
 
     Rout  = CartesianIndices(u) # indices for first n-1 dimensions
     M_out = length(u)

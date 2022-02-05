@@ -27,9 +27,11 @@
             
             if length(dims) == 1
                 @test u ≈ sum(vold)
+                @test u >= 0
             else    
                 @test v ≈ cumsum(vold, dims = length(dims))
                 @test u ≈ sum(vold, dims = length(dims))
+                @test all(u .>= 0)
 
                 idx = Array(idx)
                 for i in CartesianIndices(dims[1:end-1])
