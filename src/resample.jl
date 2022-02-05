@@ -76,7 +76,7 @@ function indices!(v::AnyCuArray)
                 CurMax *= CUDA.exp(CUDA.log(rand(Float32)) / mirrorj)
                 if id <= M_out
                     @inbounds i = Rout[id]
-                    if u[i] < 0 # prevents revisiting same `i'
+                    if u[i] < 0 # prevents visiting same `i' more than once
                         # compute cumulative sums
                         @inbounds vsum = v[i, j] += vsum
                         @inbounds r[i, mirrorj] = CurMax
@@ -86,7 +86,7 @@ function indices!(v::AnyCuArray)
             if id <= M_out
                 @inbounds i = Rout[id]
 
-                if u[i] < 0 # prevents revisiting same `i'
+                if u[i] < 0 # prevents visiting same `i' more than once
                     # compute average likelihood across inner particles
                     # (with normalization constant that was omitted from v for speed)
                     @inbounds u[i] = vsum
