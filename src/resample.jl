@@ -119,7 +119,7 @@ function indices!(v::AnyCuArray)
     # outer likelihoods
     # Initialize to -1 in order to track which elements have been written to.
     # Since likelihoods are nonnegative, negative elements have never been visited.
-    u   = -CUDA.ones(Float32, size(v)[1:end-1]...)     
+    u   = CUDA.fill(-one(Float32), size(v)[1:end-1]...)     
 
     # random numbers
     r   = CuArray{Float32}(undef, size(v)...)
