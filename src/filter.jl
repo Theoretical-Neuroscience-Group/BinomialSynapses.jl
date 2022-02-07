@@ -36,3 +36,11 @@ function update!(
     outer_resample!(state, model, u)
     return filterstate
 end
+
+function Base.show(io::IO, ::MIME"text/plain", filter::NestedParticleFilter)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end
+
+function Base.show(io::IO, filter::NestedParticleFilter)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end

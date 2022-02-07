@@ -156,3 +156,19 @@ struct BinomialObservation{T1, T2}
     EPSP::T1
     dt::T2
 end
+
+function Base.show(io::IO, ::MIME"text/plain", ::AbstractBinomialModel)
+    print(io, "Binomial release model")
+end
+
+function Base.show(io::IO, ::AbstractBinomialModel)
+    print(io, "Binomial release model")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", ::AbstractBinomialState)
+    print(io, "n =, k =")
+end
+
+function Base.show(io::IO, ::AbstractBinomialState)
+    print(io, "n =, k =")
+end
