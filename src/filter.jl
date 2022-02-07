@@ -19,6 +19,9 @@ function NestedParticleState(
     return NestedParticleState(state, model)
 end
 
+m_out(fstate::NestedParticleState) = size(fstate.state.n)[end-1]
+m_in(fstate::NestedParticleState) = size(fstate.state.n)[end]
+
 function update!(
     filterstate::NestedParticleState,
     observation::BinomialObservation,
