@@ -9,20 +9,35 @@
             LinRange(0.00, 2.00, 45),
             LinRange(0.05, 2.00, 45),
             LinRange(0.05, 2.00, 45),
-            2048, 512, 12,
-            timestep = RandomTimestep(Exponential(0.121))                 
+            2048, 512, 12             
         )
+        times = zeros(0)
+        epsps = zeros(0)
+        time = 0.
+        delta = 0.
 
-        initialize!(sim)
         t = 0
         while true
             t += 1
-            propagate!(sim)
+            obs = propagate!(sim, λ = 0.121)
+            push!(times, time += obs.dt)
+            push!(epsps, obs.EPSP)
             e = sim.fstate.model.τ |> collect |> proportionmap |> values |> entropy
             if e < threshold || t > 1000
                 return t
             end
         end
+
+        # initialize!(sim)
+        # t = 0
+        # while true
+        #     t += 1
+        #     propagate!(sim)
+        #     e = sim.fstate.model.τ |> collect |> proportionmap |> values |> entropy
+        #     if e < threshold || t > 1000
+        #         return t
+        #     end
+        # end
     end
 
     number_of_timesteps = 0.

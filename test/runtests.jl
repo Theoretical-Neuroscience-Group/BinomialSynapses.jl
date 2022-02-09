@@ -1,5 +1,6 @@
 using BinomialSynapses
 using CUDA
+using StatsBase: proportionmap, entropy
 
 using BenchmarkTools
 using Test
