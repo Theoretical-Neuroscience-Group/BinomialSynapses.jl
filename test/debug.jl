@@ -13,7 +13,7 @@
             timestep = RandomTimestep(Exponential(0.121))                 
         )
 
-        initialize!(sim)
+        # initialize!(sim)
         t = 0
         while true
             t += 1
