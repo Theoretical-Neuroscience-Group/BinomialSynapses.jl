@@ -21,7 +21,7 @@ function NestedFilterSimulation(
                 m_out, m_in,
                 Nrng, prng, qrng, σrng, τrng
              )
-    times = zeros(0)
+    times = zeros(1)
     epsps = zeros(0)
     return NestedFilterSimulation(hmodel, filter, hstate, fstate, timestep, times, epsps)
 end
