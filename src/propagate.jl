@@ -4,11 +4,11 @@ function propagate!(n::AbstractArray, k::AbstractArray, model::AbstractBinomialM
     # propagate the hidden states n, k by one timestep
     m_out, m_in = size(n)
 
-    @inbounds for i in 1:m_in
+    @inbounds for i in 1:m_out
+        p_refill = 1 - exp(-dt / model.τ[i])
         @inbounds for j in 1:m_in
             # refill counts and probabilities
             n[i, j]  = relu(model.N[i] - n[i, j] + k[i, j])
-            p_refill = 1 - exp(-dt / model.τ[i])
 
             # draw vesicles to be refilled, update n
             k[i, j] = rand(Binomial(n[i, j], p_refill))
