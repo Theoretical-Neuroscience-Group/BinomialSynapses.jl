@@ -15,7 +15,6 @@ function NestedParticleState(
     n     = repeat(model.N, 1, m_in)
     k     = CUDA.zeros(Int, m_out, m_in)
     state = BinomialState(n, k)
-    propagate!(state, model, 0f0)
     return NestedParticleState(state, model)
 end
 
