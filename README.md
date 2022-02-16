@@ -5,7 +5,8 @@
 
 ## Installation
 
-To install this package in Julia 1.5 or 1.6, type
+This package needs at least Julia 1.6.1. 
+In a Julia REPL, activate an environment and type:
 
 ```julia
 ]add BinomialSynapses
