@@ -8,14 +8,13 @@ BinomialGridModel(
     Nind, pind, qind, σind, τind,
     Nrng, prng, qrng, σrng, τrng
 )
-BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+BinomialGridModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
 BinomialModel
-BinomialModel(Nmax, m_out, device = :gpu)
+BinomialModel(Nmax::Integer, m_out::Integer, device = :gpu)
 BinomialModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
 BinomialModel(model::BinomialGridModel)
 ScalarBinomialModel
-BinomialState(Nmax::Integer, m_out::Integer, m_in::Integer, device = :gpu)
-BinomialState(Nmax, m_out, m_in, device = :gpu)
+BinomialState(Nmax::Integer, m_out::Integer, m_in::Integer, device::Symbol = :gpu)
 ScalarBinomialState
 BinomialObservation
 propagate!(state::BinomialState, model, dt)
@@ -34,7 +33,10 @@ get_step
 ```@docs
 NestedParticleFilter
 NestedParticleState
-NestedParticleState(m_out::Integer, m_in, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+NestedParticleState(
+    m_out::Integer, m_in::Integer,
+    my_Nrng, my_prng, my_qrng, my_σrng, my_τrng
+)
 update!(
     filterstate::NestedParticleState,
     observation::BinomialObservation,

@@ -23,7 +23,7 @@ end
 Construct a randomly initialized particle system with a given number of outer (`m_out`) and inner (`m_in`) particles and specified grids for the parameters.
 """
 function NestedParticleState(
-    m_out::Int, m_in::Int,
+    m_out::Integer, m_in::Integer,
     my_Nrng, my_prng, my_qrng, my_σrng, my_τrng
 )
     model = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
