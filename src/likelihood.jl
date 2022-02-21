@@ -1,3 +1,10 @@
+"""
+    likelihood(state, model::AbstractBinomialModel, obs)
+Return the likelihood of an observation conditioned on the current state and model.
+This broadcasts properly over state and model ensemble, if they have compatible sizes.
+"""
+likelihood(state::BinomialState, model, obs) = likelihood(state.k, model, obs)
+
 function likelihood(k, model::AbstractBinomialModel, obs)
     return mean(
                 exp.(-0.5f0 .* ((obs .- model.q .* k) ./ model.σ).^2)
@@ -22,8 +29,12 @@ function likelihood_indices(
     return u, idx
 end
 
-function likelihood_resample!(state::BinomialState, model, observation::BinomialObservation)
-    u, idx = likelihood_indices(state.k, model, observation.EPSP)
+"""
+    likelihood_resample!(state, model::AbstractBinomialModel, obs)
+Return the likelihood of an observation conditioned on the current state and model ensemble and at the same time resample the state ensemble (inner particles).
+"""
+function likelihood_resample!(state::BinomialState, model, obs::BinomialObservation)
+    u, idx = likelihood_indices(state.k, model, obs.EPSP)
     resample!(state, idx)
     return u
 end

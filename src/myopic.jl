@@ -1,15 +1,34 @@
+"""
+    MyopicPolicy <: OEDPolicy
+
+A myopic OEDPolicy, i.e. one in which only the effect of the next time step on the parameter estimation, e.g. the entropy of a parameter, is taken into account.
+"""
 abstract type MyopicPolicy <: OEDPolicy end
 
-# parallel implementation of the myopic policy, in which multiple copies of the particles 
-# are propagated in parallel
+"""
+    Myopic(dts, target)
+
+A parallel implementation of a myopic policy with candidate time steps `dts` and optimization target `target`, in which multiple copies of the particles 
+are propagated in parallel.
+
+Implemented settings of `target`: choose time step such that it
+- `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
+- `_tauentropy`: minimizes the marginal entropy of `τ`
+"""
 struct Myopic{T1, T2} <: MyopicPolicy
     dts::T1
     target::T2
 end
 
-# `MyopicFast` is the same as `Myopic`, except that instead of expanding states and
-# parameters along another dimension, and propagating each parameter with each dt,
-# `dts` are randomly assigned to parameters
+"""
+    MyopicFast(dts, target)
+
+MyopicFast` is the same as `Myopic`, except that instead of expanding states and parameters along another dimension, and propagating each parameter with each dt, `dts` are randomly assigned to members of the parameter ensemble.
+
+Implemented settings of `target`: choose time step such that it
+- `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
+- `_tauentropy`: minimizes the marginal entropy of `τ`
+"""
 struct MyopicFast{T1, T2} <: MyopicPolicy
     dts::T1
     target::T2

@@ -1,5 +1,11 @@
 MAP(fstate::NestedParticleState; kwargs...) = MAP(fstate.model, kwargs...)
 
+"""
+    MAP(model; marginal = false)
+
+Compute the maximum a posteriori estimate of the parameters based on the model ensemble `model`, which is the mode the particle distribution. 
+When `marginal = false`, the mode of the joint distribution of all parameters is returned, whereas for `marginal = true`, the mode of each marginal is computed separately.
+"""
 function MAP(model::BinomialGridModel; kwargs...)
     MAP(BinomialModel(model); kwargs...)
 end
