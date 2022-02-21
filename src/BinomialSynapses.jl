@@ -44,7 +44,7 @@ include("statistics.jl")
 export MAP
 
 include("record.jl")
-export Recording
+export Recording, save
 
 include("simulate.jl")
 export NestedFilterSimulation, initialize!, m_out, run!
