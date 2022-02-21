@@ -15,6 +15,7 @@ export
        BinomialModel,
        BinomialGridModel,
        ScalarBinomialModel,
+       AbstractBinomialState,
        BinomialState,
        ScalarBinomialState,
        BinomialObservation

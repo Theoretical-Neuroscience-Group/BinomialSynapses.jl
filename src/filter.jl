@@ -64,3 +64,13 @@ end
 function Base.show(io::IO, filter::NestedParticleFilter)
     print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
 end
+
+function Base.show(io::IO, ::MIME"text/plain", state::NestedParticleState)
+    print(io, "Nested particle state with
+model: $(state.model)
+state: $(state.state)")
+end
+
+function Base.show(io::IO, state::NestedParticleState)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end

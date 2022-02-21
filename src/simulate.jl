@@ -176,7 +176,7 @@ function Base.show(io::IO, ::MIME"text/plain", sim::NestedFilterSimulation)
     # status = isempty(sim.epsps) ? "Uninitialized" : "Initialized"
     print(io, "Nested particle filter simulation 
     Filter: ", sim.filter, "
-    # of timesteps run: ", length(sim.epsps), "
+    time step counter: ", length(sim.epsps), "
     # of outer particles: ", m_out(sim.fstate), "
     # of inner particles: ", m_in(sim.fstate), "
     True model: ", sim.hmodel, "
