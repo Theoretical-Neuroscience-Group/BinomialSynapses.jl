@@ -1,6 +1,31 @@
+"""
+    AbstractBinomialModel
+
+An abstract type for binomial synaptic models.
+A binomial model always has the following parameters:
+- `N`: number of release sites
+- `p`: probability of release
+- `q`: quantum of release
+- `σ`: observation noise
+- `τ`: refilling time constant
+"""
 abstract type AbstractBinomialModel end
+
+"""
+    AbstractBinomialState
+
+An abstract type for binomial model states.
+A binomial model state has to have the following variables:
+- `n`: number of readily releasable vesicles
+- `k`: number of released vesicles
+"""
 abstract type AbstractBinomialState end
 
+"""
+    BinomialModel(N, p, q, σ, τ)
+
+The standard structure for a binomial model or model ensemble.
+"""
 struct BinomialModel{T1,T2} <: AbstractBinomialModel
     N::T1
     p::T2
@@ -9,6 +34,16 @@ struct BinomialModel{T1,T2} <: AbstractBinomialModel
     τ::T2
 end
 
+"""
+    BinomialGridModel(
+        Nind, pind, qind, σind, τind,
+        Nrng, prng, qrng, σrng, τrng,
+        N,    p,    q,    σ,    τ
+       )
+
+A binomial model ensemble whose parameters are constrained to live on a grid
+defined by `Nrng`, `prng`, etc.
+"""
 struct BinomialGridModel{T1, T2, T3, T4, T5} <: AbstractBinomialModel
     Nind::T1
     pind::T1
@@ -27,6 +62,15 @@ struct BinomialGridModel{T1, T2, T3, T4, T5} <: AbstractBinomialModel
     τ::T5
 end
 
+"""
+    BinomialGridModel(
+        Nind, pind, qind, σind, τind,
+        Nrng, prng, qrng, σrng, τrng
+    )
+
+Construct a binomial model ensemble with parameters on a grid, e.g. `Nrng`, 
+based on choosing indices, e.g. `Nind`.
+"""
 function BinomialGridModel(
     Nind, pind, qind, σind, τind,
     Nrng, prng, qrng, σrng, τrng
@@ -44,7 +88,13 @@ function BinomialGridModel(
     )
 end
 
-function BinomialGridModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+"""
+    BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+
+Randomly initialize a binomial model ensemble with parameters uniformly sampled from
+the specified grid (on the GPU).
+"""
+function BinomialGridModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
     Nrng = CuArray(Int.(my_Nrng))
     prng = CuArray(Float32.(my_prng))
     qrng = CuArray(Float32.(my_qrng))
@@ -63,6 +113,12 @@ function BinomialGridModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_σrng, my_�
             )
 end
 
+"""
+    refresh!(model::BinomialGridModel)
+
+Set the parameters of the model ensemble according to its current set of
+indices.
+"""
 function refresh!(model::BinomialGridModel)
     model.N .= model.Nrng[model.Nind]
     model.p .= model.prng[model.pind]
@@ -72,21 +128,31 @@ function refresh!(model::BinomialGridModel)
     return model
 end
 
-# special outer constructor to convert a BinomialGridModel into a BinomialModel
+"""
+    BinomialModel(model::BinomialGridModel)
+
+Convert a `BinomialGridModel` into a `BinomialModel`.
+"""
 function BinomialModel(model::BinomialGridModel)
     refresh!(model)
     return BinomialModel(model.N, model.p, model.q, model.σ, model.τ)
 end
 
-function BinomialModel(nmax::Int, m_out::Int, device = :gpu)
+"""
+    BinomialModel(Nmax, m_out, device = :gpu)
+
+Randomly initialize a binomial model ensemble of size `m_out`,
+with maximum value for `N` of `Nmax` on the GPU or CPU.
+"""
+function BinomialModel(Nmax::Integer, m_out::Integer, device = :gpu)
     if device == :gpu
-        N = CuArray(rand(1:nmax, m_out))
+        N = CuArray(rand(1:Nmax, m_out))
         p = CUDA.rand(m_out)
         q = CUDA.rand(m_out)
         σ = CUDA.rand(m_out)
         τ = CUDA.rand(m_out)
     elseif device == :cpu
-        N = rand(1:nmax, m_out)
+        N = rand(1:Nmax, m_out)
         p = rand(m_out)
         q = rand(m_out)
         σ = rand(m_out)
@@ -95,16 +161,32 @@ function BinomialModel(nmax::Int, m_out::Int, device = :gpu)
     return BinomialModel(N, p, q, σ, τ)
 end
 
-function BinomialModel(m_out::Int, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+"""
+    BinomialModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+
+Randomly initialize a binomial model ensemble on a grid, but throw away the grid info
+and just keep the parameters.
+"""
+function BinomialModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
     gridmodel = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
     return BinomialModel(gridmodel)
 end
 
-function ScalarBinomialModel(nmax, device = :cpu)
-    return BinomialModel(nmax, 1, device)
+"""
+    ScalarBinomialModel(Nmax, device = :cpu)
+
+Randomly initialize a model ensemble of size 1, which corresponds to a scalar model (used for the hidden state).
+"""
+function ScalarBinomialModel(Nmax, device = :cpu)
+    return BinomialModel(Nmax, 1, device)
 end
 
-function ScalarBinomialModel(N::Int, p, q, σ, τ, device = :cpu)
+"""
+    ScalarBinomialModel(N, p, q, σ, τ, device = :cpu)
+
+Initialize a scalar binomial model with the given parameters.
+"""
+function ScalarBinomialModel(N::Integer, p, q, σ, τ, device = :cpu)
     if device == :cpu
         Ns = N .* ones(Int, 1)
         ps = p .* ones(1)
@@ -121,27 +203,48 @@ function ScalarBinomialModel(N::Int, p, q, σ, τ, device = :cpu)
     return BinomialModel(Ns, ps, qs, σs, τs)
 end
 
+"""
+    BinomialState(n, k)
+
+An ensemble of states of the binomial model.
+"""
 struct BinomialState{T} <: AbstractBinomialState
     n::T
     k::T
 end
 
-function BinomialState(nmax::Int, m_out::Int, m_in::Int, device::Symbol = :gpu)
+"""
+    BinomialState(Nmax, m_out, m_in, device = :gpu)
+
+Randomly initialize a state ensemble of size `m_out` x `m_in` and maximum value of `N` 
+equal to `Nmax` on the specified device `:gpu` or `:cpu`.
+"""
+function BinomialState(Nmax::Integer, m_out::Integer, m_in::Integer, device::Symbol = :gpu)
     if device == :gpu
-        n = CuArray(rand(1:nmax, m_out, m_in))
+        n = CuArray(rand(1:Nmax, m_out, m_in))
         k = CUDA.zeros(Int, m_out, m_in)
     elseif device == :cpu
-        n = rand(1:nmax, m_out, m_in)
+        n = rand(1:Nmax, m_out, m_in)
         k = zeros(Int, m_out, m_in)
     end
     return BinomialState(n, k)
 end
 
-function ScalarBinomialState(nmax::Int, device = :cpu)
-    return BinomialState(nmax, 1, 1, device)
+"""
+    ScalarBinomialState(Nmax, device = :cpu)
+
+Randomly initialize a state ensemble of size 1, which corresponds to a scalar model (used for the hidden state).
+"""
+function ScalarBinomialState(Nmax::Integer, device = :cpu)
+    return BinomialState(Nmax, 1, 1, device)
 end
 
-function ScalarBinomialState(n::Int, k::Int, device = :cpu)
+"""
+    ScalarBinomialState(n, k, device = :cpu)
+
+Initialize a scalar state with the specified values of the variables.
+"""
+function ScalarBinomialState(n::Integer, k::Integer, device = :cpu)
     if device == :cpu
         ns = n .* ones(Int, 1, 1)
         ks = k .* ones(Int, 1, 1)
@@ -152,6 +255,11 @@ function ScalarBinomialState(n::Int, k::Int, device = :cpu)
     return BinomialState(ns, ks)
 end
 
+"""
+    BinomialObservation
+
+A structure for an observation consisting of an EPSP and a time step.
+"""
 struct BinomialObservation{T1, T2}
     EPSP::T1
     dt::T2

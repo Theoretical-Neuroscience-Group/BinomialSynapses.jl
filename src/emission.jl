@@ -1,3 +1,9 @@
+"""
+    emit(state, model, timestep)
+
+Return a `BinomialObservation` based on the current `state` and `model`, after a 
+speficied time step `timestep`.
+"""
 function emit(state, model, timestep) end
 
 function emit(

@@ -37,6 +37,11 @@ function propagate!(n::AnyCuArray, k::AnyCuArray, model::AbstractBinomialModel, 
     return n, k
 end
 
+"""
+    propagate!(state, model, dt)
+
+Propagate `state` forward according to the `model`, given a time step `dt`.
+"""
 function propagate!(state::BinomialState, model, dt)
     propagate!(state.n, state.k, model, dt)
     return state
