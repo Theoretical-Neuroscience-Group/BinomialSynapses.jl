@@ -2,12 +2,12 @@
     AbstractBinomialModel
 
 An abstract type for binomial synaptic models.
-A binomial model always has parameters 
-`N`: number of release sites
-`p`: probability of release
-`q`: quantum of release
-`σ`: observation noise
-`τ`: refilling time constant
+A binomial model always has the following parameters:
+- `N`: number of release sites
+- `p`: probability of release
+- `q`: quantum of release
+- `σ`: observation noise
+- `τ`: refilling time constant
 """
 abstract type AbstractBinomialModel end
 
@@ -15,14 +15,14 @@ abstract type AbstractBinomialModel end
     AbstractBinomialState
 
 An abstract type for binomial model states.
-A binomial model state has to have at least variable 
-`n`: number of readily releasable vesicles
-`k`: number of released vesicles
+A binomial model state has to have the following variables:
+- `n`: number of readily releasable vesicles
+- `k`: number of released vesicles
 """
 abstract type AbstractBinomialState end
 
 """
-    BinomialModel{T1,T2}
+    BinomialModel(N, p, q, σ, τ)
 
 The standard structure for a binomial model or model ensemble.
 """
@@ -35,7 +35,11 @@ struct BinomialModel{T1,T2} <: AbstractBinomialModel
 end
 
 """
-    BinomialGridModel{T1, T2, T3, T4, T5}
+    BinomialGridModel(
+        Nind, pind, qind, σind, τind,
+        Nrng, prng, qrng, σrng, τrng,
+        N,    p,    q,    σ,    τ
+       )
 
 A binomial model ensemble whose parameters are constrained to live on a grid
 defined by `Nrng`, `prng`, etc.
@@ -200,7 +204,7 @@ function ScalarBinomialModel(N::Integer, p, q, σ, τ, device = :cpu)
 end
 
 """
-    BinomialState{T}
+    BinomialState(n, k)
 
 An ensemble of states of the binomial model.
 """

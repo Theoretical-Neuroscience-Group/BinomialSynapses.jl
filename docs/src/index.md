@@ -3,10 +3,20 @@
 ## Models
 ```@docs
 AbstractBinomialModel
-BinomialModel
 BinomialGridModel
+BinomialGridModel(
+    Nind, pind, qind, σind, τind,
+    Nrng, prng, qrng, σrng, τrng
+)
+BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+BinomialModel
+BinomialModel(Nmax, m_out, device = :gpu)
+BinomialModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+BinomialModel(model::BinomialGridModel)
 ScalarBinomialModel
 BinomialState
+BinomialState(Nmax, m_out, m_in, device = :gpu)
+ScalarBinomialState(Nmax, device = :cpu)
 ScalarBinomialState
 BinomialObservation
 propagate!(state::BinomialState, model, dt)
@@ -25,7 +35,12 @@ get_step
 ```@docs
 NestedParticleFilter
 NestedParticleState
-update!
+NestedParticleState(m_out, m_in, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+update!(
+    filterstate::NestedParticleState,
+    observation::BinomialObservation,
+    filter::NestedParticleFilter
+)
 jitter!
 likelihood
 likelihood_resample!
@@ -50,6 +65,7 @@ MyopicFast_tau
 ```@docs
 NestedFilterSimulation
 initialize!
+propagate!(sim::NestedFilterSimulation)
 run!
 Recording
 update!(rec::Recording, sim, time)
