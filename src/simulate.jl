@@ -95,7 +95,7 @@ function Recording(f1, f2, sim::NestedFilterSimulation)
     begin
         time = @timed nothing
     end
-    res = f1(sim, time)
+    res = f1(sim, time.time)
     data = [res]
     return Recording(f1, f2, data)
 end
