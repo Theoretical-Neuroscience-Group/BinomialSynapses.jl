@@ -148,7 +148,7 @@ function BinomialModel(Nmax::Integer, m_out::Integer, device = :gpu)
         σ = CUDA.rand(m_out)
         τ = CUDA.rand(m_out)
     elseif device == :cpu
-        N = rand(1:nmax, m_out)
+        N = rand(1:Nmax, m_out)
         p = rand(m_out)
         q = rand(m_out)
         σ = rand(m_out)
