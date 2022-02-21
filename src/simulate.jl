@@ -90,8 +90,6 @@ function run!(
     return sim.times, sim.epsps
 end
 
-MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
-
 function Recording(f1, f2, sim::NestedFilterSimulation)
     begin
         time = @timed nothing
