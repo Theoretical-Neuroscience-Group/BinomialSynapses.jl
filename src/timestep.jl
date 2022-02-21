@@ -14,15 +14,14 @@ abstract type Timestep end
 
 Returns a value for the time step, based on the chosen method for choosing a time step.
 """
-# NOTE: this could be simplified by making subtypes of `Timestep` callable
 function get_step(::Timestep) end
+# NOTE: this could be simplified by making subtypes of `Timestep` callable
 
 """
     FixedTimestep(dt)
 
 Choose a fixed time step of size `dt`.
 """
-# TODO: should we enforce positivity?
 struct FixedTimestep{T} <: Timestep
     dt::T
 end

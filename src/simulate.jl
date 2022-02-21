@@ -111,7 +111,7 @@ function propagate!(sim::NestedFilterSimulation)
 end
 
 """
-    propagate!(sim, it)
+    propagate!(sim, dt)
 
 Propagate the simulation by time step `dt`.
 """
@@ -159,7 +159,11 @@ end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
 
-# TODO: I don't remember what this is for!
+"""
+    Recording(f1, f2, sim)
+
+Initialize a `Recording` for the specified functions `f1` and `f2` and already existing simulation `sim`.
+"""
 function Recording(f1, f2, sim::NestedFilterSimulation)
     begin
         time = @timed nothing

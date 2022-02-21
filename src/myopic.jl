@@ -35,9 +35,32 @@ struct MyopicFast{T1, T2} <: MyopicPolicy
 end
 
 # default target is miniminum entropy
+"""
+    Myopic(dts)
+
+Minimize the joint entropy.
+"""
 Myopic(dts) = Myopic(dts, _entropy)
+
+"""
+    MyopicFast(dts)
+
+Minimize the joint entropy.
+"""
 MyopicFast(dts) = MyopicFast(dts, _entropy)
+
+"""
+    Myopic_tau(dts)
+
+Minimize the entropy of τ.
+"""
 Myopic_tau(dts) = Myopic(dts, _tauentropy)
+
+"""
+    MyopicFast_tau(dts)
+
+Minimize the entropy of τ.
+"""
 MyopicFast_tau(dts) = MyopicFast(dts, _tauentropy)
 
 function _oed!(sim, ::MyopicPolicy)
