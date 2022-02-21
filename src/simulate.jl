@@ -82,8 +82,6 @@ function run!(
         begin
             time = propagate!(sim)
         end
-        print(time.time)
-        print('\n')
         if plot_each_timestep
             posterior_plot(sim)
         end
