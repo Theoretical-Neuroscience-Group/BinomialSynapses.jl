@@ -56,16 +56,17 @@ get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
 
 function propagate!(sim::NestedFilterSimulation)
     dt = get_step(sim)
-    propagate!(sim, dt)
+    time = propagate!(sim, dt)
+    return time
 end
 
 function propagate!(sim::NestedFilterSimulation, dt)
-    propagate_hidden!(sim, dt)
+    time1 = @timed propagate_hidden!(sim, dt)
     obs = emit(sim, dt)
-    filter_update!(sim, obs)
+    time2 = @timed filter_update!(sim, obs)
     push!(sim.times, sim.times[end] + dt)
     push!(sim.epsps, obs.EPSP)
-    return sim
+    return time1.time + time2.time
 end
 
 function run!(
@@ -79,7 +80,7 @@ function run!(
     end
     for i in 1:T
         begin
-            time = @timed propagate!(sim)
+            time = propagate!(sim)
         end
         print(time.time)
         print('\n')
