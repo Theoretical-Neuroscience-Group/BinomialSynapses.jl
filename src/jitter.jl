@@ -1,5 +1,8 @@
-using CUDA
+"""
+    jitter!(model::BinomialGridModel, width)
 
+Apply jitter with parameter `width` to the indices of a binomial model on a grid.
+"""
 function jitter!(model::BinomialGridModel, width)
     prob1 = Float32(1/width)
     prob2 = Float32(1/(width-1))
