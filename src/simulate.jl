@@ -81,6 +81,8 @@ function run!(
         begin
             time = @timed propagate!(sim)
         end
+        print(time)
+        print('\n')
         if plot_each_timestep
             posterior_plot(sim)
         end
@@ -90,11 +92,11 @@ function run!(
     return sim.times, sim.epsps
 end
 
-function Recording(f1, f2, sim::NestedFilterSimulation)
-    begin
-        time = @timed nothing
-    end
-    res = f1(sim, time)
-    data = [res]
-    return Recording(f1, f2, data)
-end
+#function Recording(f1, f2, sim::NestedFilterSimulation)
+#    begin
+#        time = @timed nothing
+#    end
+#    res = f1(sim, time)
+#    data = [res]
+#    return Recording(f1, f2, data)
+#end
