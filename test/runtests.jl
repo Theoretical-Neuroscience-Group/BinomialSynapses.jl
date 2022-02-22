@@ -1,6 +1,8 @@
 using BinomialSynapses
 using CUDA
 using Distributions: Exponential
+using JLD
+using StatsBase
 
 using BenchmarkTools
 using Test
@@ -24,4 +26,5 @@ const RUN_BENCHMARKS = false # optional intermediate benchmarks
     include("myopic.jl")
 
     include("_integration.jl")
+    include("saving.jl")
 end
