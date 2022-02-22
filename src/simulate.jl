@@ -55,9 +55,9 @@ end
 get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
 
 function propagate!(sim::NestedFilterSimulation)
-    dt = get_step(sim)
-    time = propagate!(sim, dt)
-    return time
+    time1 = @timed get_step(sim)
+    time2 = propagate!(sim, dt)
+    return time1.time + time2
 end
 
 function propagate!(sim::NestedFilterSimulation, dt)
