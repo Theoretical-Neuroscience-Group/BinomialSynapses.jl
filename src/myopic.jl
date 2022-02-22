@@ -220,7 +220,6 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
         entropies[dt] = η*dt
     end
 
-    entropies = Dict{Float64, Float64}()
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
