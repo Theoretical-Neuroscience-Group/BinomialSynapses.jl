@@ -206,6 +206,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
 
     counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
+    entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(Nind)
         iN = Nind[i]
         ip = pind[i]
@@ -216,6 +217,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
         key = (dt, iN, ip, iq, iσ, iτ)
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
+        entropies[dt] = η*dt
     end
 
     entropies = Dict{Float64, Float64}()
@@ -268,15 +270,17 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy:
 
     counts = Dict{Tuple{Float64, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
+    entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(τind)
         iτ = τind[i]
         dt = dts[i]
         key = (dt, iτ)
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
+        entropies[dt] = η*dt
     end
 
-    entropies = Dict{Float64, Float64}()
+    
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
