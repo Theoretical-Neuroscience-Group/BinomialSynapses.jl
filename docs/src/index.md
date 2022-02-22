@@ -70,7 +70,6 @@ propagate!(sim::NestedFilterSimulation)
 run!
 Recording
 update!(rec::Recording, sim, time)
-save
 ```
 
 

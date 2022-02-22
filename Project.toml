@@ -1,7 +1,7 @@
 name = "BinomialSynapses"
 uuid = "8a0f34ba-5679-4d46-87d2-b44c4b1cf105"
 authors = ["Simone Carlo Surace", "Camille Gontier"]
-version = "0.4.1"
+version = "0.4.2"
 
 [deps]
 BinomialGPU = "c5bbfde1-2136-42cd-9b65-d5719df69ebf"
