@@ -99,6 +99,11 @@ function initialize!(sim::NestedFilterSimulation)
 end
 
 get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
+function get_step(sim::NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}) where 
+{T1, T2, T3, T4, T5 <: DeterministicTrain, T6, T7}
+    i = length(sim.times)
+    return sim.tsteps.train[i]
+end
 
 """
     propagate!(sim)
