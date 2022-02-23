@@ -40,7 +40,7 @@ end
 
 Follows a predefined fixed train of ISIs.
 """
-struct RandomTimestep{T} <: Timestep
+struct DeterministicTrain{T} <: Timestep
     train::T
 end
 
