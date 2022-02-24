@@ -1,6 +1,6 @@
 @testset "resample.jl" begin
     println("             > resample.jl")
-    @testset "indices!" begin
+    CUDA.functional() && @testset "indices!" begin
         if RUN_BENCHMARKS
             @testset "benchmark" begin
                 println("")
@@ -105,7 +105,7 @@
         end
     end
 
-    @testset "resample!" begin
+    CUDA.functional() && @testset "resample!" begin
         @testset "1D, 1D" begin
             A = CUDA.rand(8)
             B = CUDA.zeros(8)
@@ -183,7 +183,7 @@
         end
     end
 
-    @testset "outer_resample!" begin
+    CUDA.functional() && @testset "outer_resample!" begin
         if RUN_BENCHMARKS
             m_out = 1024
             m_in  = 1024

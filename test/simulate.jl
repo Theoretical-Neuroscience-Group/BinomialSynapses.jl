@@ -1,4 +1,4 @@
-@testset "simulate.jl" begin
+CUDA.functional() && @testset "simulate.jl" begin
     println("             > simulate.jl")
     N = 10
     p = 0.85
