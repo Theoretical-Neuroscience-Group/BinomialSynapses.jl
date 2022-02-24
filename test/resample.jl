@@ -105,7 +105,7 @@
         end
     end
 
-    CUDA.functional() && @testset "resample!" begin
+    @testset "resample!" begin
         @testset "1D, 1D" begin
             A = CUDA.rand(8)
             B = CUDA.zeros(8)
@@ -183,7 +183,7 @@
         end
     end
 
-    CUDA.functional() && @testset "outer_resample!" begin
+    @testset "outer_resample!" begin
         if RUN_BENCHMARKS
             m_out = 1024
             m_in  = 1024

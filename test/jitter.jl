@@ -1,4 +1,4 @@
-@testset "jitter.jl" begin
+CUDA.functional() && @testset "jitter.jl" begin
     println("             > jitter.jl")
     m_out = 5
     model = BinomialGridModel(

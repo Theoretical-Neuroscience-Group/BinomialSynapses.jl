@@ -75,7 +75,7 @@
         @test all(idx[5:6,:].==1)
     end
     
-    @testset "three dimensions" begin
+    CUDA.functional() && @testset "three dimensions" begin
         using BinomialSynapses: likelihood_indices
         M_dt = 2
         M_out = 3

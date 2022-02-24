@@ -1,4 +1,4 @@
-@testset "integration tests" begin
+CUDA.functional() && @testset "integration tests" begin
     println("             > INTEGRATION TESTS")
 
     function benchmark(timestep::Timestep)
