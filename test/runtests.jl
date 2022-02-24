@@ -7,7 +7,7 @@ using StatsBase
 using BenchmarkTools
 using Test
 
-CUDA.versioninfo()
+CUDA.functional() && CUDA.versioninfo()
 
 const RUN_BENCHMARKS = false # optional intermediate benchmarks
 
