@@ -1,5 +1,5 @@
 # BinomialSynapses
-[![ci](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yaml/badge.svg)](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yaml)
+[![ci](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yaml)
 [![Codecov](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl)
 [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url]
 
