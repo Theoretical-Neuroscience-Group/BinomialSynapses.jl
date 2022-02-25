@@ -1,5 +1,5 @@
 @testset "resample.jl" begin
-    println("             > resample.jl")
+    @info "Testing resample.jl"
     CUDA.functional() && @testset "indices!" begin
         if RUN_BENCHMARKS
             @testset "benchmark" begin

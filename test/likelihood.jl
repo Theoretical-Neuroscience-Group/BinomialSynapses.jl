@@ -1,5 +1,5 @@
 @testset "likelihood.jl" begin
-    println("             > likelihood.jl")
+    @info "Testing likelihood.jl"
     CUDA.functional() && @testset "consistency" begin
         using BinomialSynapses: likelihood_indices
 

@@ -1,5 +1,5 @@
 @testset "myopic.jl" begin
-    println("             > myopic.jl")
+    @info "Testing myopic.jl"
     @testset "_repeat" begin
         m_out = 3
         m_in = 4
@@ -51,7 +51,7 @@
         qrng = 0.1:0.2:0.9
         σrng = 0.5:0.5:2.5
         τrng = 0.1:0.1:0.5
-        
+
         @testset "CPU" begin
             Nind = [
                 1 1 1 2 2 2;
@@ -103,13 +103,13 @@
     @testset "_entropy: MyopicFast" begin
         using BinomialSynapses: _entropy
         
+        Nrng = 1:5
+        prng = 0.1:0.2:0.9
+        qrng = 0.1:0.2:0.9
+        σrng = 0.5:0.5:2.5
+        τrng = 0.1:0.1:0.5
+        
         @testset "CPU" begin
-            Nrng = 1:5
-            prng = 0.1:0.2:0.9
-            qrng = 0.1:0.2:0.9
-            σrng = 0.5:0.5:2.5
-            τrng = 0.1:0.1:0.5
-
             Nind = [2, 1, 1, 2, 3, 2, 2]
             pind = qind = σind = τind = Nind
 
@@ -151,13 +151,13 @@
     @testset "_tauentropy: Myopic" begin
         using BinomialSynapses: _tauentropy
 
-        @testset "CPU" begin
-            Nrng = 1:5
-            prng = 0.1:0.2:0.9
-            qrng = 0.1:0.2:0.9
-            σrng = 0.5:0.5:2.5
-            τrng = 0.1:0.1:0.5
+        Nrng = 1:5
+        prng = 0.1:0.2:0.9
+        qrng = 0.1:0.2:0.9
+        σrng = 0.5:0.5:2.5
+        τrng = 0.1:0.1:0.5
 
+        @testset "CPU" begin
             Nind = [
                 1 1 1 2 2 2;
                 1 1 2 2 2 2;
@@ -208,13 +208,13 @@
     @testset "_tauentropy: MyopicFast" begin
         using BinomialSynapses: _tauentropy
 
-        @testset "CPU" begin
-            Nrng = 1:5
-            prng = 0.1:0.2:0.9
-            qrng = 0.1:0.2:0.9
-            σrng = 0.5:0.5:2.5
-            τrng = 0.1:0.1:0.5
+        Nrng = 1:5
+        prng = 0.1:0.2:0.9
+        qrng = 0.1:0.2:0.9
+        σrng = 0.5:0.5:2.5
+        τrng = 0.1:0.1:0.5
 
+        @testset "CPU" begin
             Nind = [2, 1, 1, 2, 3, 2, 2]
             pind = qind = σind = τind = Nind
 

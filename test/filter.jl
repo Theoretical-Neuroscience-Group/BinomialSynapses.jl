@@ -1,5 +1,5 @@
 CUDA.functional() && @testset "filter.jl" begin
-    println("             > filter.jl")
+    @info "Testing filter.jl"
     m_out  = 1024
     m_in   = 1024
 

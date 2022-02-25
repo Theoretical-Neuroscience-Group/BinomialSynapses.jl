@@ -7,9 +7,19 @@ using StatsBase
 using BenchmarkTools
 using Test
 
-CUDA.functional() && CUDA.versioninfo()
+if CUDA.functional()
+    @info "Functional CUDA device detected."
+    CUDA.versioninfo()
+else
+    @warn "No CUDA device detected. Skipping GPU tests."
+end
 
 const RUN_BENCHMARKS = false # optional intermediate benchmarks
+if RUN_BENCHMARKS
+    @info "Running full suite of benchmarks."
+else
+    @info "Skipping intermediate benchmarks."
+end
 
 @testset "BinomialSynapses.jl" begin
     include("models.jl")

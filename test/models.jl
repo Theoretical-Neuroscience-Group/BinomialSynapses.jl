@@ -1,3 +1,3 @@
 @testset "models.jl" begin
-    println("             > models.jl")
+    @info "Testing models.jl"
 end

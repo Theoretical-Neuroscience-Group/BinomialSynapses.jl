@@ -1,5 +1,5 @@
 @testset "statistics.jl" begin
-    println("             > statistics.jl")
+    @info "Testing statistics.jl"
     @testset "MAP, marginal = true" begin
         model = BinomialModel(
                     [1, 2, 2, 2, 4, 4],

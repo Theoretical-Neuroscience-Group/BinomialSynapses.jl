@@ -1,5 +1,5 @@
 CUDA.functional() && @testset "record.jl" begin
-    println("             > record.jl")
+    @info "Testing record.jl"
     N = 10
     p = 0.85
     q = 1.0

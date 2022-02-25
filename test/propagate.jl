@@ -1,5 +1,5 @@
 @testset "propagate.jl" begin
-    println("             > propagate.jl")
+    @info "Testing propagate.jl"
     CUDA.functional() && @testset "GPU" begin
         m_out = 1024
         m_in  = 1024
