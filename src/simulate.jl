@@ -111,8 +111,10 @@ end
 Propagate the simulation, i.e. choose a time step and then propagate the simulation by it.
 """
 function propagate!(sim::NestedFilterSimulation)
-    dt = get_step(sim)
-    propagate!(sim, dt)
+    time1 = @timed get_step(sim)
+    dt = time1.value
+    time2 = propagate!(sim, dt)
+    return time1.time + time2
 end
 
 """
@@ -121,12 +123,12 @@ end
 Propagate the simulation by time step `dt`.
 """
 function propagate!(sim::NestedFilterSimulation, dt)
-    propagate_hidden!(sim, dt)
+    time1 = @timed propagate_hidden!(sim, dt)
     obs = emit(sim, dt)
-    filter_update!(sim, obs)
+    time2 = @timed filter_update!(sim, obs)
     push!(sim.times, sim.times[end] + dt)
     push!(sim.epsps, obs.EPSP)
-    return sim
+    return time1.time + time2.time
 end
 
 """
@@ -151,7 +153,7 @@ function run!(
     end
     for i in 1:T
         begin
-            time = @timed propagate!(sim)
+            time = propagate!(sim)
         end
         if plot_each_timestep
             posterior_plot(sim)
@@ -173,7 +175,7 @@ function Recording(f1, f2, sim::NestedFilterSimulation)
     begin
         time = @timed nothing
     end
-    res = f1(sim, time)
+    res = f1(sim, time.time)
     data = [res]
     return Recording(f1, f2, data)
 end
