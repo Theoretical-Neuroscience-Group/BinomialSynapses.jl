@@ -1,6 +1,6 @@
 @testset "likelihood.jl" begin
-    println("             > likelihood.jl")
-    @testset "consistency" begin
+    @info "Testing likelihood.jl"
+    CUDA.functional() && @testset "consistency" begin
         using BinomialSynapses: likelihood_indices
 
         m_out = 1024
@@ -44,7 +44,7 @@
         end
     end
 
-    @testset "correctness of values" begin
+    CUDA.functional() && @testset "correctness of values" begin
         observation = 3.0
         M_out = 6
         M_in = 4
@@ -75,7 +75,7 @@
         @test all(idx[5:6,:].==1)
     end
     
-    @testset "three dimensions" begin
+    CUDA.functional() && @testset "three dimensions" begin
         using BinomialSynapses: likelihood_indices
         M_dt = 2
         M_out = 3

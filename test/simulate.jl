@@ -1,5 +1,5 @@
-@testset "simulate.jl" begin
-    println("             > simulate.jl")
+CUDA.functional() && @testset "simulate.jl" begin
+    @info "Testing simulate.jl"
     N = 10
     p = 0.85
     q = 1.0

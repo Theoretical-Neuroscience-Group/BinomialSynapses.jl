@@ -1,5 +1,5 @@
-@testset "integration tests" begin
-    println("             > INTEGRATION TESTS")
+CUDA.functional() && @testset "integration tests" begin
+    @info "Performing INTEGRATION TESTS"
 
     function benchmark(timestep::Timestep)
         N = 10
@@ -23,7 +23,7 @@
 
     @testset "benchmark of filter" begin
         println("")
-        println("Benchmarking single iteration with exponential random timestep")
+        @info "Benchmarking single iteration with exponential random timestep"
         benchmark(RandomTimestep(Exponential(0.121)))
         println("")
         println("")
@@ -34,21 +34,21 @@
         candidates = LinRange(0.005, 2, 8)
         @testset "OEDPolicy: Uniform" begin
             println("")
-            println("Benchmarking single iteration with OEDPolicy: Uniform")
+            @info "Benchmarking single iteration with OEDPolicy: Uniform"
             benchmark(Uniform(candidates))
             println("")
             println("")
         end
         @testset "OEDPolicy: Myopic" begin
             println("")
-            println("Benchmarking single iteration with OEDPolicy: Myopic")
+            @info "Benchmarking single iteration with OEDPolicy: Myopic"
             benchmark(Myopic(candidates))
             println("")
             println("")
         end
         @testset "OEDPolicy: MyopicFast" begin
             println("")
-            println("Benchmarking single iteration with OEDPolicy: MyopicFast")
+            @info "Benchmarking single iteration with OEDPolicy: MyopicFast"
             benchmark(MyopicFast(candidates))
             println("")
             println("")
