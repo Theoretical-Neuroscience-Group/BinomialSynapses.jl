@@ -1,5 +1,5 @@
 # BinomialSynapses
-[![ci](https://github.com/NatzkaLabs/ai-timeseries-julia/actions/workflows/ci.yaml/badge.svg)](https://github.com/NatzkaLabs/ai-timeseries-julia/actions/workflows/ci.yaml)
+[![ci](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yaml/badge.svg)](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yaml)
 [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url]
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
