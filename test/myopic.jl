@@ -1,11 +1,12 @@
 @testset "myopic.jl" begin
     println("             > myopic.jl")
     @testset "_repeat" begin
+        m_out = 3
+        m_in = 4
+        m_dts = 5
         @testset "CPU" begin
             using BinomialSynapses: _repeat
-            m_out = 3
-            m_in = 4
-            m_dts = 5
+        
             state = BinomialState(10, m_out, m_in, :cpu)
             model = BinomialModel(10, m_out, :cpu)
             fstate = NestedParticleState(state, model)
@@ -24,7 +25,6 @@
         end
 
         CUDA.functional() && @testset "GPU" begin
-            # test on GPU
             state = BinomialState(10, m_out, m_in)
             model = BinomialModel(10, m_out)
             fstate = NestedParticleState(state, model)
@@ -46,13 +46,13 @@
     @testset "_entropy: Myopic" begin
         using BinomialSynapses: _entropy
 
+        Nrng = 1:5
+        prng = 0.1:0.2:0.9
+        qrng = 0.1:0.2:0.9
+        σrng = 0.5:0.5:2.5
+        τrng = 0.1:0.1:0.5
+        
         @testset "CPU" begin
-            Nrng = 1:5
-            prng = 0.1:0.2:0.9
-            qrng = 0.1:0.2:0.9
-            σrng = 0.5:0.5:2.5
-            τrng = 0.1:0.1:0.5
-
             Nind = [
                 1 1 1 2 2 2;
                 1 1 2 2 2 2;
