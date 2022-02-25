@@ -1,5 +1,5 @@
 @testset "timestep.jl" begin
-    @info "Testin timestep.jl"
+    @info "Testing timestep.jl"
 
     timestep = FixedTimestep(0.3)
     @test get_step(timestep) == 0.3
