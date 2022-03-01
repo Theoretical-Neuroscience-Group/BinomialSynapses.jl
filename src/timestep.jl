@@ -47,7 +47,7 @@ Produces a predefined finite sequence of time steps.
 The simulation terminates when the sequence is exhausted.
 """
 struct DeterministicTrain{T} <: Timestep
-    train::T
+    stack::T
     function DeterministicTrain(v::AbstractVector{<:Real})
         isempty(v) && 
             throw(ErrorException("DeterminisicTrain must have nonempty argument."))
@@ -61,5 +61,5 @@ get_step(timestep::FixedTimestep) = timestep.dt
 get_step(timestep::RandomTimestep) = rand(timestep.distribution)
 
 function get_step(timestep::DeterministicTrain)
-    isempty(timestep.train) ? nothing : pop!(timestep.train)
+    isempty(timestep.stack) ? nothing : pop!(timestep.stack)
 end
