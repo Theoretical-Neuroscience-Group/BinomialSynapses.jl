@@ -38,11 +38,27 @@ end
 """
     DeterministicTrain(train)
 
-Follows a predefined fixed train of ISIs.
+Produces a predefined finite sequence of time steps.
+The simulation terminates when the sequence is exhausted.
 """
 struct DeterministicTrain{T} <: Timestep
     train::T
+    function DeterministicTrain(v::AbstractVector{<:Real})
+        isempty(v) && 
+            throw(ErrorException("DeterminisicTrain must have nonempty argument."))
+        any(v .<= 0) && 
+            throw(ErrorException("DeterminisicTrain needs strictly positive arguments."))
+        return new{typeof(v)}(reverse(v))
+    end
 end
 
 get_step(timestep::FixedTimestep) = timestep.dt
 get_step(timestep::RandomTimestep) = rand(timestep.distribution)
+
+function get_step(timestep::DeterministicTrain)
+    if isempty(timestep.train)
+        return nothing
+    else
+        return pop!(timestep.train)
+    end
+end
