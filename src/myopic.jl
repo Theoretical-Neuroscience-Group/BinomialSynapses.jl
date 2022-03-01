@@ -194,26 +194,12 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     
     η = policy.penalty
 
-    counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
-    totals = Dict{Float64, Int}() # total counts per dt
     entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(Nind)
-        iN = Nind[i]
-        ip = pind[i]
-        iq = qind[i]
-        iσ = σind[i]
-        iτ = τind[i]
+        samples = [Nind[i]';pind[i]';qind[i]';σind[i]';τind[i]']
+        Σ_est = cov(samples')
         dt = dts[i]
-        key = (dt, iN, ip, iq, iσ, iτ)
-        counts[key] = get!(counts, key, 0) + 1
-        totals[dt] = get!(totals, dt, 0.) + 1
-        entropies[dt] = η*dt
-    end
-
-    @inbounds for (key, count) in counts
-        dt = key[1]
-        p = count/totals[dt]
-        entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
+        entropies[dt] = 0.5*log(det(2*pi*ℯ*Σ_est)) + η*dt
     end
     
     return argmin(entropies)
