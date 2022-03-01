@@ -49,8 +49,6 @@ The simulation terminates when the sequence is exhausted.
 struct DeterministicTrain{T} <: Timestep
     stack::T
     function DeterministicTrain(v::AbstractVector{<:Real})
-        isempty(v) && 
-            throw(ErrorException("DeterminisicTrain must have nonempty argument."))
         any(v .<= 0) && 
             throw(ErrorException("DeterminisicTrain needs strictly positive arguments."))
         return new{typeof(v)}(reverse(v))

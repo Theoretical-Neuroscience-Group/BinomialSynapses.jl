@@ -15,7 +15,6 @@
     @test get_step(timestep) == 3
     @test isnothing(get_step(timestep))
 
-    @test_throws ErrorException DeterministicTrain(Int[])
     @test_throws ErrorException DeterministicTrain([1, 1, -1])
     @test_throws ErrorException DeterministicTrain([1, 0])
 end
