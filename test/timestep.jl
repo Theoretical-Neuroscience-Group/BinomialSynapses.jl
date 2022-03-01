@@ -3,6 +3,7 @@
 
     timestep = FixedTimestep(0.3)
     @test get_step(timestep) == 0.3
+    @test_throws ErrorException FixedTimestep(-1)
 
     timestep = RandomTimestep(Exponential(0.5))
     @test get_step(timestep) > 0
