@@ -1,4 +1,4 @@
-@testset "Saving Recording using JLD" begin
+CUDA.functional() && @testset "Saving Recording using JLD" begin
     N = 10
     p = 0.85
     q = 1.0

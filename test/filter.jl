@@ -1,5 +1,5 @@
-@testset "filter.jl" begin
-    println("             > filter.jl")
+CUDA.functional() && @testset "filter.jl" begin
+    @info "Testing filter.jl"
     m_out  = 1024
     m_in   = 1024
 
@@ -19,7 +19,7 @@
 
     if true
         println("")
-        println("Benchmarking one filter update step: should take less than 10ms")
+        @info "Benchmarking one filter update step: should take less than 10ms."
         display(@benchmark CUDA.@sync update!($fstate, $obs, $filter))
         println("")
         println("")
