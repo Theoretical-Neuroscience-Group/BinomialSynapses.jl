@@ -25,7 +25,7 @@ struct FixedTimestep{T} <: Timestep
     dt::T
     function FixedTimestep(dt::Real)
         dt <= 0 &&
-            throw(ErrorException("FixedTimestep must have positive argument."))
+            throw(ErrorException("FixedTimestep must have strictly positive argument."))
         return new{typeof(dt)}(dt)
     end
 end
