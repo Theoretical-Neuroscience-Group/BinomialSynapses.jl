@@ -61,9 +61,5 @@ get_step(timestep::FixedTimestep) = timestep.dt
 get_step(timestep::RandomTimestep) = rand(timestep.distribution)
 
 function get_step(timestep::DeterministicTrain)
-    if isempty(timestep.train)
-        return nothing
-    else
-        return pop!(timestep.train)
-    end
+    isempty(timestep.train) ? nothing : pop!(timestep.train)
 end
