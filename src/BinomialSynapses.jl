@@ -6,8 +6,9 @@ using CUDA: i32
 using Distributions: Binomial, Exponential, Normal
 using LaTeXStrings
 using Plots
-using Statistics: mean
+using Statistics: mean, cov
 using StatsBase: mode, entropy
+using LinearAlgebra: det
 
 include("models.jl")
 export
