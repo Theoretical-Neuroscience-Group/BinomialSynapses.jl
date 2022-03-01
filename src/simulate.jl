@@ -99,10 +99,15 @@ function initialize!(sim::NestedFilterSimulation)
 end
 
 get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
+
 function get_step(sim::NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}) where 
-{T1, T2, T3, T4, T5 <: DeterministicTrain, T6, T7}
+    {T1, T2, T3, T4, T5 <: DeterministicTrain, T6, T7}
     i = length(sim.times)
-    return sim.tsteps.train[i]
+    if i <= length(sim.tsteps.train)
+        @inbounds return sim.tsteps.train[i]
+    else
+        return nothing
+    end
 end
 
 """
@@ -129,6 +134,8 @@ function propagate!(sim::NestedFilterSimulation, dt)
     return sim
 end
 
+propagate!(::NestedFilterSimulation, ::Nothing) = nothing
+
 """
     run!(
         sim; 
@@ -150,8 +157,12 @@ function run!(
         initialize!(sim)
     end
     for i in 1:T
-        begin
-            time = @timed propagate!(sim)
+        time = @timed begin
+            r = propagate!(sim)
+            if isnothing(r)
+                @warn "Simulation ended prematurely due to `get_step` returning `nothing`."
+                break
+            end
         end
         if plot_each_timestep
             posterior_plot(sim)
