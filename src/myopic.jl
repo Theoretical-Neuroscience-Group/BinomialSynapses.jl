@@ -162,6 +162,12 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     σind = Array(model.σind)
     τind = Array(model.τind)
 
+    Nrng = Array(model.Nrng)
+    prng = Array(model.prng)
+    qrng = Array(model.qrng)
+    σrng = Array(model.σrng)
+    τrng = Array(model.τrng)
+
     dts = Array(obs.dt)
 
     η = policy.penalty
@@ -169,7 +175,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     minent = Inf
     imin = 0
     @inbounds for i in 1:size(Nind, 1)
-        samples = [Nind[i, :]';pind[i, :]';qind[i, :]';σind[i, :]';τind[i, :]']
+        samples = [Nrng[Nind[i, :]]';prng[pind[i, :]]';qrng[qind[i, :]]';σrng[σind[i, :]]';τrng[τind[i, :]]']
         Σ_est = cov(samples')
 
         ent = 0.5*log(det(2*pi*ℯ*Σ_est))
@@ -189,6 +195,12 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     qind = Array(model.qind)
     σind = Array(model.σind)
     τind = Array(model.τind)
+    
+    Nrng = Array(model.Nrng)
+    prng = Array(model.prng)
+    qrng = Array(model.qrng)
+    σrng = Array(model.σrng)
+    τrng = Array(model.τrng)    
 
     dts = Array(obs.dt)
     
@@ -196,7 +208,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
 
     entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(Nind)
-        samples = [Nind[i]';pind[i]';qind[i]';σind[i]';τind[i]']
+        samples = [Nrng[Nind[i]]';prng[pind[i]]';qrng[qind[i]]';σrng[σind[i]]';τrng[τind[i]]']
         Σ_est = cov(samples')
         dt = dts[i]
         entropies[dt] = 0.5*log(det(2*pi*ℯ*Σ_est)) + η*dt
