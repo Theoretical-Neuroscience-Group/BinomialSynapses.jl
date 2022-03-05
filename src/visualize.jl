@@ -82,7 +82,9 @@ function posterior_plot(
         return
     end
     display(plot(pE, pN, pp, pq, pσ, pτ, layout = (3, 2)))
-    savefig(string(i,".png"))
+    if i%10 == 0
+        savefig(string(i,".png"))
+    end
 end
 
 function posterior_plot(sim::NestedFilterSimulation,i)
