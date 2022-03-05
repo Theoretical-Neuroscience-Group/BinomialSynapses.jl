@@ -36,12 +36,11 @@ function flatten(A::AbstractMatrix)
 end
 
 function posterior_plot(
-    fstate, times, epsps;
+    i, fstate, times, epsps;
     truemodel = nothing,
     truestate = nothing,
-    showstates = false,
-    i
-)
+    showstates = false)
+    
     Nrng = Array(fstate.model.Nrng)
     prng = Array(fstate.model.prng)
     qrng = Array(fstate.model.qrng)
@@ -87,5 +86,5 @@ function posterior_plot(
 end
 
 function posterior_plot(sim::NestedFilterSimulation,i)
-    return posterior_plot(sim.fstate, sim.times, sim.epsps, truemodel = sim.hmodel,i)
+    return posterior_plot(i,sim.fstate, sim.times, sim.epsps, truemodel = sim.hmodel)
 end
