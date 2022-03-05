@@ -156,7 +156,7 @@ function run!(
             time = propagate!(sim)
         end
         if plot_each_timestep
-            posterior_plot(sim)
+            posterior_plot(sim,i)
         end
         update!(recording, sim, time) 
     end
