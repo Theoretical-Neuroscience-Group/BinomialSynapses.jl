@@ -88,6 +88,18 @@ function _synthetic_obs(sim, policy)
     dt_vector = _temp_dts(sim, policy)
     return BinomialObservation(cu(epsp_vector), cu(dt_vector))
 end
+    
+function _synthetic_obs(sim, policy::MyopicOracle)
+    epsp_vector = _temp_epsps_oracle(sim)
+    dt_vector = _temp_dts(sim, policy)
+    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
+end
+        
+function _synthetic_obs(sim, policy::MyopicFastOracle)
+    epsp_vector = _temp_epsps_oracle(sim)
+    dt_vector = _temp_dts(sim, policy)
+    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
+end
 
 
 _temp_state(sim, ::Myopic) = _repeat(sim.fstate, length(sim.tsteps.dts))
@@ -150,6 +162,31 @@ function _temp_epsps(sim)
     p_star = map.p
     q_star = map.q
     τ_star = map.τ
+
+    x = 1.
+    L = length(times)
+    if L > 1
+        for ii in 2:L
+            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
+        end
+    end
+
+    e_temp = zeros(Float32, length(dts))
+    for kk in 1:length(e_temp)
+        x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
+        e_temp[kk] = x_temp*N_star*p_star*q_star
+    end
+    return _shape_epsps(e_temp, sim, sim.tsteps)
+end
+    
+function _temp_epsps_oracle(sim)
+    dts = sim.tsteps.dts
+    times = sim.times
+
+    N_star = sim.hmodel.N
+    p_star = sim.hmodel.p
+    q_star = sim.hmodel.q
+    τ_star = sim.hmodel.τ
 
     x = 1.
     L = length(times)
