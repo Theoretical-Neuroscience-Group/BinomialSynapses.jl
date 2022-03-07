@@ -31,30 +31,46 @@ struct MyopicFast{T1, T2, T3} <: MyopicPolicy
     penalty::T3    
 end
 
+struct MyopicOracle{T1, T2, T3} <: MyopicPolicy
+    dts::T1
+    target::T2
+    penalty::T3
+end
+
+struct MyopicFastOracle{T1, T2, T3} <: MyopicPolicy
+    dts::T1
+    target::T2
+    penalty::T3    
+end
+
 # default target is miniminum entropy
 """
     Myopic(dts)
 Minimize the joint entropy.
 """
 Myopic(dts,penalty) = Myopic(dts, _entropy,penalty)
+MyopicOracle(dts,penalty) = MyopicOracle(dts, _entropy,penalty)
 
 """
     MyopicFast(dts)
 Minimize the joint entropy.
 """
 MyopicFast(dts,penalty) = MyopicFast(dts, _entropy,penalty)
+MyopicFastOracle(dts,penalty) = MyopicFastOracle(dts, _entropy,penalty)
 
 """
     Myopic_tau(dts)
 Minimize the entropy of τ.
 """
 Myopic_tau(dts,penalty) = Myopic(dts, _tauentropy,penalty)
+Myopic_tauOracle(dts,penalty) = MyopicOracle(dts, _tauentropy,penalty)
 
 """
     MyopicFast_tau(dts)
 Minimize the entropy of τ.
 """
 MyopicFast_tau(dts,penalty) = MyopicFast(dts, _tauentropy,penalty)
+MyopicFast_tauOracle(dts,penalty) = MyopicFastOracle(dts, _tauentropy,penalty)
 
 function _oed!(sim, ::MyopicPolicy)
     policy = sim.tsteps
