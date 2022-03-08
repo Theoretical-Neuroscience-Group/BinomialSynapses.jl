@@ -230,8 +230,18 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     @inbounds for i in 1:size(Nind, 1)
         samples = [Nrng[Nind[i, :]]';prng[pind[i, :]]';qrng[qind[i, :]]';σrng[σind[i, :]]';τrng[τind[i, :]]']
         Σ_est = cov(samples')
+    
+        determinant = det(2*pi*ℯ*Σ_est)
+        
+        if determinant > 0
 
-        ent = 0.5*log(det(2*pi*ℯ*Σ_est))
+            ent = 0.5*log(determinant)
+        
+        else
+            
+            ent = Inf
+        
+        end
 
         if ent + η*dts[i] < minent
             minent = ent + η*dts[i]
