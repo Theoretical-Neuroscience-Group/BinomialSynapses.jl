@@ -181,6 +181,7 @@ function runBatch!(
 
                 entropy_temp = []
                 for l in 1:10
+		    print(l)
                     sim_copy = copy(sim)
                     sim_copy.tsteps = DeterministicTrain(train)
                     for k in 1:length(train)
