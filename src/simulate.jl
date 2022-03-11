@@ -192,10 +192,9 @@ function runBatch!(
             end
 	end
         train_opt = sim.tsteps.train[argmin(entrop)]
-        sim.tsteps = DeterministicTrain(train_opt)
 	for j in 1:length(train_opt)
 	    begin
-		time = propagate!(sim)
+		time = propagate!(sim,train_opt[j])
 	    end
 	    if plot_each_timestep
 		posterior_plot(sim,j)
