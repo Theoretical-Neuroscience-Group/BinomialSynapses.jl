@@ -183,7 +183,6 @@ function runBatch!(
                 for l in 1:10
 		    print(l)
                     sim_copy = NestedFilterSimulation(sim.hmodel,
-		    	sim.hmodel,
     			sim.filter,
     			sim.hstate,
     			sim.fstate,
