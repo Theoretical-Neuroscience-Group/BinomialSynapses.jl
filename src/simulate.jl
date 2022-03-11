@@ -180,15 +180,17 @@ function runBatch!(
                 train = sim.tsteps.train[j]
 
                 entropy_temp = []
+		T1 = sim.hmodel
+    		T2 = sim.filter
+    		T3 = deepcopy(sim.hstate)
+    		T4 = deepcopy(sim.fstate)
+    		T5 = sim.tsteps
+    		T6 = deepcopy(sim.times)
+    		T7 = deepcopy(sim.epsps)
                 for l in 1:10
 		    print(l)
-                    sim_copy = NestedFilterSimulation(sim.hmodel,
-    			sim.filter,
-    			sim.hstate,
-    			sim.fstate,
-    			sim.tsteps,
-    			sim.times,
-    			sim.epsps)
+
+                    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
                         propagate!(sim_copy,train[k])
                     end
