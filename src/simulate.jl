@@ -183,9 +183,8 @@ function runBatch!(
                 for l in 1:10
 		    print(l)
                     sim_copy = sim
-                    sim_copy.tsteps = DeterministicTrain(train)
                     for k in 1:length(train)
-                        propagate!(sim_copy)
+                        propagate!(sim_copy,train[k])
                     end
                     append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
                 end
