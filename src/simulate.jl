@@ -182,7 +182,14 @@ function runBatch!(
                 entropy_temp = []
                 for l in 1:10
 		    print(l)
-                    sim_copy = sim
+                    sim_copy = NestedFilterSimulation(sim.hmodel,
+		    	sim.hmodel,
+    			sim.filter,
+    			sim.hstate,
+    			sim.fstate,
+    			sim.tsteps,
+    			sim.times,
+    			sim.epsps)
                     for k in 1:length(train)
                         propagate!(sim_copy,train[k])
                     end
