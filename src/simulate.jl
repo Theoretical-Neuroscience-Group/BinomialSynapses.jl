@@ -208,28 +208,7 @@ function runBatch!(
 end	
 
 
-function compute_entropy(model)
-    Nind = Array(model.Nind)
-    pind = Array(model.pind)
-    qind = Array(model.qind)
-    σind = Array(model.σind)
-    τind = Array(model.τind)
 
-    Nrng = Array(model.Nrng)
-    prng = Array(model.prng)
-    qrng = Array(model.qrng)
-    σrng = Array(model.σrng)
-    τrng = Array(model.τrng)
-
-    @inbounds for i in 1:size(Nind, 1)
-    samples = [Nrng[Nind[i, :]]';prng[pind[i, :]]';qrng[qind[i, :]]';σrng[σind[i, :]]';τrng[τind[i, :]]']
-    Σ_est = cov(samples')
-    determinant = det(2*pi*ℯ*Σ_est)
-    ent = 0.5*log(determinant)
-
-    return ent
-
-end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
 
