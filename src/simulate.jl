@@ -190,22 +190,23 @@ function runBatch!(
                 end
                 entrop[j] = mean(entropy_temp)
             end
-		end
+	end
         train_opt = sim.tsteps.train[argmin(entrop)]
         sim.tsteps = DeterministicTrain(train_opt)
-		for j in 1:length(train_opt)
-			begin
-				time = propagate!(sim)
-			end
-			if plot_each_timestep
-				posterior_plot(sim,j)
-			end
-			update!(recording, sim, time)
-		end
+	for j in 1:length(train_opt)
+	    begin
+		time = propagate!(sim)
+	    end
+	    if plot_each_timestep
+		posterior_plot(sim,j)
+	    end
+	    update!(recording, sim, time)
 	end
-	save(recording)
+    end
+    save(recording)
     return sim.times, sim.epsps
 end	
+
 
 function compute_entropy(model)
     Nind = Array(model.Nind)
@@ -227,6 +228,7 @@ function compute_entropy(model)
     ent = 0.5*log(determinant)
 
     return ent
+
 end
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
