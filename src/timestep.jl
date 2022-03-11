@@ -44,5 +44,9 @@ struct DeterministicTrain{T} <: Timestep
     train::T
 end
 
+struct BatchTrain{T} <: Timestep
+    train::T
+end
+
 get_step(timestep::FixedTimestep) = timestep.dt
 get_step(timestep::RandomTimestep) = rand(timestep.distribution)
