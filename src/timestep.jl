@@ -35,5 +35,18 @@ struct RandomTimestep{T} <: Timestep
     distribution::T
 end
 
+"""
+    DeterministicTrain(train)
+
+Follows a predefined fixed train of ISIs.
+"""
+struct DeterministicTrain{T} <: Timestep
+    train::T
+end
+
+struct BatchTrain{T} <: Timestep
+    train::T
+end
+
 get_step(timestep::FixedTimestep) = timestep.dt
 get_step(timestep::RandomTimestep) = rand(timestep.distribution)

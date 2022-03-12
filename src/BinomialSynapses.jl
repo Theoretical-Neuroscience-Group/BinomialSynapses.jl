@@ -6,8 +6,9 @@ using CUDA: i32
 using Distributions: Binomial, Exponential, Normal
 using LaTeXStrings
 using Plots
-using Statistics: mean
+using Statistics: mean, cov
 using StatsBase: mode, entropy
+using LinearAlgebra: det
 
 include("models.jl")
 export
@@ -23,7 +24,7 @@ include("propagate.jl")
 export propagate!
 
 include("timestep.jl")
-export Timestep, FixedTimestep, RandomTimestep, get_step
+export Timestep, FixedTimestep, RandomTimestep, get_step, DeterministicTrain, BatchTrain
 
 include("emission.jl")
 export emit
@@ -47,7 +48,7 @@ include("record.jl")
 export Recording
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, m_out, run!
+export NestedFilterSimulation, initialize!, m_out, run!, runBatch!
 
 include("visualize.jl")
 export posterior_plot
@@ -56,6 +57,6 @@ include("OED.jl")
 export OEDPolicy, policy, Uniform
 
 include("myopic.jl")
-export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
+export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau, MyopicOracle, MyopicFastOracle, Myopic_tauOracle, MyopicFast_tauOracle
 
 end#module

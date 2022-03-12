@@ -99,6 +99,11 @@ function initialize!(sim::NestedFilterSimulation)
 end
 
 get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
+function get_step(sim::NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}) where 
+{T1, T2, T3, T4, T5 <: DeterministicTrain, T6, T7}
+    i = length(sim.times)
+    return sim.tsteps.train[i]
+end
 
 """
     propagate!(sim)
@@ -106,8 +111,10 @@ get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
 Propagate the simulation, i.e. choose a time step and then propagate the simulation by it.
 """
 function propagate!(sim::NestedFilterSimulation)
-    dt = get_step(sim)
-    propagate!(sim, dt)
+    time1 = @timed get_step(sim)
+    dt = time1.value
+    time2 = propagate!(sim, dt)
+    return time1.time + time2
 end
 
 """
@@ -116,12 +123,12 @@ end
 Propagate the simulation by time step `dt`.
 """
 function propagate!(sim::NestedFilterSimulation, dt)
-    propagate_hidden!(sim, dt)
+    time1 = @timed propagate_hidden!(sim, dt)
     obs = emit(sim, dt)
-    filter_update!(sim, obs)
+    time2 = @timed filter_update!(sim, obs)
     push!(sim.times, sim.times[end] + dt)
     push!(sim.epsps, obs.EPSP)
-    return sim
+    return time1.time + time2.time
 end
 
 """
@@ -146,16 +153,88 @@ function run!(
     end
     for i in 1:T
         begin
-            time = @timed propagate!(sim)
+            time = propagate!(sim)
         end
         if plot_each_timestep
-            posterior_plot(sim)
+            posterior_plot(sim,i)
         end
         update!(recording, sim, time) 
     end
     save(recording)
     return sim.times, sim.epsps
 end
+
+function runBatch!(
+    sim::NestedFilterSimulation;
+    T::Integer,
+    plot_each_timestep::Bool = false,
+    recording::Recording = NoRecording
+)
+    if length(sim.times) == 0
+        initialize!(sim)
+    end
+    for i in 1:T
+        begin
+            entrop = zeros(length(keys(sim.tsteps.train)))
+            for j in 1:length(keys(sim.tsteps.train))
+                train = sim.tsteps.train[j]
+
+                entropy_temp = []
+		T1 = sim.hmodel
+    		T2 = sim.filter
+    		T3 = deepcopy(sim.hstate)
+    		T4 = deepcopy(sim.fstate)
+    		T5 = sim.tsteps
+    		T6 = deepcopy(sim.times)
+    		T7 = deepcopy(sim.epsps)
+                for l in 1:100
+
+                    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
+                    for k in 1:length(train)
+                        propagate!(sim_copy,train[k])
+                    end
+                    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
+                end
+                entrop[j] = mean(entropy_temp)
+            end
+	end
+        train_opt = sim.tsteps.train[argmin(entrop)]
+	for j in 1:length(train_opt)
+	    begin
+		time = propagate!(sim,train_opt[j])
+	    end
+	    if plot_each_timestep
+		posterior_plot(sim,j)
+	    end
+	    update!(recording, sim, time)
+	end
+    end
+    save(recording)
+    return sim.times, sim.epsps
+end	
+
+function compute_entropy(model)
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    Nrng = Array(model.Nrng)
+    prng = Array(model.prng)
+    qrng = Array(model.qrng)
+    σrng = Array(model.σrng)
+    τrng = Array(model.τrng)
+
+    samples = [Nrng[Nind]';prng[pind]';qrng[qind]';σrng[σind]';τrng[τind]']
+    Σ_est = cov(samples')
+    determinant = det(2*pi*ℯ*Σ_est)
+    ent = 0.5*log(determinant)
+
+    return ent
+
+end
+
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
 
@@ -168,7 +247,7 @@ function Recording(f1, f2, sim::NestedFilterSimulation)
     begin
         time = @timed nothing
     end
-    res = f1(sim, time)
+    res = f1(sim, time.time)
     data = [res]
     return Recording(f1, f2, data)
 end

@@ -1,67 +1,76 @@
 """
     MyopicPolicy <: OEDPolicy
-
 A myopic OEDPolicy, i.e. one in which only the effect of the next time step on the parameter estimation, e.g. the entropy of a parameter, is taken into account.
 """
 abstract type MyopicPolicy <: OEDPolicy end
 
 """
     Myopic(dts, target)
-
 A parallel implementation of a myopic policy with candidate time steps `dts` and optimization target `target`, in which multiple copies of the particles 
 are propagated in parallel.
-
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct Myopic{T1, T2} <: MyopicPolicy
+struct Myopic{T1, T2, T3} <: MyopicPolicy
     dts::T1
     target::T2
+    penalty::T3
 end
 
 """
     MyopicFast(dts, target)
-
 MyopicFast` is the same as `Myopic`, except that instead of expanding states and parameters along another dimension, and propagating each parameter with each dt, `dts` are randomly assigned to members of the parameter ensemble.
-
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct MyopicFast{T1, T2} <: MyopicPolicy
+struct MyopicFast{T1, T2, T3} <: MyopicPolicy
     dts::T1
     target::T2
+    penalty::T3    
+end
+
+struct MyopicOracle{T1, T2, T3} <: MyopicPolicy
+    dts::T1
+    target::T2
+    penalty::T3
+end
+
+struct MyopicFastOracle{T1, T2, T3} <: MyopicPolicy
+    dts::T1
+    target::T2
+    penalty::T3    
 end
 
 # default target is miniminum entropy
 """
     Myopic(dts)
-
 Minimize the joint entropy.
 """
-Myopic(dts) = Myopic(dts, _entropy)
+Myopic(dts,penalty) = Myopic(dts, _entropy,penalty)
+MyopicOracle(dts,penalty) = MyopicOracle(dts, _entropy,penalty)
 
 """
     MyopicFast(dts)
-
 Minimize the joint entropy.
 """
-MyopicFast(dts) = MyopicFast(dts, _entropy)
+MyopicFast(dts,penalty) = MyopicFast(dts, _entropy,penalty)
+MyopicFastOracle(dts,penalty) = MyopicFastOracle(dts, _entropy,penalty)
 
 """
     Myopic_tau(dts)
-
 Minimize the entropy of τ.
 """
-Myopic_tau(dts) = Myopic(dts, _tauentropy)
+Myopic_tau(dts,penalty) = Myopic(dts, _tauentropy,penalty)
+Myopic_tauOracle(dts,penalty) = MyopicOracle(dts, _tauentropy,penalty)
 
 """
     MyopicFast_tau(dts)
-
 Minimize the entropy of τ.
 """
-MyopicFast_tau(dts) = MyopicFast(dts, _tauentropy)
+MyopicFast_tau(dts,penalty) = MyopicFast(dts, _tauentropy,penalty)
+MyopicFast_tauOracle(dts,penalty) = MyopicFastOracle(dts, _tauentropy,penalty)
 
 function _oed!(sim, ::MyopicPolicy)
     policy = sim.tsteps
@@ -76,6 +85,18 @@ end
 
 function _synthetic_obs(sim, policy)
     epsp_vector = _temp_epsps(sim)
+    dt_vector = _temp_dts(sim, policy)
+    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
+end
+    
+function _synthetic_obs(sim, policy::MyopicOracle)
+    epsp_vector = _temp_epsps_oracle(sim)
+    dt_vector = _temp_dts(sim, policy)
+    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
+end
+        
+function _synthetic_obs(sim, policy::MyopicFastOracle)
+    epsp_vector = _temp_epsps_oracle(sim)
     dt_vector = _temp_dts(sim, policy)
     return BinomialObservation(cu(epsp_vector), cu(dt_vector))
 end
@@ -157,11 +178,36 @@ function _temp_epsps(sim)
     end
     return _shape_epsps(e_temp, sim, sim.tsteps)
 end
+    
+function _temp_epsps_oracle(sim)
+    dts = sim.tsteps.dts
+    times = sim.times
+
+    N_star = sim.hmodel.N
+    p_star = sim.hmodel.p
+    q_star = sim.hmodel.q
+    τ_star = sim.hmodel.τ
+
+    x = 1.
+    L = length(times)
+    if L > 1
+        for ii in 2:L
+            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
+        end
+    end
+
+    e_temp = zeros(Float32, length(dts))
+    for kk in 1:length(e_temp)
+        x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
+        e_temp[kk] = x_temp*N_star*p_star*q_star
+    end
+    return _shape_epsps(e_temp, sim, sim.tsteps)
+end
 
 _shape_epsps(e_temp, sim, ::Myopic) = e_temp
 _shape_epsps(e_temp, sim, ::MyopicFast) = repeat(e_temp, m_out(sim)÷length(sim.tsteps.dts))
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
@@ -169,35 +215,43 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
     σind = Array(model.σind)
     τind = Array(model.τind)
 
+    Nrng = Array(model.Nrng)
+    prng = Array(model.prng)
+    qrng = Array(model.qrng)
+    σrng = Array(model.σrng)
+    τrng = Array(model.τrng)
+
     dts = Array(obs.dt)
+
+    η = policy.penalty
 
     minent = Inf
     imin = 0
     @inbounds for i in 1:size(Nind, 1)
-        dict = Dict{NTuple{5, Int64}, Int}()
-        @inbounds for j in 1:size(Nind, 2)
-            iN = Nind[i, j]
-            ip = pind[i, j]
-            iq = qind[i, j]
-            iσ = σind[i, j]
-            iτ = τind[i, j]
-            key = (iN, ip, iq, iσ, iτ)
-            dict[key] = get!(dict, key, 0) + 1
+        samples = [Nrng[Nind[i, :]]';prng[pind[i, :]]';qrng[qind[i, :]]';σrng[σind[i, :]]';τrng[τind[i, :]]']
+        Σ_est = cov(samples')
+    
+        determinant = det(2*pi*ℯ*Σ_est)
+        
+        if determinant > 0
+
+            ent = 0.5*log(determinant)
+        
+        else
+            
+            ent = Inf
+        
         end
-        ent = 0.
-        for value in values(dict)
-            p = value/size(Nind, 2)
-            ent -= p * log(p)
-        end
-        if ent < minent
-            minent = ent
+
+        if ent + η*dts[i] < minent
+            minent = ent + η*dts[i]
             imin = i 
         end
     end
     return dts[imin]
 end
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
@@ -206,9 +260,12 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+    
+    η = policy.penalty
 
     counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
+    entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(Nind)
         iN = Nind[i]
         ip = pind[i]
@@ -219,9 +276,9 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
         key = (dt, iN, ip, iq, iσ, iτ)
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
+        entropies[dt] = η*dt
     end
 
-    entropies = Dict{Float64, Float64}()
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
@@ -231,11 +288,13 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
     return argmin(entropies)
 end
 
-function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
+function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+    
+    η = policy.penalty
 
     minent = Inf
     imin = 0
@@ -251,31 +310,35 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopi
             p = value/size(τind, 2)
             ent -= p * log(p)
         end
-        if ent < minent
-            minent = ent
+        if ent + η*dts[i] < minent
+            minent = ent + η*dts[i]
             imin = i 
         end
     end
     return dts[imin]
 end
 
-function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+    
+    η = policy.penalty
 
     counts = Dict{Tuple{Float64, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
+    entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(τind)
         iτ = τind[i]
         dt = dts[i]
         key = (dt, iτ)
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
+        entropies[dt] = η*dt
     end
 
-    entropies = Dict{Float64, Float64}()
+    
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
@@ -284,4 +347,3 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopi
     
     return argmin(entropies)
 end
-
