@@ -187,8 +187,7 @@ function runBatch!(
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:10
-		    print(l)
+                for l in 1:100
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
