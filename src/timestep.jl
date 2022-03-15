@@ -23,6 +23,11 @@ function get_step(::Timestep) end
 """
 struct FixedTimestep{T} <: Timestep
     dt::T
+    function FixedTimestep(dt::Real)
+        dt <= 0 &&
+            throw(ErrorException("FixedTimestep must have strictly positive argument."))
+        return new{typeof(dt)}(dt)
+    end
 end
 
 """
@@ -35,5 +40,24 @@ struct RandomTimestep{T} <: Timestep
     distribution::T
 end
 
+"""
+    DeterministicTrain(train)
+
+Produces a predefined finite sequence of time steps.
+The simulation terminates when the sequence is exhausted.
+"""
+struct DeterministicTrain{T} <: Timestep
+    stack::T
+    function DeterministicTrain(v::AbstractVector{<:Real})
+        any(v .<= 0) && 
+            throw(ErrorException("DeterminisicTrain needs strictly positive arguments."))
+        return new{typeof(v)}(reverse(v))
+    end
+end
+
 get_step(timestep::FixedTimestep) = timestep.dt
 get_step(timestep::RandomTimestep) = rand(timestep.distribution)
+
+function get_step(timestep::DeterministicTrain)
+    isempty(timestep.stack) ? nothing : pop!(timestep.stack)
+end

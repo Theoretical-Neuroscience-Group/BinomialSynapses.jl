@@ -39,4 +39,47 @@ CUDA.functional() && @testset "simulate.jl" begin
     for i in eachindex(times)
         @test times[i] ≈ 0.1*(i-1)
     end
+
+    # Test `DeterministicTrain`
+    sim = NestedFilterSimulation(
+            N, p, q, σ, τ,
+            1:20,
+            LinRange(0.00, 1.00, 100),
+            LinRange(0.00, 2.00, 100),
+            LinRange(0.05, 2.00, 100),
+            LinRange(0.05, 2.00, 100),
+            2048, 512, 12,
+            timestep = DeterministicTrain([1., 2., 3.])
+          )
+    @test length(sim.times) == 0
+    @test length(sim.epsps) == 0
+
+    initialize!(sim)
+    @test sim.times == [0.]
+
+    propagate!(sim)
+    @test sim.times[2] == 1.
+
+    propagate!(sim)
+    @test sim.times[3] == 3.
+
+    propagate!(sim)
+    @test sim.times[4] == 6.
+
+    @test isnothing(propagate!(sim))
+
+    sim = NestedFilterSimulation(
+            N, p, q, σ, τ,
+            1:20,
+            LinRange(0.00, 1.00, 100),
+            LinRange(0.00, 2.00, 100),
+            LinRange(0.05, 2.00, 100),
+            LinRange(0.05, 2.00, 100),
+            2048, 512, 12,
+            timestep = DeterministicTrain([1., 2., 3.])
+          )
+
+    run!(sim, T = 10)
+    @test length(sim.times) == 4
+    @test length(sim.epsps) == 4
 end

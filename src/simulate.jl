@@ -100,6 +100,7 @@ end
 
 get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
 
+
 """
     propagate!(sim)
 
@@ -124,6 +125,8 @@ function propagate!(sim::NestedFilterSimulation, dt)
     return sim
 end
 
+propagate!(::NestedFilterSimulation, ::Nothing) = nothing
+
 """
     run!(
         sim; 
@@ -145,8 +148,12 @@ function run!(
         initialize!(sim)
     end
     for i in 1:T
-        begin
-            time = @timed propagate!(sim)
+        time = @timed begin
+            r = propagate!(sim)
+            if isnothing(r)
+                @warn "Simulation ended prematurely due to `get_step` returning `nothing`."
+                break
+            end
         end
         if plot_each_timestep
             posterior_plot(sim)
