@@ -89,28 +89,51 @@ function BinomialGridModel(
 end
 
 """
-    BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+    BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng, device = :gpu)
 
 Randomly initialize a binomial model ensemble with parameters uniformly sampled from
 the specified grid (on the GPU).
 """
-function BinomialGridModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
-    Nrng = CuArray(Int.(my_Nrng))
-    prng = CuArray(Float32.(my_prng))
-    qrng = CuArray(Float32.(my_qrng))
-    σrng = CuArray(Float32.(my_σrng))
-    τrng = CuArray(Float32.(my_τrng))
+function BinomialGridModel(
+    m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng;
+    device::Symbol = :gpu
+)
+    Nrng = my_Nrng
+    prng = my_prng
+    qrng = my_qrng
+    σrng = my_σrng
+    τrng = my_τrng
 
-    Nind = cu(rand(1:length(Nrng), m_out))
-    pind = cu(rand(1:length(prng), m_out))
-    qind = cu(rand(1:length(qrng), m_out))
-    σind = cu(rand(1:length(σrng), m_out))
-    τind = cu(rand(1:length(τrng), m_out))
+    Nind = rand(1:length(Nrng), m_out)
+    pind = rand(1:length(prng), m_out)
+    qind = rand(1:length(qrng), m_out)
+    σind = rand(1:length(σrng), m_out)
+    τind = rand(1:length(τrng), m_out)
 
-    return BinomialGridModel(
-                Nind, pind, qind, σind, τind,
-                Nrng, prng, qrng, σrng, τrng
-            )
+    if device === :cpu
+        return BinomialGridModel(
+            Nind, pind, qind, σind, τind,
+            Nrng, prng, qrng, σrng, τrng
+        )
+    elseif device === :gpu
+        Nrng = CuArray(Int.(Nrng))
+        prng = CuArray(Float32.(prng))
+        qrng = CuArray(Float32.(qrng))
+        σrng = CuArray(Float32.(σrng))
+        τrng = CuArray(Float32.(τrng))
+
+        Nind = cu(Nind)
+        pind = cu(pind)
+        qind = cu(qind)
+        σind = cu(σind)
+        τind = cu(τind)
+
+        return BinomialGridModel(
+            Nind, pind, qind, σind, τind,
+            Nrng, prng, qrng, σrng, τrng
+        )
+    end
+    throw(ArgumentError("Device must be either :cpu or :gpu."))
 end
 
 """
@@ -144,8 +167,8 @@ end
 Randomly initialize a binomial model ensemble of size `m_out`,
 with maximum value for `N` of `Nmax` on the GPU or CPU.
 """
-function BinomialModel(Nmax::Integer, m_out::Integer, device = :gpu)
-    if device == :gpu
+function BinomialModel(Nmax::Integer, m_out::Integer; device::Symbol = :gpu)
+    if device === :gpu
         N = CuArray(rand(1:Nmax, m_out))
         p = CUDA.rand(m_out)
         q = CUDA.rand(m_out)
@@ -167,8 +190,14 @@ end
 Randomly initialize a binomial model ensemble on a grid, but throw away the grid info
 and just keep the parameters.
 """
-function BinomialModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
-    gridmodel = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+function BinomialModel(
+    m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng;
+    device::Symbol = :gpu
+)
+    gridmodel = BinomialGridModel(
+        m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng, 
+        device = device
+    )
     return BinomialModel(gridmodel)
 end
 
@@ -177,7 +206,7 @@ end
 
 Randomly initialize a model ensemble of size 1, which corresponds to a scalar model (used for the hidden state).
 """
-function ScalarBinomialModel(Nmax, device = :cpu)
+function ScalarBinomialModel(Nmax, device::Symbol = :cpu)
     return BinomialModel(Nmax, 1, device)
 end
 
@@ -186,14 +215,14 @@ end
 
 Initialize a scalar binomial model with the given parameters.
 """
-function ScalarBinomialModel(N::Integer, p, q, σ, τ, device = :cpu)
+function ScalarBinomialModel(N::Integer, p, q, σ, τ; device::Symbol = :cpu)
     if device == :cpu
         Ns = N .* ones(Int, 1)
         ps = p .* ones(1)
         qs = q .* ones(1)
         σs = σ .* ones(1)
         τs = τ .* ones(1)
-    elseif device == :gpu
+    elseif device === :gpu
         Ns = N .* CUDA.ones(Int, 1)
         ps = Float32(p) .* CUDA.ones(1)
         qs = Float32(q) .* CUDA.ones(1)
@@ -219,8 +248,8 @@ end
 Randomly initialize a state ensemble of size `m_out` x `m_in` and maximum value of `N` 
 equal to `Nmax` on the specified device `:gpu` or `:cpu`.
 """
-function BinomialState(Nmax::Integer, m_out::Integer, m_in::Integer, device::Symbol = :gpu)
-    if device == :gpu
+function BinomialState(Nmax::Integer, m_out::Integer, m_in::Integer; device::Symbol = :gpu)
+    if device === :gpu
         n = CuArray(rand(1:Nmax, m_out, m_in))
         k = CUDA.zeros(Int, m_out, m_in)
     elseif device == :cpu
@@ -231,12 +260,31 @@ function BinomialState(Nmax::Integer, m_out::Integer, m_in::Integer, device::Sym
 end
 
 """
+    BinomialState(N, m_in)
+
+Initialize a state ensemble with `n` equal to `N` across inner particles and `k` equal to zero. The same device is used for `n` and `k` as for `N`.
+"""
+function BinomialState(N::AbstractArray{<:Integer}, m_in::Integer)
+    m_out = length(N)
+    n = repeat(N, 1, m_in)
+    k = zeros(Int, m_out, m_in)
+    return BinomialState(n, k)
+end
+
+function BinomialState(N::AnyCuArray{<:Integer}, m_in::Integer)
+    m_out = length(N)
+    n = repeat(N, 1, m_in)
+    k = CUDA.zeros(Int, m_out, m_in)
+    return BinomialState(n, k)
+end
+
+"""
     ScalarBinomialState(Nmax, device = :cpu)
 
 Randomly initialize a state ensemble of size 1, which corresponds to a scalar model (used for the hidden state).
 """
-function ScalarBinomialState(Nmax::Integer, device = :cpu)
-    return BinomialState(Nmax, 1, 1, device)
+function ScalarBinomialState(Nmax::Integer; device = :cpu)
+    return BinomialState(Nmax, 1, 1, device = device)
 end
 
 """
@@ -244,11 +292,11 @@ end
 
 Initialize a scalar state with the specified values of the variables.
 """
-function ScalarBinomialState(n::Integer, k::Integer, device = :cpu)
+function ScalarBinomialState(n::Integer, k::Integer; device::Symbol = :cpu)
     if device == :cpu
         ns = n .* ones(Int, 1, 1)
         ks = k .* ones(Int, 1, 1)
-    elseif device == :gpu
+    elseif device === :gpu
         ns = n .* CUDA.ones(Int, 1, 1)
         ks = k .* CUDA.ones(Int, 1, 1)
     end
