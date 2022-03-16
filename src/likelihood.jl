@@ -1,5 +1,6 @@
 """
     likelihood(state, model::AbstractBinomialModel, obs)
+
 Return the likelihood of an observation conditioned on the current state and model.
 This broadcasts properly over state and model ensemble, if they have compatible sizes.
 """
@@ -31,6 +32,7 @@ end
 
 """
     likelihood_resample!(state, model::AbstractBinomialModel, obs)
+
 Return the likelihood of an observation conditioned on the current state and model ensemble and at the same time resample the state ensemble (inner particles).
 """
 function likelihood_resample!(state::BinomialState, model, obs::BinomialObservation)

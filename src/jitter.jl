@@ -17,7 +17,7 @@ function jitter!(model::BinomialGridModel, width)
     return model
 end
 
-function jitter!(indices, maxindex, prob1, prob2)
+function jitter!(indices::AnyCuArray, maxindex, prob1, prob2)
     function kernel(indices, maxindex, prob1, prob2)
         # grid-stride loop
         tid    = threadIdx().x

@@ -155,7 +155,7 @@ function indices!(v::AnyCuArray)
     return u, idx
 end
 
-function resample!(in, out, idx)
+function resample!(in::AnyCuArray, out::AnyCuArray, idx::AnyCuArray)
     function kernel(in, out, idx, Ra, R1, R2, R3)
         i = (blockIdx().x - 1i32) * blockDim().x + threadIdx().x
         @inbounds if i <= length(in)
