@@ -51,3 +51,22 @@ function jitter!(indices::AnyCuArray, maxindex, prob1, prob2)
     kernel(indices, maxindex, prob1, prob2; threads=threads, blocks=blocks)
     return indices
 end
+
+# CPU fallback:
+function jitter!(indices, maxindex, prob1, prob2)
+    for i in eachindex(indices)
+        r = rand()
+        @inbounds idx = indices[i]
+        if idx == 1
+            r < prob2 && (idx += 1)
+        elseif idx == maxindex
+            r < prob2 && (idx -= 1)
+        elseif r < prob1
+            idx += 1
+        elseif r > 1-prob1
+            idx -= 1
+        end
+        @inbounds indices[i] = idx
+    end
+    return indices
+end
