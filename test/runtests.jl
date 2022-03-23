@@ -31,7 +31,7 @@ end
     # include("emission.jl")
     include("likelihood.jl")
     include("jitter.jl")
-    # include("resample.jl")
+    include("resample.jl")
     # include("filter.jl")
     # include("statistics.jl")
     include("simulate.jl")
