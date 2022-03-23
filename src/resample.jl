@@ -155,7 +155,9 @@ function indices!(v::AnyCuArray)
     return u, idx
 end
 
-# CPU fallback:
+# CPU fallbacks:
+indices!(v::AbstractVector) = outer_indices!(v)
+
 function indices!(v::AbstractArray{T}) where T
     # initializations:
 
@@ -165,7 +167,7 @@ function indices!(v::AbstractArray{T}) where T
     # outer likelihoods
     # Initialize to -1 in order to track which elements have been written to.
     # Since likelihoods are nonnegative, negative elements have never been visited.
-    u = fill(-one(T), size(v)[1:end-1]...)     
+    u = zeros(T, size(v)[1:end-1]...)     
 
     # random numbers
     r = Array{T}(undef, size(v)...)
@@ -186,7 +188,8 @@ function indices!(v::AbstractArray{T}) where T
         for j in 1:M_in
             mirrorj = M_in - j + 1 # mirrored index j
             CurMax *= exp(log(rand(T)) / mirrorj)
-            @inbounds vsum = v[i, j] += vsum
+            @inbounds v[i, j] += vsum
+            @inbounds vsum = v[i, j]
             @inbounds r[i, mirrorj] = CurMax
         end
         # compute average likelihood across inner particles

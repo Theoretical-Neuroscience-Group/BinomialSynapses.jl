@@ -29,7 +29,7 @@ end
     # include("propagate.jl")
     # include("timestep.jl")
     # include("emission.jl")
-    # include("likelihood.jl")
+    include("likelihood.jl")
     include("jitter.jl")
     # include("resample.jl")
     # include("filter.jl")

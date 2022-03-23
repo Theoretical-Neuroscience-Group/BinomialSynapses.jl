@@ -7,9 +7,10 @@ This broadcasts properly over state and model ensemble, if they have compatible 
 likelihood(state::BinomialState, model, obs) = likelihood(state.k, model, obs)
 
 function likelihood(k, model::AbstractBinomialModel, obs)
+    T = eltype(model.σ)
     return mean(
-                exp.(-0.5f0 .* ((obs .- model.q .* k) ./ model.σ).^2)
-                ./ (sqrt(2*Float32(pi)) .* model.σ)
+                exp.(-T(0.5) .* ((obs .- model.q .* k) ./ model.σ).^2)
+                ./ (sqrt(2*T(pi)) .* model.σ)
            , dims = 2
            )[:,1]
 end
