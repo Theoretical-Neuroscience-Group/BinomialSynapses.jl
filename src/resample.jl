@@ -236,6 +236,25 @@ function resample!(in::AnyCuArray, out::AnyCuArray, idx::AnyCuArray)
     return out
 end
 
+# CPU fallback:
+function resample!(in, out, idx)
+    idx_dim = ndims(idx)
+    R1 = CartesianIndices(size(in)[1:idx_dim-1]) # indices before resampling dimension
+    R2 = CartesianIndices((size(in, idx_dim),)) # indices for resampling dimension
+    R3 = CartesianIndices(size(in)[idx_dim+1:end]) # indices after resampling dimension
+
+    Ra = CartesianIndices((length(R1), length(R2), length(R3))) # high-level indices
+
+    @inbounds for i in eachindex(in)
+        I = Ra[i]     # choose high-level index
+        I1 = R1[I[1]] # choose index before resampling dimension
+        I2 = R2[I[2]] # choose index for resampling
+        I3 = R3[I[3]] # choose index after resampling dimension
+        out[I1, I2, I3] = in[I1, idx[I1, I2], I3]
+    end
+    return out
+end
+
 function resample!(in, idx)
     size(in)[1:ndims(idx)] == size(idx) || throw(DimensionMismatch("input and index array must have matching size"))
     out = similar(in)
