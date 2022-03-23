@@ -63,9 +63,7 @@ Minimize the entropy of τ.
 """
 MyopicFast_tau(dts) = MyopicFast(dts, _tauentropy)
 
-function _oed!(sim, ::MyopicPolicy)
-    policy = sim.tsteps
-
+function (policy::MyopicPolicy)(sim::NestedFilterSimulation)
     obs = _synthetic_obs(sim, policy)
     temp_state = _temp_state(sim, policy)
 

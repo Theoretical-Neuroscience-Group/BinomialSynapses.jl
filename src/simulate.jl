@@ -98,7 +98,7 @@ function initialize!(sim::NestedFilterSimulation)
     return sim
 end
 
-get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
+(ts::Timestep)(::NestedFilterSimulation) = ts()
 
 
 """
@@ -107,7 +107,7 @@ get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
 Propagate the simulation, i.e. choose a time step and then propagate the simulation by it.
 """
 function propagate!(sim::NestedFilterSimulation)
-    dt = get_step(sim)
+    dt = sim.tsteps(sim)
     propagate!(sim, dt)
 end
 

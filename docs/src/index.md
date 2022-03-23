@@ -26,7 +26,6 @@ emit
 Timestep
 FixedTimestep
 RandomTimestep
-get_step
 ```
 
 ## Particle Filter

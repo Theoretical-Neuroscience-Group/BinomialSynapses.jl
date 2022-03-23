@@ -23,7 +23,7 @@ include("propagate.jl")
 export propagate!
 
 include("timestep.jl")
-export Timestep, FixedTimestep, RandomTimestep, get_step, DeterministicTrain
+export Timestep, FixedTimestep, RandomTimestep, DeterministicTrain
 
 include("emission.jl")
 export emit

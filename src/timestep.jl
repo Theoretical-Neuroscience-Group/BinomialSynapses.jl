@@ -10,11 +10,11 @@ The following basic types are supported:
 abstract type Timestep end
 
 """
-    get_step(::Timestep)
+    (ts::Timestep)()
 
 Returns a value for the time step, based on the chosen method for choosing a time step.
 """
-function get_step(::Timestep) end
+function (ts::Timestep)() end
 
 """
     FixedTimestep(dt)
@@ -55,9 +55,6 @@ struct DeterministicTrain{T} <: Timestep
     end
 end
 
-get_step(timestep::FixedTimestep) = timestep.dt
-get_step(timestep::RandomTimestep) = rand(timestep.distribution)
-
-function get_step(timestep::DeterministicTrain)
-    isempty(timestep.stack) ? nothing : pop!(timestep.stack)
-end
+(timestep::FixedTimestep)() = timestep.dt
+(timestep::RandomTimestep)() = rand(timestep.distribution)
+(timestep::DeterministicTrain)() = isempty(timestep.stack) ? nothing : pop!(timestep.stack)
