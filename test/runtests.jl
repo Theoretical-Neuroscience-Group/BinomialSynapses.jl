@@ -38,6 +38,6 @@ end
     # include("record.jl")
     # include("myopic.jl")
 
-    # include("_integration.jl")
+    include("_integration.jl")
     # include("saving.jl")
 end
