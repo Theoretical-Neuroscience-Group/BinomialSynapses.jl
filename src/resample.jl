@@ -128,10 +128,10 @@ function indices!(v::AnyCuArray)
     # outer likelihoods
     # Initialize to -1 in order to track which elements have been written to.
     # Since likelihoods are nonnegative, negative elements have never been visited.
-    u   = CUDA.fill(-one(Float32), size(v)[1:end-1]...)     
+    u = CUDA.fill(-one(Float32), size(v)[1:end-1]...)     
 
     # random numbers
-    r   = CuArray{Float32}(undef, size(v)...)
+    r = CuArray{Float32}(undef, size(v)...)
 
     Rout  = CartesianIndices(u) # indices for first n-1 dimensions
     M_out = length(u)
@@ -152,6 +152,60 @@ function indices!(v::AnyCuArray)
         ;
         threads=threads, blocks=blocks
     )
+    return u, idx
+end
+
+# CPU fallback:
+function indices!(v::AbstractArray{T}) where T
+    # initializations:
+
+    # indices
+    idx = Array{Int}(undef, size(v)...)   
+
+    # outer likelihoods
+    # Initialize to -1 in order to track which elements have been written to.
+    # Since likelihoods are nonnegative, negative elements have never been visited.
+    u = fill(-one(T), size(v)[1:end-1]...)     
+
+    # random numbers
+    r = Array{T}(undef, size(v)...)
+
+    Rout  = CartesianIndices(u) # indices for first n-1 dimensions
+    M_out = length(u)
+    M_in  = last(size(v))
+    
+    for id in 1:M_out
+        # sample descending sequence of sorted random numbers
+        # r[i,M_in] >= ... >= r[i,2] >= r[i,1]
+        # Algorithm by:
+        # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
+        # September 1980, Pages 359--364
+        vsum = 0f0
+        CurMax = 1f0
+        @inbounds i = Rout[id]
+        for j in 1:M_in
+            mirrorj = M_in - j + 1 # mirrored index j
+            CurMax *= CUDA.exp(CUDA.log(rand(T)) / mirrorj)
+            @inbounds vsum = v[i, j] += vsum
+            @inbounds r[i, mirrorj] = CurMax
+        end
+        # compute average likelihood across inner particles
+        # (with normalization constant that was omitted from v for speed)
+        @inbounds u[i] = vsum
+
+        # O(n) binning algorithm for sorted samples
+        bindex = 1 # bin index
+        for j in 1:M_in
+            # scale random numbers (this is equivalent to normalizing v)
+            @inbounds rsample = r[i, j] * vsum
+            # checking bindex <= M_in - 1 not necessary since
+            # v[i, M_in] = vsum
+            @inbounds while rsample > v[i, bindex]
+                bindex += 1
+            end
+            @inbounds idx[i, j] = bindex
+        end
+    end
     return u, idx
 end
 
