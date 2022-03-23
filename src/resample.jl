@@ -180,12 +180,12 @@ function indices!(v::AbstractArray{T}) where T
         # Algorithm by:
         # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
         # September 1980, Pages 359--364
-        vsum = 0f0
-        CurMax = 1f0
+        vsum = zero(T)
+        CurMax = one(T)
         @inbounds i = Rout[id]
         for j in 1:M_in
             mirrorj = M_in - j + 1 # mirrored index j
-            CurMax *= CUDA.exp(CUDA.log(rand(T)) / mirrorj)
+            CurMax *= exp(log(rand(T)) / mirrorj)
             @inbounds vsum = v[i, j] += vsum
             @inbounds r[i, mirrorj] = CurMax
         end
