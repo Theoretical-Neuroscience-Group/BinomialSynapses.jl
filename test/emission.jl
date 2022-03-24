@@ -3,8 +3,8 @@
     m_out  = 16
     m_in   = 16
 
-    state = BinomialState(128, m_out, m_in, :cpu)
-    model = BinomialModel(128, m_out, :cpu)
+    state = BinomialState(128, m_out, m_in, device = :cpu)
+    model = BinomialModel(128, m_out, device = :cpu)
     @test_throws ErrorException emit(state, model, 0.3)
 
     state = ScalarBinomialState(10, 2)
