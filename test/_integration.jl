@@ -1,4 +1,4 @@
-CUDA.functional() && @testset "integration tests" begin
+@testset "integration tests" begin
     @info "Performing INTEGRATION TESTS"
     function benchmark(timestep::Timestep, device)
         N = 10
@@ -18,7 +18,11 @@ CUDA.functional() && @testset "integration tests" begin
                 device = device
               )
         initialize!(sim)
-        display(@benchmark CUDA.@sync propagate!($sim))
+        if device == :gpu
+            display(@benchmark CUDA.@sync propagate!($sim))
+        else
+            display(@benchmark propagate!($sim))
+        end
     end
 
     function test_convergence(timestep::Timestep, T::Int, device)
@@ -53,7 +57,7 @@ CUDA.functional() && @testset "integration tests" begin
         @testset "benchmark of filter" begin
             println("")
             @info "Benchmarking single iteration with exponential random timestep"
-            benchmark(RandomTimestep(Exponential(0.121)))
+            benchmark(RandomTimestep(Exponential(0.121)), device)
             println("")
             println("")
         end
