@@ -19,13 +19,22 @@
               )
         initialize!(sim)
         if device == :gpu
+            println("")
+            @info "Benchmarking single iteration with timestep = $timestep on device = $device"
             display(@benchmark CUDA.@sync propagate!($sim))
+            println("")
+            println("")
         else
+            println("")
+            @info "Benchmarking single iteration with timestep = $timestep on device = $device"
             display(@benchmark propagate!($sim))
+            println("")
+            println("")
         end
     end
 
     function test_convergence(timestep::Timestep, T::Int, device)
+        device === :cpu && return nothing
         N = 10
         p = 0.85
         q = 1.0
@@ -55,36 +64,20 @@
     @testset "Device = $device" for device in DEVICES
 
         @testset "benchmark of filter" begin
-            println("")
-            @info "Benchmarking single iteration with exponential random timestep"
             benchmark(RandomTimestep(Exponential(0.121)), device)
-            println("")
-            println("")
         end
 
         # OED benchmarks
         @testset "benchmark of OED" begin
             candidates = LinRange(0.005, 2, 8)
             @testset "OEDPolicy: Uniform" begin
-                println("")
-                @info "Benchmarking single iteration with OEDPolicy: Uniform"
                 benchmark(Uniform(candidates), device)
-                println("")
-                println("")
             end
             @testset "OEDPolicy: Myopic" begin
-                println("")
-                @info "Benchmarking single iteration with OEDPolicy: Myopic"
                 benchmark(Myopic(candidates), device)
-                println("")
-                println("")
             end
             @testset "OEDPolicy: MyopicFast" begin
-                println("")
-                @info "Benchmarking single iteration with OEDPolicy: MyopicFast"
                 benchmark(MyopicFast(candidates), device)
-                println("")
-                println("")
             end
         end
 

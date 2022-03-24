@@ -248,7 +248,7 @@ function resample!(in, out, idx)
 
     Ra = CartesianIndices((length(R1), length(R2), length(R3))) # high-level indices
 
-    @inbounds for i in eachindex(in)
+    @inbounds for i in 1:length(in)
         I = Ra[i]     # choose high-level index
         I1 = R1[I[1]] # choose index before resampling dimension
         I2 = R2[I[2]] # choose index for resampling

@@ -24,7 +24,7 @@
         end
 
         @testset "1D" begin
-            v = [1., 1e4, 1., 0.]
+            v = [1., 1e6, 1., 0.]
             vold = copy(v)
             u, idx = indices!(v)
 
@@ -39,8 +39,8 @@
             end
         end
         @testset "2D" begin
-            v = [1e0 1e4 1e0 0e0;
-                    1e0 1e0 1e4 1e0]
+            v = [1e0 1e6 1e0 0e0;
+                    1e0 1e0 1e6 1e0]
             vold = copy(v)
             u, idx = indices!(v)
 
@@ -61,7 +61,7 @@
             v = ones(2, 3, 4)
             trueidx = [2 4 3; 1 3 2]
             for i in 1:2, j in 1:3
-                v[i, j, trueidx[i, j]] = 1f4
+                v[i, j, trueidx[i, j]] = 1f6
             end
             vold = copy(v)
             u, idx = indices!(v)
@@ -122,7 +122,7 @@
         end
 
         @testset "1D" begin
-            v = cu([1f0, 1f4, 1f0, 0f0])
+            v = cu([1f0, 1f6, 1f0, 0f0])
             vold = copy(v)
             u, idx = indices!(v)
 
@@ -139,8 +139,8 @@
             end
         end
         @testset "2D" begin
-            v = cu([1f0 1f4 1f0 0f0;
-                    1f0 1f0 1f4 1f0])
+            v = cu([1f0 1f6 1f0 0f0;
+                    1f0 1f0 1f6 1f0])
             vold = copy(v)
             u, idx = indices!(v)
 
@@ -163,7 +163,7 @@
             v = ones(Float32, 2, 3, 4)
             trueidx = [2 4 3; 1 3 2]
             for i in 1:2, j in 1:3
-                v[i, j, trueidx[i, j]] = 1f4
+                v[i, j, trueidx[i, j]] = 1f6
             end
             v = cu(v)
             vold = copy(v)
