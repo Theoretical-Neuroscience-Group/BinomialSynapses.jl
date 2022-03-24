@@ -48,7 +48,7 @@ include("record.jl")
 export Recording
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, m_out, run!, runBatch!
+export NestedFilterSimulation, initialize!, m_out, run!, runBatch!, runBatchTau!
 
 include("visualize.jl")
 export posterior_plot
