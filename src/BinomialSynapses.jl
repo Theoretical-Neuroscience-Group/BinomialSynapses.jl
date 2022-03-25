@@ -9,6 +9,7 @@ using Plots
 using Statistics: mean, cov
 using StatsBase: mode, entropy
 using LinearAlgebra: det
+using CovarianceEstimation
 
 include("models.jl")
 export
