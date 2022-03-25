@@ -299,7 +299,7 @@ function compute_entropy_tau(model)
    # ent = entropy(τ_posterior/sum(τ_posterior))
    # return ent
 			
-    dict = Dist()
+    dict = Dict()
     τind = Array(model.τind)
     for j in 1:length(τind)
 	iτ = τind[j]
