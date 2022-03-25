@@ -18,7 +18,8 @@ end
         N, p, q, σ, τ,
         Nrng, prng, qrng, σrng, τrng,
         m_out, m_in, width;
-        timestep::Timestep = RandomTimestep(Exponential(0.121))
+        timestep::Timestep = RandomTimestep(Exponential(0.121)),
+        device = :gpu
     )
 
 This is the main way simulations are supposed to be constructed by the user, i.e.
@@ -33,14 +34,16 @@ function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    timestep::Timestep = RandomTimestep(Exponential(0.121))
+    timestep::Timestep = RandomTimestep(Exponential(0.121)),
+    device::Symbol = :gpu
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
     filter = NestedParticleFilter(width)
     hstate = ScalarBinomialState(N, 0)
     fstate = NestedParticleState(
                 m_out, m_in,
-                Nrng, prng, qrng, σrng, τrng
+                Nrng, prng, qrng, σrng, τrng,
+                device = device
              )
     times = zeros(0)
     epsps = zeros(0)

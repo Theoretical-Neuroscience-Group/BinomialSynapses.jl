@@ -11,6 +11,9 @@
 <!-- [![Build status](https://badge.buildkite.com/15db27ead6ca652df308f96b4805115a1720f1d75155d90b63.svg)](https://buildkite.com/theoretical-neuroscience-group/binomialsynapses) -->
 <!-- [![Coverage](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl) -->
 
+This is a package for performing filering and active learning for a binomial synaptic model using nested particle filters.
+Performance is achieved by providing a CUDA GPU implementation, but the code also runs (much more slowly) on the CPU.
+
 ## Installation
 
 This package needs at least Julia 1.6.1. 

@@ -7,9 +7,12 @@ using StatsBase
 using BenchmarkTools
 using Test
 
+const DEVICES = [:cpu]
+
 if CUDA.functional()
     @info "Functional CUDA device detected."
     CUDA.versioninfo()
+    push!(DEVICES, :gpu)
 else
     @warn "No CUDA device detected. Skipping GPU tests."
 end
