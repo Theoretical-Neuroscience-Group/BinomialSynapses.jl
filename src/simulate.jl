@@ -286,28 +286,28 @@ end
 	
 function compute_entropy_tau(model)
 
-    τind = Array(model.τind)
-    τrng = Array(model.τrng)
-    τ_posterior = zeros(length(τrng))
-    for j in 1:length(τrng)
-        τ_posterior[j] = count(i->(i==j),τind)
-    end
-    ent = entropy(τ_posterior/sum(τ_posterior))
-    return ent
+   # τind = Array(model.τind)
+   # τrng = Array(model.τrng)
+   # τ_posterior = zeros(length(τrng))
+   # for j in 1:length(τrng)
+   #     τ_posterior[j] = count(i->(i==j),τind)
+   # end
+   # ent = entropy(τ_posterior/sum(τ_posterior))
+   # return ent
 			
-    #dict = Dist()
-    #τind = Array(model.τind)
-    #for j in 1:length(τind)
-#	iτ = τind[j]
-#	key = (iτ,)
-#        dict[key] = get!(dict, key, 0) + 1
-#    end
-#    ent = 0.
-#    for value in values(dict)
-#        p = value/length(τind)
-#        ent -= p * log(p)
-#    end
-#    return ent		
+    dict = Dist()
+    τind = Array(model.τind)
+    for j in 1:length(τind)
+	iτ = τind[j]
+	key = (iτ,)
+        dict[key] = get!(dict, key, 0) + 1
+    end
+    ent = 0.
+    for value in values(dict)
+        p = value/length(τind)
+        ent -= p * log(p)
+    end
+    return ent		
 
 end
 
