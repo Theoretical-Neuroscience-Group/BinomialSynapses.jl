@@ -174,7 +174,7 @@ function runBatch!(
         initialize!(sim)
     end
     for i in 1:T
-        begin
+        time_batch = @timed begin
             entrop = zeros(length(keys(sim.tsteps.train)))
             for j in 1:length(keys(sim.tsteps.train))
                 train = sim.tsteps.train[j]
@@ -198,6 +198,8 @@ function runBatch!(
                 entrop[j] = mean(entropy_temp)
             end
 	end
+	print(time_batch.time)
+	print("\n")
         train_opt = sim.tsteps.train[argmin(entrop)]
 	for j in 1:length(train_opt)
 	    begin
