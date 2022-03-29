@@ -180,14 +180,23 @@ function runBatch!(
                 train = sim.tsteps.train[j]
 
                 entropy_temp = []
-		T1 = sim.hmodel
+				
+		map = MAP(sim.fstate.model)
+
+    		N_star = map.N
+    		p_star = map.p
+    		q_star = map.q
+		σ_star = map.σ
+    		τ_star = map.τ
+				
+		T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
     		T2 = sim.filter
-    		T3 = deepcopy(sim.hstate)
+    		T3 = ScalarBinomialState(N_star, 0)
     		T4 = deepcopy(sim.fstate)
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:30
+                for l in 1:15
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
