@@ -181,7 +181,7 @@ function runBatch_map!(
 
                 entropy_temp = []
 				
-		map = MAP(sim.fstate.model,marginal=true)
+		map = MAP(sim.fstate.model)
 
     		N_star = map.N
     		p_star = map.p
@@ -196,7 +196,7 @@ function runBatch_map!(
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:30
+                for l in 1:50
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
@@ -263,7 +263,7 @@ function runBatch_avg!(
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:30
+                for l in 1:100
 		    random_idx = rand(1:length(Nind))
 		    N_star = Nrng[Nind[random_idx]]
 		    p_star = prng[pind[random_idx]]
