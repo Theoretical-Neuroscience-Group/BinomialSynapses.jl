@@ -73,7 +73,6 @@ MyopicFast_tau(dts,penalty) = MyopicFast(dts, _tauentropy,penalty)
 MyopicFast_tauOracle(dts,penalty) = MyopicFastOracle(dts, _tauentropy,penalty)
 
 function _oed!(sim, ::MyopicPolicy)
-    print('a')
     policy = sim.tsteps
 
     obs = _synthetic_obs(sim, policy)
