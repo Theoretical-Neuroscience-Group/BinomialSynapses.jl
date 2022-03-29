@@ -258,7 +258,7 @@ function runBatch_avg!(
 				
 		
     		T2 = sim.filter
-    		T3 = ScalarBinomialState(N_star, 0)
+    		
     		T4 = deepcopy(sim.fstate)
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
@@ -271,7 +271,7 @@ function runBatch_avg!(
 		    σ_star = σrng[σind[random_idx]]
 		    τ_star = τrng[τind[random_idx]]
 		    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
-
+                    T3 = ScalarBinomialState(N_star, 0)
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
                         propagate!(sim_copy,train[k])
