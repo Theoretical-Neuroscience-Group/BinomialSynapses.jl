@@ -183,11 +183,11 @@ function runBatch_map!(
 				
 		map = MAP(sim.fstate.model)
 
-    		N_star = map.N
-    		p_star = map.p
-    		q_star = map.q
-		σ_star = map.σ
-    		τ_star = map.τ
+    		N_star = 60
+    		p_star = 0.15
+    		q_star = 0.06
+		σ_star = 0.025
+    		τ_star = 0.05
 				
 		T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
     		T2 = sim.filter
@@ -196,7 +196,7 @@ function runBatch_map!(
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:50
+                for l in 1:20
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
