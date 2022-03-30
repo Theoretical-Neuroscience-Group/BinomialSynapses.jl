@@ -164,6 +164,57 @@ function run!(
     return sim.times, sim.epsps
 end
 
+function runBatch!(
+    sim::NestedFilterSimulation;
+    T::Integer,
+    plot_each_timestep::Bool = false,
+    recording::Recording = NoRecording
+)
+    if length(sim.times) == 0
+        initialize!(sim)
+    end
+    for i in 1:T
+        time_batch = @timed begin
+            entrop = zeros(length(keys(sim.tsteps.train)))
+            for j in 1:length(keys(sim.tsteps.train))
+                train = sim.tsteps.train[j]
+
+                entropy_temp = []
+		T1 = sim.hmodel
+    		T2 = sim.filter
+    		T3 = deepcopy(sim.hstate)
+    		T4 = deepcopy(sim.fstate)
+    		T5 = sim.tsteps
+    		T6 = deepcopy(sim.times)
+    		T7 = deepcopy(sim.epsps)
+                for l in 1:30
+
+                    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
+                    for k in 1:length(train)
+                        propagate!(sim_copy,train[k])
+                    end
+                    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
+                end
+                entrop[j] = mean(entropy_temp)
+            end
+	end
+	print(time_batch.time)
+	print("\n")
+        train_opt = sim.tsteps.train[argmin(entrop)]
+	for j in 1:length(train_opt)
+	    begin
+		time = propagate!(sim,train_opt[j])
+	    end
+	    if plot_each_timestep
+		posterior_plot(sim,j)
+	    end
+	    update!(recording, sim, time)
+	end
+    end
+    save(recording)
+    return sim.times, sim.epsps
+end	
+
 function runBatch_map!(
     sim::NestedFilterSimulation;
     T::Integer,
