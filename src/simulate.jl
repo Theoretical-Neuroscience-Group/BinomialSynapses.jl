@@ -234,11 +234,11 @@ function runBatch_map!(
 				
 		map = MAP(sim.fstate.model)
 
-    		N_star = 60
-    		p_star = 0.15
-    		q_star = 0.06
-		σ_star = 0.025
-    		τ_star = 0.05
+    		N_star = map.N
+    		p_star = map.p
+    		q_star = map.q
+		σ_star = map.σ
+    		τ_star = map.τ
 				
 		T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
     		T2 = sim.filter
