@@ -191,7 +191,7 @@ function runBatch_map!(
 				
 		T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
     		T2 = sim.filter
-    		T3 = deepcopy(sim.hstate)
+    		T3 = ScalarBinomialState(N_star, 0)
     		T4 = deepcopy(sim.fstate)
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
