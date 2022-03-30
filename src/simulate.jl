@@ -232,7 +232,7 @@ function runBatch_map!(
 
                 entropy_temp = []
 				
-		map = MAP(sim.fstate.model,marginal=true)
+		map = MAP(sim.fstate.model)
 
     		N_star = map.N
     		p_star = map.p
