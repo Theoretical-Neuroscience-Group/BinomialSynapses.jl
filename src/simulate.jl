@@ -232,7 +232,7 @@ function runBatch_map!(
 
                 entropy_temp = []
 				
-		map = MAP(sim.fstate.model)
+		map = MAP(sim.fstate.model,marginal=true)
 
     		N_star = map.N
     		p_star = map.p
@@ -242,12 +242,12 @@ function runBatch_map!(
 				
 		T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
     		T2 = sim.filter
-    		T3 = deepcopy(sim.hstate)
+    		T3 = ScalarBinomialState(N_star, 0)
     		T4 = deepcopy(sim.fstate)
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:10
+                for l in 1:5
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
