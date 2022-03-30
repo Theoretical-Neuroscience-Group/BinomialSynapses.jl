@@ -187,7 +187,7 @@ function runBatch!(
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:30
+                for l in 1:10
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
@@ -247,7 +247,7 @@ function runBatch_map!(
     		T5 = sim.tsteps
     		T6 = deepcopy(sim.times)
     		T7 = deepcopy(sim.epsps)
-                for l in 1:5
+                for l in 1:10
 
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
@@ -414,7 +414,7 @@ function compute_entropy(model)
     samples = [Nrng[Nind]';prng[pind]';qrng[qind]';σrng[σind]';τrng[τind]']
    # Σ_est = cov(samples')
     method = LinearShrinkage(DiagonalUnequalVariance(), 0.5)
-    Σ_est = cov(method, samples)
+    Σ_est = cov(method, samples')
 			
 			
     determinant = det(2*pi*ℯ*Σ_est)
