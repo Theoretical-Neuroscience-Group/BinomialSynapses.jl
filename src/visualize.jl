@@ -118,7 +118,7 @@ function posterior_plot(sim::NestedFilterExperiment,i)
     pτ = show_histogram(τrng, τind,
             xlabel = L"\tau [s]", ylabel = L"p(\tau)")
 
-    display(plot(pN, pp, pq, pσ, pτ, layout = (3, 2)))
+    display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
     if i%10 == 0
         savefig(string(i,".png"))
     end
