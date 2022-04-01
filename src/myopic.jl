@@ -73,17 +73,7 @@ function _synthetic_obs(sim, policy)
     return BinomialObservation(cu(epsp_vector), cu(dt_vector))
 end
     
-function _synthetic_obs(sim, policy::MyopicOracle)
-    epsp_vector = _temp_epsps_oracle(sim)
-    dt_vector = _temp_dts(sim, policy)
-    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
-end
-        
-function _synthetic_obs(sim, policy::MyopicFastOracle)
-    epsp_vector = _temp_epsps_oracle(sim)
-    dt_vector = _temp_dts(sim, policy)
-    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
-end
+
 
 
 _temp_state(sim, ::Myopic) = _repeat(sim.fstate, length(sim.tsteps.dts))
