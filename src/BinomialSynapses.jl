@@ -43,7 +43,7 @@ include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
 
 include("experiment.jl")
-export NestedFilterExperiment
+export NestedFilterExperiment, run_experiment!
 
 include("statistics.jl")
 export MAP
@@ -52,7 +52,7 @@ include("record.jl")
 export Recording
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, m_out, run!, runBatch_map!, runBatchTau!, NestedFilterExperiment, run_experiment!
+export NestedFilterSimulation, initialize!, m_out, run!, runBatch_map!, runBatchTau!
 
 include("visualize.jl")
 export posterior_plot
