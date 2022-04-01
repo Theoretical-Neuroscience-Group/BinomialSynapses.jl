@@ -92,6 +92,9 @@ function posterior_plot(sim::NestedFilterSimulation,i)
 end
     
 function posterior_plot(sim::NestedFilterExperiment,i)
+    
+    fstate = sim.fstate
+        
     Nrng = Array(fstate.model.Nrng)
     prng = Array(fstate.model.prng)
     qrng = Array(fstate.model.qrng)
