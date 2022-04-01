@@ -164,56 +164,7 @@ function run!(
     return sim.times, sim.epsps
 end
 
-function runBatch!(
-    sim::NestedFilterSimulation;
-    T::Integer,
-    plot_each_timestep::Bool = false,
-    recording::Recording = NoRecording
-)
-    if length(sim.times) == 0
-        initialize!(sim)
-    end
-    for i in 1:T
-        time_batch = @timed begin
-            entrop = zeros(length(keys(sim.tsteps.train)))
-            for j in 1:length(keys(sim.tsteps.train))
-                train = sim.tsteps.train[j]
 
-                entropy_temp = []
-		T1 = sim.hmodel
-    		T2 = sim.filter
-    		T3 = deepcopy(sim.hstate)
-    		T4 = deepcopy(sim.fstate)
-    		T5 = sim.tsteps
-    		T6 = deepcopy(sim.times)
-    		T7 = deepcopy(sim.epsps)
-                for l in 1:10
-
-                    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
-                    for k in 1:length(train)
-                        propagate!(sim_copy,train[k])
-                    end
-                    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
-                end
-                entrop[j] = mean(entropy_temp)
-            end
-	end
-	print(time_batch.time)
-	print("\n")
-        train_opt = sim.tsteps.train[argmin(entrop)]
-	for j in 1:length(train_opt)
-	    begin
-		time = propagate!(sim,train_opt[j])
-	    end
-	    if plot_each_timestep
-		posterior_plot(sim,j)
-	    end
-	    update!(recording, sim, time)
-	end
-    end
-    save(recording)
-    return sim.times, sim.epsps
-end	
 
 function runBatch_map!(
     sim::NestedFilterSimulation;
@@ -274,80 +225,7 @@ function runBatch_map!(
     save(recording)
     return sim.times, sim.epsps
 end	
-	
-function runBatch_avg!(
-    sim::NestedFilterSimulation;
-    T::Integer,
-    plot_each_timestep::Bool = false,
-    recording::Recording = NoRecording
-)
-    if length(sim.times) == 0
-        initialize!(sim)
-    end
-    for i in 1:T
-        time_batch = @timed begin
-            entrop = zeros(length(keys(sim.tsteps.train)))
-            for j in 1:length(keys(sim.tsteps.train))
-                train = sim.tsteps.train[j]
 
-                entropy_temp = []
-				
-		Nind = Array(sim.fstate.model.Nind)
-		Nrng = Array(sim.fstate.model.Nrng)
-
-		pind = Array(sim.fstate.model.pind)
-		prng = Array(sim.fstate.model.prng)
-
-		qind = Array(sim.fstate.model.qind)
-		qrng = Array(sim.fstate.model.qrng)
-
-		σind = Array(sim.fstate.model.σind)
-		σrng = Array(sim.fstate.model.σrng)
-
-		τind = Array(sim.fstate.model.τind)
-		τrng = Array(sim.fstate.model.τrng)
-				
-		
-    		T2 = sim.filter
-    		
-    		T4 = deepcopy(sim.fstate)
-    		T5 = sim.tsteps
-    		T6 = deepcopy(sim.times)
-    		T7 = deepcopy(sim.epsps)
-                for l in 1:100
-		    random_idx = rand(1:length(Nind))
-		    N_star = Nrng[Nind[random_idx]]
-		    p_star = prng[pind[random_idx]]
-		    q_star = qrng[qind[random_idx]]
-		    σ_star = σrng[σind[random_idx]]
-		    τ_star = τrng[τind[random_idx]]
-		    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
-                    T3 = ScalarBinomialState(N_star, 0)
-                    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
-                    for k in 1:length(train)
-                        propagate!(sim_copy,train[k])
-                    end
-                    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
-                end
-                entrop[j] = mean(entropy_temp)
-            end
-	end
-	print(time_batch.time)
-	print("\n")
-        train_opt = sim.tsteps.train[argmin(entrop)]
-	for j in 1:length(train_opt)
-	    begin
-		time = propagate!(sim,train_opt[j])
-	    end
-	    if plot_each_timestep
-		posterior_plot(sim,j)
-	    end
-	    update!(recording, sim, time)
-	end
-    end
-    save(recording)
-    return sim.times, sim.epsps
-end
 	
 function runBatchTau!(
     sim::NestedFilterSimulation;
@@ -425,15 +303,6 @@ function compute_entropy(model)
 end
 	
 function compute_entropy_tau(model)
-
-   # τind = Array(model.τind)
-   # τrng = Array(model.τrng)
-   # τ_posterior = zeros(length(τrng))
-   # for j in 1:length(τrng)
-   #     τ_posterior[j] = count(i->(i==j),τind)
-   # end
-   # ent = entropy(τ_posterior/sum(τ_posterior))
-   # return ent
 			
     dict = Dict()
     τind = Array(model.τind)
