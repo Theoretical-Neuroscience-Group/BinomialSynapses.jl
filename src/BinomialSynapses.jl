@@ -61,6 +61,6 @@ include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
 
 include("experiment.jl")
-export NestedFilterExperiment, run_experiment!
+export NestedFilterExperiment
 
 end#module
