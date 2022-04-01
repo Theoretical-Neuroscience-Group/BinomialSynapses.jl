@@ -57,7 +57,8 @@ function run_experiment!(
     	T5 = sim.tsteps
     	T6 = deepcopy(sim.times)
     	T7 = deepcopy(sim.epsps)
-        for l in 1:5
+	entropy_temp = []
+        for l in 1:10
 
             sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
             for k in 1:length(train)
@@ -69,4 +70,30 @@ function run_experiment!(
     end
     print(sim.tsteps.train[argmin(entrop)])
     print('\n')
+end
+	
+function compute_entropy(model)
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    Nrng = Array(model.Nrng)
+    prng = Array(model.prng)
+    qrng = Array(model.qrng)
+    σrng = Array(model.σrng)
+    τrng = Array(model.τrng)
+
+    samples = [Nrng[Nind]';prng[pind]';qrng[qind]';σrng[σind]';τrng[τind]']
+   # Σ_est = cov(samples')
+    method = LinearShrinkage(DiagonalUnequalVariance(), 0.5)
+    Σ_est = cov(method, samples')
+			
+			
+    determinant = det(2*pi*ℯ*Σ_est)
+    ent = 0.5*log(determinant)
+
+    return ent
+
 end
