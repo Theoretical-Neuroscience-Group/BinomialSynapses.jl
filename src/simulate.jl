@@ -394,8 +394,8 @@ function run_experiment!(
     	T3 = ScalarBinomialState(N_star, 0)
     	T4 = deepcopy(sim.fstate)
     	T5 = sim.tsteps
-    	T6 = deepcopy(sim.times)
-    	T7 = deepcopy(sim.epsps)
+    	T6 = epscs
+    	T7 = dts
 	entropy_temp = []
         for l in 1:10
 
