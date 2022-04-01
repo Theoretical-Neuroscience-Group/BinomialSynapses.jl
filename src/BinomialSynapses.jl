@@ -42,6 +42,9 @@ export outer_resample!, indices!, resample!
 include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
 
+include("experiment.jl")
+export NestedFilterExperiment
+
 include("statistics.jl")
 export MAP
 
@@ -60,7 +63,6 @@ export OEDPolicy, policy, Uniform
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
 
-include("experiment.jl")
-export NestedFilterExperiment
+
 
 end#module
