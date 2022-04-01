@@ -49,7 +49,7 @@ include("record.jl")
 export Recording
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, m_out, run!, runBatch_map!, runBatchTau!
+export NestedFilterSimulation, initialize!, m_out, run!, runBatch_map!, runBatchTau!, NestedFilterExperiment, run_experiment!
 
 include("visualize.jl")
 export posterior_plot
@@ -60,7 +60,5 @@ export OEDPolicy, policy, Uniform
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
 
-include("experiment.jl")
-export NestedFilterExperiment, run_experiment!
 
 end#module
