@@ -346,7 +346,7 @@ end
 function NestedFilterExperiment(
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    timestep::Timestep = RandomTimestep(Exponential(0.121))
+    timestep
 )
     filter = NestedParticleFilter(width)
     fstate = NestedParticleState(
@@ -369,8 +369,8 @@ function run_experiment!(
     sim::NestedFilterExperiment,
     epscs, dts; 
     T::Integer, 
-    plot_each_timestep::Bool = false, 
-    recording::Recording = NoRecording
+    plot_each_timestep::Bool = false 
+    # recording::Recording = NoRecording
 )
     for i in 1:T
         propagate!(sim, epscs[i], dts[i])
