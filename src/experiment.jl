@@ -59,7 +59,7 @@ function run_experiment!(
     	T6 = epscs
     	T7 = dts
 	entropy_temp = []
-        for l in 1:10
+        for l in 1:2
 
             sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
             for k in 1:length(train)
