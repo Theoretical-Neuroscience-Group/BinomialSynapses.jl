@@ -5,7 +5,7 @@ struct NestedFilterExperiment{T1, T2, T3}
 end
 
 function show_histogram(
-    bins, indices1, indices2, indices3;
+    bins, indices1, indices2;
     truevalue = nothing, xlabel = L"N [-]", ylabel = L"p(N)"
 )
     nbins = length(bins)
@@ -18,10 +18,6 @@ function show_histogram(
     for i in 1:length(indices2)
         counts2[indices2[i]] += 1
     end
-    counts3 = zeros(nbins)
-    for i in 1:length(indices3)
-        counts3[indices3[i]] += 1
-    end
 	
     p = plot(
             bins,
@@ -33,13 +29,6 @@ function show_histogram(
     plot!(
             bins,
             counts2./sum(counts2),
-            xlabel=xlabel,
-            ylabel=ylabel,
-            legend=false
-           )
-    plot!(
-            bins,
-            counts3./sum(counts3),
             xlabel=xlabel,
             ylabel=ylabel,
             legend=false
@@ -123,10 +112,8 @@ end
 function postpro_experiment!(
     sim1::NestedFilterExperiment,
     sim2::NestedFilterExperiment,
-    sim3::NestedFilterExperiment,
     epscs1, dts1,
     epscs2, dts2,
-    epscs3, dts3; 
     T::Integer, 
     plot_each_timestep::Bool = false 
     # recording::Recording = NoRecording
@@ -134,7 +121,6 @@ function postpro_experiment!(
     for i in 1:T
         propagate!(sim1, epscs1[i], dts1[i])
 	propagate!(sim2, epscs2[i], dts2[i])
-	propagate!(sim3, epscs3[i], dts3[i])
         if plot_each_timestep
             
 	    fstate1 = sim1.fstate        
@@ -155,13 +141,6 @@ function postpro_experiment!(
 	    qind2 = Array(fstate2.model.qind)
 	    σind2 = Array(fstate2.model.σind)
 	    τind2 = Array(fstate2.model.τind)
-				
-	    fstate3 = sim3.fstate
-	    Nind3 = Array(fstate3.model.Nind)
-	    pind3 = Array(fstate3.model.pind)
-	    qind3 = Array(fstate3.model.qind)
-	    σind3 = Array(fstate3.model.σind)
-	    τind3 = Array(fstate3.model.τind)
 				
 	    pN = show_histogram(Nrng, Nind1, Nind2, Nind3,
 		    xlabel = L"N [-]", ylabel = L"p(N)")
