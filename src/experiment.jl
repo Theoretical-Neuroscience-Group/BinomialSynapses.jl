@@ -5,21 +5,46 @@ struct NestedFilterExperiment{T1, T2, T3}
 end
 
 function show_histogram(
-    bins, indices;
+    bins, indices1, indices2, indices3;
     truevalue = nothing, xlabel = L"N [-]", ylabel = L"p(N)"
 )
     nbins = length(bins)
-    counts = zeros(nbins)
-    for i in 1:length(indices)
-        counts[indices[i]] += 1
+	
+    counts1 = zeros(nbins)
+    for i in 1:length(indices1)
+        counts1[indices1[i]] += 1
     end
+    counts2 = zeros(nbins)
+    for i in 1:length(indices2)
+        counts2[indices2[i]] += 1
+    end
+    counts3 = zeros(nbins)
+    for i in 1:length(indices3)
+        counts3[indices3[i]] += 1
+    end
+	
     p = plot(
             bins,
-            counts./sum(counts),
+            counts1./sum(counts1),
             xlabel=xlabel,
             ylabel=ylabel,
             legend=false
            )
+    plot!(
+            bins,
+            counts2./sum(counts2),
+            xlabel=xlabel,
+            ylabel=ylabel,
+            legend=false
+           )
+    plot!(
+            bins,
+            counts3./sum(counts3),
+            xlabel=xlabel,
+            ylabel=ylabel,
+            legend=false
+           )
+	
     if !isnothing(truevalue)
         plot!([truevalue], seriestype="vline",legend=false)
     end
@@ -96,16 +121,63 @@ function run_experiment!(
 end
 	
 function postpro_experiment!(
-    sim::NestedFilterExperiment,
-    epscs, dts; 
+    sim1::NestedFilterExperiment,
+    sim2::NestedFilterExperiment,
+    sim3::NestedFilterExperiment,
+    epscs1, dts1,
+    epscs2, dts2,
+    epscs3, dts3; 
     T::Integer, 
     plot_each_timestep::Bool = false 
     # recording::Recording = NoRecording
 )
     for i in 1:T
-        propagate!(sim, epscs[i], dts[i])
+        propagate!(sim1, epscs1[i], dts1[i])
+	propagate!(sim2, epscs2[i], dts2[i])
+	propagate!(sim3, epscs3[i], dts3[i])
         if plot_each_timestep
-            posterior_plot(sim,i)
+            
+	    fstate = sim1.fstate        
+	    Nrng = Array(fstate.model.Nrng)
+	    prng = Array(fstate.model.prng)
+	    qrng = Array(fstate.model.qrng)
+	    σrng = Array(fstate.model.σrng)
+	    τrng = Array(fstate.model.τrng)
+	    Nind1 = Array(fstate.model.Nind)
+	    pind1 = Array(fstate.model.pind)
+	    qind1 = Array(fstate.model.qind)
+	    σind1 = Array(fstate.model.σind)
+	    τind1 = Array(fstate.model.τind)
+				
+	    fstate = sim2.fstate
+	    Nind2 = Array(fstate.model.Nind)
+	    pind2 = Array(fstate.model.pind)
+	    qind2 = Array(fstate.model.qind)
+	    σind2 = Array(fstate.model.σind)
+	    τind2 = Array(fstate.model.τind)
+				
+	    fstate = sim3.fstate
+	    Nind3 = Array(fstate.model.Nind)
+	    pind3 = Array(fstate.model.pind)
+	    qind3 = Array(fstate.model.qind)
+	    σind3 = Array(fstate.model.σind)
+	    τind3 = Array(fstate.model.τind)
+				
+	    pN = show_histogram(Nrng, Nind1, Nind2, Nind3,
+		    xlabel = L"N [-]", ylabel = L"p(N)")
+	    pp = show_histogram(prng, pind1, pind2, pind3,
+		    xlabel = L"p [-]", ylabel = L"p(p)")
+	    pq = show_histogram(qrng, qind1, qind2, qind3,
+		    xlabel = L"q [A]", ylabel = L"p(q)")
+	    pσ = show_histogram(σrng, σind1, σind2, σind3,
+		    xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
+	    pτ = show_histogram(τrng, τind1, τind2, τind3,
+		    xlabel = L"\tau [s]", ylabel = L"p(\tau)")
+
+	    display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
+	    if i%5 == 0
+		savefig(string(i,".png"))
+	    end
         end
     end
 
