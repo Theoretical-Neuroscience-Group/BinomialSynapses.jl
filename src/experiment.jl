@@ -142,15 +142,15 @@ function postpro_experiment!(
 	    σind2 = Array(fstate2.model.σind)
 	    τind2 = Array(fstate2.model.τind)
 				
-	    pN = show_histogram(Nrng, Nind1, Nind2, Nind3,
+	    pN = show_histogram(Nrng, Nind1, Nind2,
 		    xlabel = L"N [-]", ylabel = L"p(N)")
-	    pp = show_histogram(prng, pind1, pind2, pind3,
+	    pp = show_histogram(prng, pind1, pind2,
 		    xlabel = L"p [-]", ylabel = L"p(p)")
-	    pq = show_histogram(qrng, qind1, qind2, qind3,
+	    pq = show_histogram(qrng, qind1, qind2,
 		    xlabel = L"q [A]", ylabel = L"p(q)")
-	    pσ = show_histogram(σrng, σind1, σind2, σind3,
+	    pσ = show_histogram(σrng, σind1, σind2,
 		    xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
-	    pτ = show_histogram(τrng, τind1, τind2, τind3,
+	    pτ = show_histogram(τrng, τind1, τind2,
 		    xlabel = L"\tau [s]", ylabel = L"p(\tau)")
 
 	    display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
