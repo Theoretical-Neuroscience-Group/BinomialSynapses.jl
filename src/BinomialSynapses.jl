@@ -43,7 +43,7 @@ include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
 
 include("experiment.jl")
-export NestedFilterExperiment, run_experiment!
+export NestedFilterExperiment, run_experiment!, postpro_experiment!
 
 include("statistics.jl")
 export MAP
