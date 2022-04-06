@@ -72,6 +72,22 @@ function run_experiment!(
     print(sim.tsteps.train[argmin(entrop)])
     print('\n')
 end
+	
+function postpro_experiment!(
+    sim::NestedFilterExperiment,
+    epscs, dts; 
+    T::Integer, 
+    plot_each_timestep::Bool = false 
+    # recording::Recording = NoRecording
+)
+    for i in 1:T
+        propagate!(sim, epscs[i], dts[i])
+        if plot_each_timestep
+            posterior_plot(sim,i)
+        end
+    end
+
+end
 
 function compute_entropy(model)
     Nind = Array(model.Nind)
