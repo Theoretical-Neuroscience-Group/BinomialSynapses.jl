@@ -137,31 +137,31 @@ function postpro_experiment!(
 	propagate!(sim3, epscs3[i], dts3[i])
         if plot_each_timestep
             
-	    fstate = sim1.fstate        
-	    Nrng = Array(fstate.model.Nrng)
-	    prng = Array(fstate.model.prng)
-	    qrng = Array(fstate.model.qrng)
-	    σrng = Array(fstate.model.σrng)
-	    τrng = Array(fstate.model.τrng)
-	    Nind1 = Array(fstate.model.Nind)
-	    pind1 = Array(fstate.model.pind)
-	    qind1 = Array(fstate.model.qind)
-	    σind1 = Array(fstate.model.σind)
-	    τind1 = Array(fstate.model.τind)
+	    fstate1 = sim1.fstate        
+	    Nrng = Array(fstate1.model.Nrng)
+	    prng = Array(fstate1.model.prng)
+	    qrng = Array(fstate1.model.qrng)
+	    σrng = Array(fstate1.model.σrng)
+	    τrng = Array(fstate1.model.τrng)
+	    Nind1 = Array(fstate1.model.Nind)
+	    pind1 = Array(fstate1.model.pind)
+	    qind1 = Array(fstate1.model.qind)
+	    σind1 = Array(fstate1.model.σind)
+	    τind1 = Array(fstate1.model.τind)
 				
-	    fstate = sim2.fstate
-	    Nind2 = Array(fstate.model.Nind)
-	    pind2 = Array(fstate.model.pind)
-	    qind2 = Array(fstate.model.qind)
-	    σind2 = Array(fstate.model.σind)
-	    τind2 = Array(fstate.model.τind)
+	    fstate2 = sim2.fstate
+	    Nind2 = Array(fstate2.model.Nind)
+	    pind2 = Array(fstate2.model.pind)
+	    qind2 = Array(fstate2.model.qind)
+	    σind2 = Array(fstate2.model.σind)
+	    τind2 = Array(fstate2.model.τind)
 				
-	    fstate = sim3.fstate
-	    Nind3 = Array(fstate.model.Nind)
-	    pind3 = Array(fstate.model.pind)
-	    qind3 = Array(fstate.model.qind)
-	    σind3 = Array(fstate.model.σind)
-	    τind3 = Array(fstate.model.τind)
+	    fstate3 = sim3.fstate
+	    Nind3 = Array(fstate3.model.Nind)
+	    pind3 = Array(fstate3.model.pind)
+	    qind3 = Array(fstate3.model.qind)
+	    σind3 = Array(fstate3.model.σind)
+	    τind3 = Array(fstate3.model.τind)
 				
 	    pN = show_histogram(Nrng, Nind1, Nind2, Nind3,
 		    xlabel = L"N [-]", ylabel = L"p(N)")
