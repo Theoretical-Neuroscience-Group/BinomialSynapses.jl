@@ -113,7 +113,7 @@ function postpro_experiment!(
     sim1::NestedFilterExperiment,
     sim2::NestedFilterExperiment,
     epscs1, dts1,
-    epscs2, dts2,
+    epscs2, dts2;
     T::Integer, 
     plot_each_timestep::Bool = false 
     # recording::Recording = NoRecording
