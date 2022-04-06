@@ -4,6 +4,28 @@ struct NestedFilterExperiment{T1, T2, T3}
     tsteps::T3
 end
 
+function show_histogram(
+    bins, indices;
+    truevalue = nothing, xlabel = L"N [-]", ylabel = L"p(N)"
+)
+    nbins = length(bins)
+    counts = zeros(nbins)
+    for i in 1:length(indices)
+        counts[indices[i]] += 1
+    end
+    p = plot(
+            bins,
+            counts./sum(counts),
+            xlabel=xlabel,
+            ylabel=ylabel,
+            legend=false
+           )
+    if !isnothing(truevalue)
+        plot!([truevalue], seriestype="vline",legend=false)
+    end
+    return p
+end
+
 function NestedFilterExperiment(
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
