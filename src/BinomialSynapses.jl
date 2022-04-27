@@ -1,15 +1,15 @@
 module BinomialSynapses
 
 using BinomialGPU
+using CovarianceEstimation
 using CUDA
 using CUDA: i32
 using Distributions: Binomial, Exponential, Normal
 using LaTeXStrings
+using LinearAlgebra: det
 using Plots
 using Statistics: mean, cov
 using StatsBase: mode, entropy
-using LinearAlgebra: det
-using CovarianceEstimation
 
 include("models.jl")
 export
