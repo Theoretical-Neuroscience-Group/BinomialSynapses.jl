@@ -114,7 +114,7 @@ function propagate!(sim::NestedFilterSimulation)
     dt = time1.value
     time2 = propagate!(sim, dt)
     if isnothing(time2)
-        return time1.time
+        return nothing
     else
         return time1.time + time2
     end
