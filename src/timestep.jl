@@ -10,11 +10,11 @@ The following basic types are supported:
 abstract type Timestep end
 
 """
-    get_step(::Timestep)
+    (ts::Timestep)()
 
 Returns a value for the time step, based on the chosen method for choosing a time step.
 """
-function get_step(::Timestep) end
+function (ts::Timestep)() end
 
 """
     FixedTimestep(dt)
@@ -23,6 +23,11 @@ function get_step(::Timestep) end
 """
 struct FixedTimestep{T} <: Timestep
     dt::T
+    function FixedTimestep(dt::Real)
+        dt <= 0 &&
+            throw(ErrorException("FixedTimestep must have strictly positive argument."))
+        return new{typeof(dt)}(dt)
+    end
 end
 
 """
@@ -38,15 +43,22 @@ end
 """
     DeterministicTrain(train)
 
-Follows a predefined fixed train of ISIs.
+Produces a predefined finite sequence of time steps.
+The simulation terminates when the sequence is exhausted.
 """
 struct DeterministicTrain{T} <: Timestep
-    train::T
+    stack::T
+    function DeterministicTrain(v::AbstractVector{<:Real})
+        any(v .<= 0) && 
+            throw(ErrorException("DeterminisicTrain needs strictly positive arguments."))
+        return new{typeof(v)}(reverse(v))
+    end
 end
 
 struct BatchTrain{T} <: Timestep
     train::T
 end
 
-get_step(timestep::FixedTimestep) = timestep.dt
-get_step(timestep::RandomTimestep) = rand(timestep.distribution)
+(timestep::FixedTimestep)() = timestep.dt
+(timestep::RandomTimestep)() = rand(timestep.distribution)
+(timestep::DeterministicTrain)() = isempty(timestep.stack) ? nothing : pop!(timestep.stack)

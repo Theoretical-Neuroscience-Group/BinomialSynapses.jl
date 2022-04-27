@@ -7,9 +7,12 @@ using StatsBase
 using BenchmarkTools
 using Test
 
+const DEVICES = [:cpu]
+
 if CUDA.functional()
     @info "Functional CUDA device detected."
     CUDA.versioninfo()
+    push!(DEVICES, :gpu)
 else
     @warn "No CUDA device detected. Skipping GPU tests."
 end
@@ -21,6 +24,8 @@ else
     @info "Skipping intermediate benchmarks."
 end
 
+# This pipeline is non-deterministic and will occasionally fail
+# even if everything is ok. In this case, re-run all tests.
 @testset "BinomialSynapses.jl" begin
     include("models.jl")
     include("propagate.jl")

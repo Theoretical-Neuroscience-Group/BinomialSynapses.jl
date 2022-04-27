@@ -18,7 +18,8 @@ end
         N, p, q, σ, τ,
         Nrng, prng, qrng, σrng, τrng,
         m_out, m_in, width;
-        timestep::Timestep = RandomTimestep(Exponential(0.121))
+        timestep::Timestep = RandomTimestep(Exponential(0.121)),
+        device = :gpu
     )
 
 This is the main way simulations are supposed to be constructed by the user, i.e.
@@ -33,14 +34,16 @@ function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    timestep::Timestep = RandomTimestep(Exponential(0.121))
+    timestep::Timestep = RandomTimestep(Exponential(0.121)),
+    device::Symbol = :gpu
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
     filter = NestedParticleFilter(width)
     hstate = ScalarBinomialState(N, 0)
     fstate = NestedParticleState(
                 m_out, m_in,
-                Nrng, prng, qrng, σrng, τrng
+                Nrng, prng, qrng, σrng, τrng,
+                device = device
              )
     times = zeros(0)
     epsps = zeros(0)
@@ -98,12 +101,8 @@ function initialize!(sim::NestedFilterSimulation)
     return sim
 end
 
-get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
-function get_step(sim::NestedFilterSimulation{T1, T2, T3, T4, T5, T6, T7}) where 
-{T1, T2, T3, T4, T5 <: DeterministicTrain, T6, T7}
-    i = length(sim.times)
-    return sim.tsteps.train[i]
-end
+(ts::Timestep)(::NestedFilterSimulation) = ts()
+
 
 """
     propagate!(sim)
@@ -111,7 +110,7 @@ end
 Propagate the simulation, i.e. choose a time step and then propagate the simulation by it.
 """
 function propagate!(sim::NestedFilterSimulation)
-    time1 = @timed get_step(sim)
+    time1 = @timed sim.tsteps(sim)
     dt = time1.value
     time2 = propagate!(sim, dt)
     return time1.time + time2
@@ -130,6 +129,8 @@ function propagate!(sim::NestedFilterSimulation, dt)
     push!(sim.epsps, obs.EPSP)
     return time1.time + time2.time
 end
+
+propagate!(::NestedFilterSimulation, ::Nothing) = nothing
 
 """
     run!(
@@ -152,8 +153,12 @@ function run!(
         initialize!(sim)
     end
     for i in 1:T
-        begin
-            time = propagate!(sim)
+        time = @timed begin
+            r = propagate!(sim)
+            if isnothing(r)
+                @warn "Simulation ended prematurely due to `get_step` returning `nothing`."
+                break
+            end
         end
         if plot_each_timestep
             posterior_plot(sim,i)
@@ -180,26 +185,24 @@ function runBatch_map!(
             entrop = zeros(length(keys(sim.tsteps.train)))
             for j in 1:length(keys(sim.tsteps.train))
                 train = sim.tsteps.train[j]
-
                 entropy_temp = []
 				
-		map = MAP(sim.fstate.model)
+		        map = MAP(sim.fstate.model)
 
-    		N_star = map.N
-    		p_star = map.p
-    		q_star = map.q
-		σ_star = map.σ
-    		τ_star = map.τ
+                N_star = map.N
+                p_star = map.p
+                q_star = map.q
+                σ_star = map.σ
+                τ_star = map.τ
 				
-		T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
-    		T2 = sim.filter
-    		T3 = ScalarBinomialState(N_star, 0)
-    		T4 = deepcopy(sim.fstate)
-    		T5 = sim.tsteps
-    		T6 = deepcopy(sim.times)
-    		T7 = deepcopy(sim.epsps)
+		        T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
+    		    T2 = sim.filter
+    		    T3 = ScalarBinomialState(N_star, 0)
+    		    T4 = deepcopy(sim.fstate)
+    		    T5 = sim.tsteps
+    		    T6 = deepcopy(sim.times)
+    		    T7 = deepcopy(sim.epsps)
                 for l in 1:5
-
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
                         propagate!(sim_copy,train[k])
@@ -208,19 +211,19 @@ function runBatch_map!(
                 end
                 entrop[j] = mean(entropy_temp)
             end
-	end
-	print(time_batch.time)
-	print("\n")
+	    end
+	    print(time_batch.time)
+	    print("\n")
         train_opt = sim.tsteps.train[argmin(entrop)]
-	for j in 1:length(train_opt)
-	    begin
-		time = propagate!(sim,train_opt[j])
-	    end
-	    if plot_each_timestep
-		posterior_plot(sim,j)
-	    end
-	    update!(recording, sim, time)
-	end
+        for j in 1:length(train_opt)
+            begin
+            time = propagate!(sim,train_opt[j])
+            end
+            if plot_each_timestep
+            posterior_plot(sim,j)
+            end
+            update!(recording, sim, time)
+        end
     end
     save(recording)
     return sim.times, sim.epsps
@@ -241,17 +244,15 @@ function runBatchTau!(
             entrop = zeros(length(keys(sim.tsteps.train)))
             for j in 1:length(keys(sim.tsteps.train))
                 train = sim.tsteps.train[j]
-
                 entropy_temp = []
-		T1 = sim.hmodel
-    		T2 = sim.filter
-    		T3 = deepcopy(sim.hstate)
-    		T4 = deepcopy(sim.fstate)
-    		T5 = sim.tsteps
-    		T6 = deepcopy(sim.times)
-    		T7 = deepcopy(sim.epsps)
+                T1 = sim.hmodel
+                T2 = sim.filter
+                T3 = deepcopy(sim.hstate)
+                T4 = deepcopy(sim.fstate)
+                T5 = sim.tsteps
+                T6 = deepcopy(sim.times)
+                T7 = deepcopy(sim.epsps)
                 for l in 1:5
-
                     sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
                     for k in 1:length(train)
                         propagate!(sim_copy,train[k])
@@ -260,17 +261,17 @@ function runBatchTau!(
                 end
                 entrop[j] = mean(entropy_temp)
             end
-	end
+	    end
         train_opt = sim.tsteps.train[argmin(entrop)]
-	for j in 1:length(train_opt)
-	    begin
-		time = propagate!(sim,train_opt[j])
-	    end
-	    if plot_each_timestep
-		posterior_plot(sim,j)
-	    end
-	    update!(recording, sim, time)
-	end
+        for j in 1:length(train_opt)
+            begin
+                time = propagate!(sim,train_opt[j])
+            end
+            if plot_each_timestep
+                posterior_plot(sim,j)
+            end
+            update!(recording, sim, time)
+        end
     end
     save(recording)
     return sim.times, sim.epsps
@@ -290,20 +291,17 @@ function compute_entropy(model)
     τrng = Array(model.τrng)
 
     samples = [Nrng[Nind]';prng[pind]';qrng[qind]';σrng[σind]';τrng[τind]']
-   # Σ_est = cov(samples')
+    # Σ_est = cov(samples')
     method = LinearShrinkage(DiagonalUnequalVariance(), 0.5)
     Σ_est = cov(method, samples')
-			
-			
+
     determinant = det(2*pi*ℯ*Σ_est)
     ent = 0.5*log(determinant)
 
     return ent
-
 end
 	
 function compute_entropy_tau(model)
-			
     dict = Dict()
     τind = Array(model.τind)
     for j in 1:length(τind)
@@ -316,8 +314,7 @@ function compute_entropy_tau(model)
         p = value/length(τind)
         ent -= p * log(p)
     end
-    return ent		
-
+    return ent
 end
 
 
@@ -336,10 +333,3 @@ function Recording(f1, f2, sim::NestedFilterSimulation)
     data = [res]
     return Recording(f1, f2, data)
 end
-		
-
-		
-	
-
-
-

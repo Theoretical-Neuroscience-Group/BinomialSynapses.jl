@@ -1,7 +1,6 @@
-CUDA.functional() && @testset "integration tests" begin
+@testset "integration tests" begin
     @info "Performing INTEGRATION TESTS"
-
-    function benchmark(timestep::Timestep)
+    function benchmark(timestep::Timestep, device)
         N = 10
         p = 0.85
         q = 1.0
@@ -15,47 +14,27 @@ CUDA.functional() && @testset "integration tests" begin
                 LinRange(0.05, 2.00, 45),
                 LinRange(0.05, 2.00, 45),
                 2048, 512, 12,
-                timestep = timestep
+                timestep = timestep,
+                device = device
               )
         initialize!(sim)
-        display(@benchmark CUDA.@sync propagate!($sim))
-    end
-
-    @testset "benchmark of filter" begin
-        println("")
-        @info "Benchmarking single iteration with exponential random timestep"
-        benchmark(RandomTimestep(Exponential(0.121)))
-        println("")
-        println("")
-    end
-
-    # OED benchmarks
-    @testset "benchmark of OED" begin
-        candidates = LinRange(0.005, 2, 8)
-        @testset "OEDPolicy: Uniform" begin
+        if device == :gpu
             println("")
-            @info "Benchmarking single iteration with OEDPolicy: Uniform"
-            benchmark(Uniform(candidates))
+            @info "Benchmarking single iteration with timestep = $timestep on device = $device"
+            display(@benchmark CUDA.@sync propagate!($sim))
             println("")
             println("")
-        end
-        @testset "OEDPolicy: Myopic" begin
+        else
             println("")
-            @info "Benchmarking single iteration with OEDPolicy: Myopic"
-            benchmark(Myopic(candidates))
-            println("")
-            println("")
-        end
-        @testset "OEDPolicy: MyopicFast" begin
-            println("")
-            @info "Benchmarking single iteration with OEDPolicy: MyopicFast"
-            benchmark(MyopicFast(candidates))
+            @info "Benchmarking single iteration with timestep = $timestep on device = $device"
+            display(@benchmark propagate!($sim))
             println("")
             println("")
         end
     end
 
-    function test_convergence(timestep::Timestep, T::Int)
+    function test_convergence(timestep::Timestep, T::Int, device)
+        device === :cpu && return nothing
         N = 10
         p = 0.85
         q = 1.0
@@ -69,8 +48,9 @@ CUDA.functional() && @testset "integration tests" begin
                 LinRange(0.05, 2.00, 45),
                 LinRange(0.05, 2.00, 45),
                 2048, 512, 12,
-                timestep = timestep
-              )
+                timestep = timestep,
+                device = device
+            )
         times, epsps = run!(sim, T = T)
         mapmodel = MAP(sim)
 
@@ -81,22 +61,43 @@ CUDA.functional() && @testset "integration tests" begin
         @test abs(mapmodel.τ - τ) <= 0.3
     end
 
-    @testset "convergence of filter" begin
-        test_convergence(RandomTimestep(Exponential(0.121)), 1000)
-    end
+    @testset "Device = $device" for device in DEVICES
 
-    # OED tests
-    @testset "convergence of OED" begin
-        candidates = LinRange(0.005, 2, 8)
-        T = 1000
-        @testset "OEDPolicy: Uniform" begin
-            test_convergence(Uniform(candidates), T)
+        @testset "benchmark of filter" begin
+            benchmark(RandomTimestep(Exponential(0.121)), device)
         end
-        @testset "OEDPolicy: Myopic" begin
-            test_convergence(Myopic(candidates), T)
+
+        # OED benchmarks
+        @testset "benchmark of OED" begin
+            candidates = LinRange(0.005, 2, 8)
+            @testset "OEDPolicy: Uniform" begin
+                benchmark(Uniform(candidates), device)
+            end
+            @testset "OEDPolicy: Myopic" begin
+                benchmark(Myopic(candidates), device)
+            end
+            @testset "OEDPolicy: MyopicFast" begin
+                benchmark(MyopicFast(candidates), device)
+            end
         end
-        @testset "OEDPolicy: MyopicFast" begin
-            test_convergence(MyopicFast(candidates), T)
+
+        @testset "convergence of filter" begin
+            test_convergence(RandomTimestep(Exponential(0.121)), 1000, device)
+        end
+
+        # OED tests
+        @testset "convergence of OED" begin
+            candidates = LinRange(0.005, 2, 8)
+            T = 1000
+            @testset "OEDPolicy: Uniform" begin
+                test_convergence(Uniform(candidates), T, device)
+            end
+            @testset "OEDPolicy: Myopic" begin
+                test_convergence(Myopic(candidates), T, device)
+            end
+            @testset "OEDPolicy: MyopicFast" begin
+                test_convergence(MyopicFast(candidates), T, device)
+            end
         end
     end
 end
