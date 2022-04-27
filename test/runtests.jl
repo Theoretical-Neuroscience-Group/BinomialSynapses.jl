@@ -24,6 +24,8 @@ else
     @info "Skipping intermediate benchmarks."
 end
 
+# This pipeline is non-deterministic and will occasionally fail
+# even if everything is ok. In this case, re-run all tests.
 @testset "BinomialSynapses.jl" begin
     include("models.jl")
     include("propagate.jl")
