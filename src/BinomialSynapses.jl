@@ -4,9 +4,9 @@ using BinomialGPU
 using CovarianceEstimation
 using CUDA
 using CUDA: i32
-using Distributions: Binomial, Exponential, Normal
+using Distributions: Binomial, Exponential, MvNormal, Normal
+using Distributions: entropy
 using LaTeXStrings
-using LinearAlgebra: det
 using Plots
 using Statistics: mean, cov
 using StatsBase: mode, entropy

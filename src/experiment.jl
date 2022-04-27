@@ -175,15 +175,10 @@ function compute_entropy(model)
     σrng = Array(model.σrng)
     τrng = Array(model.τrng)
 
-    samples = [Nrng[Nind]';prng[pind]';qrng[qind]';σrng[σind]';τrng[τind]']
-   # Σ_est = cov(samples')
+    samples = [Nrng[Nind]'; prng[pind]'; qrng[qind]'; σrng[σind]'; τrng[τind]']
+    # Σ_est = cov(samples')
     method = LinearShrinkage(DiagonalUnequalVariance(), 0.5)
-    Σ_est = cov(method, samples')
-			
-			
-    determinant = det(2*pi*ℯ*Σ_est)
-    ent = 0.5*log(determinant)
-
+    Σ_est = cov(method, samples, dims = 2)
+    ent = entropy(MvNormal(Σ_est))
     return ent
-
 end
