@@ -40,21 +40,21 @@ end
 
 Minimize the joint entropy.
 """
-Myopic(dts,penalty) = Myopic(dts, _entropy,penalty)
+Myopic(dts, penalty) = Myopic(dts, _entropy, penalty)
 
 """
     MyopicFast(dts)
 
 Minimize the joint entropy.
 """
-MyopicFast(dts,penalty) = MyopicFast(dts, _entropy,penalty)
+MyopicFast(dts, penalty) = MyopicFast(dts, _entropy, penalty)
 
 """
     Myopic_tau(dts)
 
 Minimize the entropy of τ.
 """
-Myopic_tau(dts,penalty) = Myopic(dts, _tauentropy,penalty)
+Myopic_tau(dts, penalty) = Myopic(dts, _tauentropy, penalty)
 
 """
     MyopicFast_tau(dts)
@@ -214,15 +214,10 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
         Σ_est = cov(samples')
     
         determinant = det(2*pi*ℯ*Σ_est)
-        
         if determinant > 0
-
             ent = 0.5*log(determinant)
-        
         else
-            
             ent = Inf
-        
         end
 
         if ent + η*dts[i] < minent
@@ -273,9 +268,7 @@ end
 function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
-
     dts = Array(obs.dt)
-    
     η = policy.penalty
 
     minent = Inf
@@ -303,9 +296,7 @@ end
 function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
-
     dts = Array(obs.dt)
-    
     η = policy.penalty
 
     counts = Dict{Tuple{Float64, Int}, Int}()
@@ -319,13 +310,10 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy:
         totals[dt] = get!(totals, dt, 0.) + 1
         entropies[dt] = η*dt
     end
-
-    
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
         entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
     end
-    
     return argmin(entropies)
 end
