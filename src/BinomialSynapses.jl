@@ -1,7 +1,7 @@
 module BinomialSynapses
 
 using BinomialGPU
-using CovarianceEstimation
+using CovarianceEstimation: DiagonalUnequalVariance, LinearShrinkage
 using CUDA
 using CUDA: i32
 using Distributions: Binomial, Exponential, MvNormal, Normal
