@@ -6,7 +6,7 @@ A myopic OEDPolicy, i.e. one in which only the effect of the next time step on t
 abstract type MyopicPolicy <: OEDPolicy end
 
 """
-    Myopic(dts, target)
+    Myopic(dts, target, penalty = 0)
 
 A parallel implementation of a myopic policy with candidate time steps `dts` and optimization target `target`, in which multiple copies of the particles 
 are propagated in parallel.
@@ -14,54 +14,60 @@ Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct Myopic{T1, T2, T3} <: MyopicPolicy
+struct Myopic{T1, T2, T3 <: Real} <: MyopicPolicy
     dts::T1
     target::T2
     penalty::T3
 end
 
-"""
-    MyopicFast(dts, target)
+Myopic(dts, target) = Myopic(dts, target, 0)
 
-MyopicFast` is the same as `Myopic`, except that instead of expanding states and parameters along another dimension, and propagating each parameter with each dt, `dts` are randomly assigned to members of the parameter ensemble.
+"""
+    MyopicFast(dts, target, penalty = 0)
+
+MyopicFast` is the same as `Myopic`, except that instead of expanding states 
+and parameters along another dimension, and propagating each parameter with each dt,
+`dts` are randomly assigned to members of the parameter ensemble.
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct MyopicFast{T1, T2, T3} <: MyopicPolicy
+struct MyopicFast{T1, T2, T3 <: Real} <: MyopicPolicy
     dts::T1
     target::T2
     penalty::T3    
 end
 
+MyopicFast(dts, target) = MyopicFast(dts, target, 0)
+
 # default target is miniminum entropy
 """
-    Myopic(dts)
+    Myopic(dts, penalty::Real)
 
-Minimize the joint entropy.
+Minimize the joint entropy, using a penalty term of `penalty` times the time step.
 """
-Myopic(dts, penalty) = Myopic(dts, _entropy, penalty)
-
-"""
-    MyopicFast(dts)
-
-Minimize the joint entropy.
-"""
-MyopicFast(dts, penalty) = MyopicFast(dts, _entropy, penalty)
+Myopic(dts, penalty::Real = 0) = Myopic(dts, _entropy, penalty)
 
 """
-    Myopic_tau(dts)
+    MyopicFast(dts, penalty::Real)
 
-Minimize the entropy of τ.
+Minimize the joint entropy, using a penalty term of `penalty` times the time step.
 """
-Myopic_tau(dts, penalty) = Myopic(dts, _tauentropy, penalty)
+MyopicFast(dts, penalty::Real = 0) = MyopicFast(dts, _entropy, penalty)
+
+"""
+    Myopic_tau(dts, penalty::Real)
+
+Minimize the entropy of τ, using a penalty term of `penalty` times the time step.
+"""
+Myopic_tau(dts, penalty::Real = 0) = Myopic(dts, _tauentropy, penalty)
 
 """
     MyopicFast_tau(dts)
 
-Minimize the entropy of τ.
+Minimize the entropy of τ, using a penalty term of `penalty` times the time step.
 """
-MyopicFast_tau(dts,penalty) = MyopicFast(dts, _tauentropy,penalty)
+MyopicFast_tau(dts, penalty::Real = 0) = MyopicFast(dts, _tauentropy, penalty)
 
 function (policy::MyopicPolicy)(sim::NestedFilterSimulation)
     obs = _synthetic_obs(sim, policy)
@@ -84,9 +90,10 @@ end
 _temp_state(sim, ::Myopic) = _repeat(sim.fstate, length(sim.tsteps.dts))
 
 function _repeat(fstate::NestedParticleState, m)
-    # return a new NestedParticleState which repeats `fstate.state` along a third dimension,
-    # `m` times, and `fstate.model` along a second dimension,
-    # the first dimension of each of them represents the different entries of `dt_vector`
+    # return a new NestedParticleState which repeats `fstate.state` 
+    # along a third dimension, `m` times, and `fstate.model` along 
+    # a second dimension. The first dimension of each of them 
+    # represents the different entries of `dt_vector`
     state = _repeat(fstate.state, m)
     model = _repeat(fstate.model, m)
 
@@ -129,7 +136,7 @@ end
 
 _temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 
-_temp_dts(sim, policy) = _temp_dts(sim.tsteps.dts, sim.fstate.model.N, policy, m_out(sim)) 
+_temp_dts(sim, policy) = _temp_dts(sim.tsteps.dts, sim.fstate.model.N, policy, m_out(sim))
 
 _temp_dts(dts, ::AbstractArray, ::Myopic, ::Integer) = collect(dts)
 _temp_dts(dts, ::AbstractArray, ::MyopicFast, m::Integer) = repeat(dts, m ÷ length(dts))
