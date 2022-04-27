@@ -86,22 +86,21 @@ function run_experiment!(
 			
     entrop = zeros(length(keys(sim.tsteps.train)))
     for j in 1:length(keys(sim.tsteps.train))
-	train = sim.tsteps.train[j]
-	T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
+	    train = sim.tsteps.train[j]
+	    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
     	T2 = sim.filter
     	T3 = ScalarBinomialState(N_star, 0)
     	T4 = deepcopy(sim.fstate)
     	T5 = sim.tsteps
     	T6 = epscs
     	T7 = dts
-	entropy_temp = []
+	    entropy_temp = Float64[]
         for l in 1:2
-
             sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
             for k in 1:length(train)
                 propagate!(sim_copy,train[k])
             end
-            append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
+            append!(entropy_temp, compute_entropy(sim_copy.fstate.model))
         end
         entrop[j] = mean(entropy_temp)
     end
@@ -120,46 +119,44 @@ function postpro_experiment!(
 )
     for i in 1:T
         propagate!(sim1, epscs1[i], dts1[i])
-	propagate!(sim2, epscs2[i], dts2[i])
+        propagate!(sim2, epscs2[i], dts2[i])
         if plot_each_timestep
-            
-	    fstate1 = sim1.fstate        
-	    Nrng = Array(fstate1.model.Nrng)
-	    prng = Array(fstate1.model.prng)
-	    qrng = Array(fstate1.model.qrng)
-	    σrng = Array(fstate1.model.σrng)
-	    τrng = Array(fstate1.model.τrng)
-	    Nind1 = Array(fstate1.model.Nind)
-	    pind1 = Array(fstate1.model.pind)
-	    qind1 = Array(fstate1.model.qind)
-	    σind1 = Array(fstate1.model.σind)
-	    τind1 = Array(fstate1.model.τind)
-				
-	    fstate2 = sim2.fstate
-	    Nind2 = Array(fstate2.model.Nind)
-	    pind2 = Array(fstate2.model.pind)
-	    qind2 = Array(fstate2.model.qind)
-	    σind2 = Array(fstate2.model.σind)
-	    τind2 = Array(fstate2.model.τind)
-				
-	    pN = show_histogram(Nrng, Nind1, Nind2,
-		    xlabel = L"N [-]", ylabel = L"p(N)")
-	    pp = show_histogram(prng, pind1, pind2,
-		    xlabel = L"p [-]", ylabel = L"p(p)")
-	    pq = show_histogram(qrng, qind1, qind2,
-		    xlabel = L"q [A]", ylabel = L"p(q)")
-	    pσ = show_histogram(σrng, σind1, σind2,
-		    xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
-	    pτ = show_histogram(τrng, τind1, τind2,
-		    xlabel = L"\tau [s]", ylabel = L"p(\tau)")
+            fstate1 = sim1.fstate        
+            Nrng = Array(fstate1.model.Nrng)
+            prng = Array(fstate1.model.prng)
+            qrng = Array(fstate1.model.qrng)
+            σrng = Array(fstate1.model.σrng)
+            τrng = Array(fstate1.model.τrng)
+            Nind1 = Array(fstate1.model.Nind)
+            pind1 = Array(fstate1.model.pind)
+            qind1 = Array(fstate1.model.qind)
+            σind1 = Array(fstate1.model.σind)
+            τind1 = Array(fstate1.model.τind)
+                    
+            fstate2 = sim2.fstate
+            Nind2 = Array(fstate2.model.Nind)
+            pind2 = Array(fstate2.model.pind)
+            qind2 = Array(fstate2.model.qind)
+            σind2 = Array(fstate2.model.σind)
+            τind2 = Array(fstate2.model.τind)
+                    
+            pN = show_histogram(Nrng, Nind1, Nind2,
+                xlabel = L"N [-]", ylabel = L"p(N)")
+            pp = show_histogram(prng, pind1, pind2,
+                xlabel = L"p [-]", ylabel = L"p(p)")
+            pq = show_histogram(qrng, qind1, qind2,
+                xlabel = L"q [A]", ylabel = L"p(q)")
+            pσ = show_histogram(σrng, σind1, σind2,
+                xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
+            pτ = show_histogram(τrng, τind1, τind2,
+                xlabel = L"\tau [s]", ylabel = L"p(\tau)")
 
-	    display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
-	    if i%5 == 0
-		savefig(string(i,".png"))
-	    end
+            display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
+            if i%5 == 0
+                savefig(string(i,".png"))
+            end
         end
     end
-
 end
 
 function compute_entropy(model)

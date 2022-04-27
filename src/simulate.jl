@@ -221,10 +221,10 @@ function runBatch_map!(
         train_opt = sim.tsteps.train[argmin(entrop)]
         for j in 1:length(train_opt)
             begin
-            time = propagate!(sim,train_opt[j])
+                time = propagate!(sim,train_opt[j])
             end
             if plot_each_timestep
-            posterior_plot(sim,j)
+                posterior_plot(sim,j)
             end
             update!(recording, sim, time)
         end
@@ -306,8 +306,8 @@ function compute_entropy_tau(model)
     dict = Dict()
     τind = Array(model.τind)
     for j in 1:length(τind)
-	iτ = τind[j]
-	key = (iτ,)
+        iτ = τind[j]
+        key = (iτ,)
         dict[key] = get!(dict, key, 0) + 1
     end
     ent = 0.
