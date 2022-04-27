@@ -224,7 +224,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
         if determinant > 0
             ent = 0.5*log(determinant)
         else
-            ent = Inf
+            ent = -Inf
         end
 
         if ent + η*dts[i] < minent
