@@ -113,7 +113,11 @@ function propagate!(sim::NestedFilterSimulation)
     time1 = @timed sim.tsteps(sim)
     dt = time1.value
     time2 = propagate!(sim, dt)
-    return time1.time + time2
+    if isnothing(time2)
+        return time1.time
+    else
+        return time1.time + time2
+    end
 end
 
 """
