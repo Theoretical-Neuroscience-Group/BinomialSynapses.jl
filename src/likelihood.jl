@@ -18,7 +18,7 @@ end
 gauss(x, μ, σ) = exp(-((x-μ)/σ)^2/2)
 
 function likelihood_indices(
-    k,
+    k::AnyCuArray,
     model::AbstractBinomialModel, 
     obs
 )
