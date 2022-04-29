@@ -167,7 +167,7 @@ function run!(
         if plot_each_timestep
             posterior_plot(sim,i)
         end
-        update!(recording, sim, time) 
+        update!(recording, sim, time.time) 
     end
     save(recording)
     return sim.times, sim.epsps
