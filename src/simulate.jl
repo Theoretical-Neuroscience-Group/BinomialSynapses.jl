@@ -250,11 +250,11 @@ function run_exact!(
 	    	    m_out = length(sim.fstate.model.N)
 	            random_idx = rand(1:m_out)
 
-                    N_star = sim.fstate.model.N[random_idx]
-		    p_star = sim.fstate.model.p[random_idx]
-		    q_star = sim.fstate.model.q[random_idx]
-		    σ_star = sim.fstate.model.σ[random_idx]
-		    τ_star = sim.fstate.model.τ[random_idx]
+                    N_star = Array(sim.fstate.model.N)[random_idx]
+		    p_star = Array(sim.fstate.model.p)[random_idx]
+		    q_star = Array(sim.fstate.model.q)[random_idx]
+		    σ_star = Array(sim.fstate.model.σ)[random_idx]
+		    τ_star = Array(sim.fstate.model.τ)[random_idx]
 
     		    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
 		    T2 = sim.filter
