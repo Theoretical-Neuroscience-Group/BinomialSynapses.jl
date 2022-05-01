@@ -240,7 +240,7 @@ function run_exact!(
         initialize!(sim)
     end
     for i in 1:T
-        time_batch = @timed begin
+        begin
             entrop = zeros(length(sim.tsteps.dts))
             for j in 1:length(entrop)
                 dt = sim.tsteps.dts[j]
