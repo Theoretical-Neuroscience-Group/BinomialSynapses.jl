@@ -187,7 +187,7 @@ end
 _shape_epsps(e_temp, sim, ::Myopic) = e_temp
 _shape_epsps(e_temp, sim, ::MyopicFast) = repeat(e_temp, m_out(sim)÷length(sim.tsteps.dts))
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
+function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
@@ -222,7 +222,7 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     return dts[imin]
 end
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
+function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
