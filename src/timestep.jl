@@ -55,6 +55,10 @@ struct DeterministicTrain{T} <: Timestep
     end
 end
 
+struct BatchTrain{T} <: Timestep
+    train::T
+end
+
 (timestep::FixedTimestep)() = timestep.dt
 (timestep::RandomTimestep)() = rand(timestep.distribution)
 (timestep::DeterministicTrain)() = isempty(timestep.stack) ? nothing : pop!(timestep.stack)

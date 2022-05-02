@@ -36,11 +36,11 @@ function flatten(A::AbstractMatrix)
 end
 
 function posterior_plot(
-    fstate, times, epsps;
+    i, fstate, times, epsps;
     truemodel = nothing,
     truestate = nothing,
-    showstates = false
-)
+    showstates = false)
+    
     Nrng = Array(fstate.model.Nrng)
     prng = Array(fstate.model.prng)
     qrng = Array(fstate.model.qrng)
@@ -82,8 +82,44 @@ function posterior_plot(
         return
     end
     display(plot(pE, pN, pp, pq, pσ, pτ, layout = (3, 2)))
+    if i%10 == 0
+        savefig(string(i,".png"))
+    end
 end
 
-function posterior_plot(sim::NestedFilterSimulation)
-    return posterior_plot(sim.fstate, sim.times, sim.epsps, truemodel = sim.hmodel)
+function posterior_plot(sim::NestedFilterSimulation,i)
+    return posterior_plot(i,sim.fstate, sim.times, sim.epsps, truemodel = sim.hmodel)
+end
+    
+function posterior_plot(sim::NestedFilterExperiment,i)
+    
+    fstate = sim.fstate
+        
+    Nrng = Array(fstate.model.Nrng)
+    prng = Array(fstate.model.prng)
+    qrng = Array(fstate.model.qrng)
+    σrng = Array(fstate.model.σrng)
+    τrng = Array(fstate.model.τrng)
+
+    Nind = Array(fstate.model.Nind)
+    pind = Array(fstate.model.pind)
+    qind = Array(fstate.model.qind)
+    σind = Array(fstate.model.σind)
+    τind = Array(fstate.model.τind)
+
+    pN = show_histogram(Nrng, Nind,
+            xlabel = L"N [-]", ylabel = L"p(N)")
+    pp = show_histogram(prng, pind,
+            xlabel = L"p [-]", ylabel = L"p(p)")
+    pq = show_histogram(qrng, qind,
+            xlabel = L"q [A]", ylabel = L"p(q)")
+    pσ = show_histogram(σrng, σind,
+            xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
+    pτ = show_histogram(τrng, τind,
+            xlabel = L"\tau [s]", ylabel = L"p(\tau)")
+
+    display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
+    if i%10 == 0
+        savefig(string(i,".png"))
+    end
 end

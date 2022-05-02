@@ -1,12 +1,14 @@
 module BinomialSynapses
 
 using BinomialGPU
+using CovarianceEstimation: DiagonalUnequalVariance, LinearShrinkage
 using CUDA
 using CUDA: i32
-using Distributions: Binomial, Exponential, Normal
+using Distributions: Binomial, Exponential, MvNormal, Normal
+using Distributions: entropy
 using LaTeXStrings
 using Plots
-using Statistics: mean
+using Statistics: mean, cov
 using StatsBase: mode, entropy
 
 include("models.jl")
@@ -23,7 +25,7 @@ include("propagate.jl")
 export propagate!
 
 include("timestep.jl")
-export Timestep, FixedTimestep, RandomTimestep, DeterministicTrain
+export Timestep, FixedTimestep, RandomTimestep, get_step, DeterministicTrain, BatchTrain
 
 include("emission.jl")
 export emit
@@ -40,6 +42,9 @@ export outer_resample!, indices!, resample!
 include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
 
+include("experiment.jl")
+export NestedFilterExperiment, run_experiment!, postpro_experiment!
+
 include("statistics.jl")
 export MAP
 
@@ -47,7 +52,7 @@ include("record.jl")
 export Recording
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, m_out, run!
+export NestedFilterSimulation, initialize!, m_out, run!, runBatch_map!, runBatchTau!
 
 include("visualize.jl")
 export posterior_plot
@@ -57,5 +62,7 @@ export OEDPolicy, policy, Uniform
 
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
+
+
 
 end#module

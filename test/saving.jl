@@ -1,4 +1,4 @@
-CUDA.functional() && @testset "Saving Recording using JLD" begin
+@testset "Saving Recording using JLD" begin
     N = 10
     p = 0.85
     q = 1.0
@@ -13,7 +13,8 @@ CUDA.functional() && @testset "Saving Recording using JLD" begin
         LinRange(0.05,1,25),
         LinRange(0.05,1,25),
         1024, 256, 12,
-        timestep = FixedTimestep(0.35)
+        timestep = FixedTimestep(0.35),
+        device = :cpu
     )
 
     function f1(sim, time)
@@ -64,7 +65,7 @@ CUDA.functional() && @testset "Saving Recording using JLD" begin
         map_σ = map.σ
         map_τ = map.τ
 
-        return entropy_N, entropy_p, entropy_q, entropy_σ, entropy_τ, map_N, map_p, map_q, map_σ, map_τ, sim.times, time.time
+        return entropy_N, entropy_p, entropy_q, entropy_σ, entropy_τ, map_N, map_p, map_q, map_σ, map_τ, sim.times, time
     end
 
     function f2(data)
