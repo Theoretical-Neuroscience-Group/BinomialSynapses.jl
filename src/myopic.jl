@@ -280,9 +280,15 @@ function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy
     minent = Inf
     imin = 0
     @inbounds for i in 1:size(Nind, 1)
-        samples = [Nrng[Nind[i, :]]';prng[pind[i, :]]';qrng[qind[i, :]]';σrng[σind[i, :]]';τrng[τind[i, :]]']
+        samples = hcat(
+            Nrng[Nind[i, :]],
+            prng[pind[i, :]],
+            qrng[qind[i, :]],
+            σrng[σind[i, :]],
+            τrng[τind[i, :]]
+        )
         method = LinearShrinkage(DiagonalUnequalVariance(), 0.5)
-        Σ_est = cov(method, samples, dims = 2)
+        Σ_est = cov(method, samples, dims = 1)
     
         ent = entropy(MvNormal(Σ_est))
 
