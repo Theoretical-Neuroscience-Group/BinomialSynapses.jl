@@ -13,6 +13,7 @@ are propagated in parallel.
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
+- `_diffentropy`: minimizes the joint differential entropy of the posterior distribution over parameters. This computes the covariance matrix of the joint distribution, and calculated the differential entropy of a multivariate Gaussian with that covariance matrix.
 """
 struct Myopic{T1, T2, T3 <: Real} <: MyopicPolicy
     dts::T1
@@ -31,6 +32,7 @@ and parameters along another dimension, and propagating each parameter with each
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
+- `_diffentropy`: minimizes the joint differential entropy of the posterior distribution over parameters. This computes the covariance matrix of the joint distribution, and calculated the differential entropy of a multivariate Gaussian with that covariance matrix.
 """
 struct MyopicFast{T1, T2, T3 <: Real} <: MyopicPolicy
     dts::T1
