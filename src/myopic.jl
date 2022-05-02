@@ -294,43 +294,6 @@ function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy
     return dts[imin]
 end
 
-function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
-    # CPU algorithm: move index arrays to CPU
-    Nind = Array(model.Nind)
-    pind = Array(model.pind)
-    qind = Array(model.qind)
-    σind = Array(model.σind)
-    τind = Array(model.τind)
-
-    dts = Array(obs.dt)
-    
-    η = policy.penalty
-
-    counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
-    totals = Dict{Float64, Int}() # total counts per dt
-    entropies = Dict{Float64, Float64}()
-    @inbounds for i in 1:length(Nind)
-        iN = Nind[i]
-        ip = pind[i]
-        iq = qind[i]
-        iσ = σind[i]
-        iτ = τind[i]
-        dt = dts[i]
-        key = (dt, iN, ip, iq, iσ, iτ)
-        counts[key] = get!(counts, key, 0) + 1
-        totals[dt] = get!(totals, dt, 0.) + 1
-        entropies[dt] = η*dt
-    end
-
-    @inbounds for (key, count) in counts
-        dt = key[1]
-        p = count/totals[dt]
-        entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
-    end
-    
-    return argmin(entropies)
-end
-
 function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
