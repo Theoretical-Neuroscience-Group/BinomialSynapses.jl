@@ -159,24 +159,15 @@ function _temp_epsps(sim)
 end
 
 function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts, ::AnyCuArray)
-    x = 1.
-    L = length(times)
-    if L > 1
-        for ii in 2:L
-            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
-        end
-    end
-
-    e_temp = zeros(Float32, length(dts))
-    for kk in 1:length(e_temp)
-        x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
-        e_temp[kk] = x_temp*N_star*p_star*q_star
-    end
-    return e_temp
+    return cu(_temp_epsps(times, N_star, p_star, q_star, τ_star, dts))
 end
 
 # CPU fallback:
 function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts, ::AbstractArray)
+    return _temp_epsps(times, N_star, p_star, q_star, τ_star, dts)
+end
+
+function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts)
     x = 1.
     L = length(times)
     if L > 1
