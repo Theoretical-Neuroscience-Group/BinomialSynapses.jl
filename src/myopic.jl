@@ -187,6 +187,76 @@ end
 _shape_epsps(e_temp, sim, ::Myopic) = e_temp
 _shape_epsps(e_temp, sim, ::MyopicFast) = repeat(e_temp, m_out(sim)÷length(sim.tsteps.dts))
 
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
+    # CPU algorithm: move index arrays to CPU
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    dts = Array(obs.dt)
+
+    minent = Inf
+    imin = 0
+    @inbounds for i in 1:size(Nind, 1)
+        dict = Dict{NTuple{5, Int64}, Int}()
+        @inbounds for j in 1:size(Nind, 2)
+            iN = Nind[i, j]
+            ip = pind[i, j]
+            iq = qind[i, j]
+            iσ = σind[i, j]
+            iτ = τind[i, j]
+            key = (iN, ip, iq, iσ, iτ)
+            dict[key] = get!(dict, key, 0) + 1
+        end
+        ent = 0.
+        for value in values(dict)
+            p = value/size(Nind, 2)
+            ent -= p * log(p)
+        end
+        if ent < minent
+            minent = ent
+            imin = i 
+        end
+    end
+    return dts[imin]
+end
+
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+    # CPU algorithm: move index arrays to CPU
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    dts = Array(obs.dt)
+
+    counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
+    totals = Dict{Float64, Int}() # total counts per dt
+    @inbounds for i in 1:length(Nind)
+        iN = Nind[i]
+        ip = pind[i]
+        iq = qind[i]
+        iσ = σind[i]
+        iτ = τind[i]
+        dt = dts[i]
+        key = (dt, iN, ip, iq, iσ, iτ)
+        counts[key] = get!(counts, key, 0) + 1
+        totals[dt] = get!(totals, dt, 0.) + 1
+    end
+
+    entropies = Dict{Float64, Float64}()
+    @inbounds for (key, count) in counts
+        dt = key[1]
+        p = count/totals[dt]
+        entropies[dt] = get!(entropies, dt, 0.) - p * log(p)
+    end
+    
+    return argmin(entropies)
+end
+
 function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
