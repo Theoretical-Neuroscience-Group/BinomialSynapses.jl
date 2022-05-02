@@ -163,7 +163,7 @@ function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts, ::AnyCuArray)
         x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
-    return e_temp
+    return cu(e_temp)
 end
 
 # CPU fallback:
