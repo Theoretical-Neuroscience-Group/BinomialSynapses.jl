@@ -1,4 +1,4 @@
-CUDA.functional() && @testset "Saving Recording using JLD" begin
+@testset "Saving Recording using JLD" begin
     N = 10
     p = 0.85
     q = 1.0
@@ -13,7 +13,8 @@ CUDA.functional() && @testset "Saving Recording using JLD" begin
         LinRange(0.05,1,25),
         LinRange(0.05,1,25),
         1024, 256, 12,
-        timestep = FixedTimestep(0.35)
+        timestep = FixedTimestep(0.35),
+        device = :cpu
     )
 
     function f1(sim, time)
