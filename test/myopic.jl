@@ -232,5 +232,58 @@
             @test _tauentropy(model, obs, policy) ≈ 0.1
         end
     end
+
+    @testset "_diffentropy: Myopic" begin
+        using BinomialSynapses: _diffentropy
+
+        Nrng = 1:5
+        prng = 0.1:0.2:0.9
+        qrng = 0.1:0.2:0.9
+        σrng = 0.5:0.5:2.5
+        τrng = 0.1:0.1:0.5
+
+        @testset "CPU" begin
+            Nind = rand(1:4, 4, 10)
+            Nind[3, 1:5] .= 1
+            Nind[3, 6:10] .= 2
+
+            pind = qind = σind = τind = Nind
+
+            model = BinomialGridModel(
+                Nind, pind, qind, σind, τind,
+                Nrng, prng, qrng, σrng, τrng
+            )
+            
+            policy = Myopic([1.])
+            obs = BinomialObservation(zeros(4), [0.1, 0.2, 0.3, 0.4])
+
+            @test _diffentropy(model, obs, policy) ≈ 0.3
+        end
+
+        CUDA.functional() && @testset "GPU" begin
+            Nrng = CuArray(Int.(Nrng))
+            prng = CuArray(Float32.(prng))
+            qrng = CuArray(Float32.(qrng))
+            σrng = CuArray(Float32.(σrng))
+            τrng = CuArray(Float32.(τrng))
+
+            Nind = rand(1:4, 4, 10)
+            Nind[2, 1:5] .= 1
+            Nind[2, 6:10] .= 2
+            pind = qind = σind = τind = Nind
+
+            Nind = cu(Nind)
+
+            model = BinomialGridModel(
+                cu(Nind), cu(pind), cu(qind), cu(σind), cu(τind),
+                cu(Nrng), cu(prng), cu(qrng), cu(σrng), cu(τrng)
+            )
+            
+            policy = Myopic([1.])
+            obs = BinomialObservation(zeros(4), [0.1, 0.2, 0.3, 0.4])
+
+            @test _diffentropy(model, obs, policy) ≈ 0.2
+        end
+    end
 end
 
