@@ -64,7 +64,7 @@ CUDA.functional() && @testset "Saving Recording using JLD" begin
         map_σ = map.σ
         map_τ = map.τ
 
-        return entropy_N, entropy_p, entropy_q, entropy_σ, entropy_τ, map_N, map_p, map_q, map_σ, map_τ, sim.times, time.time
+        return entropy_N, entropy_p, entropy_q, entropy_σ, entropy_τ, map_N, map_p, map_q, map_σ, map_τ, sim.times, time
     end
 
     function f2(data)
