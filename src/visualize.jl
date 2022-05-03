@@ -12,7 +12,7 @@ function show_histogram(
             counts./sum(counts),
             xlabel=xlabel,
             ylabel=ylabel,
-            legend=false
+            legend=false,linewidth = 2
            )
     if !isnothing(truevalue)
         plot!([truevalue], seriestype="vline",legend=false)
@@ -57,19 +57,19 @@ function posterior_plot(
     pE = show_EPSP_trace(times, epsps)
     pN = show_histogram(Nrng, Nind,
             xlabel = L"N [-]", ylabel = L"p(N)")
-    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false,yaxis=nothing)
+    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
     pp = show_histogram(prng, pind,
             xlabel = L"p [-]", ylabel = L"p(p)")
-    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false,yaxis=nothing)
+    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
     pq = show_histogram(qrng, qind,
             xlabel = L"q [A]", ylabel = L"p(q)")
-    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false,yaxis=nothing)
+    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
     pσ = show_histogram(σrng, σind,
             xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
-    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false,yaxis=nothing)
+    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
     pτ = show_histogram(τrng, τind,
             xlabel = L"\tau [s]", ylabel = L"p(\tau)")
-    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false,yaxis=nothing)
+    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
     if showstates
         pn = histogram(flatten(Array(fstate.state.n)), bins=1:20,
                 normalize = :probability,
@@ -82,7 +82,7 @@ function posterior_plot(
         display(plot(pE, pN, pp, pq, pσ, pτ, pn, pk, layout = (4, 2)))
         return
     end
-    display(plot(pE, pN, pp, pq, pσ, pτ, layout = (3, 2)))
+    display(plot(pE, pN, pp, pq, pσ, pτ, size= (600,400), layout = (3, 2)))
     if i%10 == 0
         savefig(string(i,".png"))
     end
