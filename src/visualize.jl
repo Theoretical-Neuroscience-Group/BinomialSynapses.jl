@@ -26,7 +26,8 @@ function show_EPSP_trace(times, epsps)
         epsps,
         xlabel="Time [s]",
         ylabel="EPSC [A]",
-        legend=false
+        legend=false,
+        markershape = :circle, linestyle = :dash
     )
 end
 
