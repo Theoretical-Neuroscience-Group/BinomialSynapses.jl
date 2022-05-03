@@ -27,7 +27,7 @@ function show_EPSP_trace(times, epsps)
         xlabel="Time [s]",
         ylabel="EPSC [A]",
         legend=false,
-        markershape = :circle, linestyle = :dash
+        markershape = :circle, linestyle = :dash,yaxis=nothing
     )
 end
 
@@ -57,19 +57,19 @@ function posterior_plot(
     pE = show_EPSP_trace(times, epsps)
     pN = show_histogram(Nrng, Nind,
             xlabel = L"N [-]", ylabel = L"p(N)")
-    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false,yaxis=nothing)
     pp = show_histogram(prng, pind,
             xlabel = L"p [-]", ylabel = L"p(p)")
-    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false,yaxis=nothing)
     pq = show_histogram(qrng, qind,
             xlabel = L"q [A]", ylabel = L"p(q)")
-    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false,yaxis=nothing)
     pσ = show_histogram(σrng, σind,
             xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
-    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false,yaxis=nothing)
     pτ = show_histogram(τrng, τind,
             xlabel = L"\tau [s]", ylabel = L"p(\tau)")
-    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false)
+    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false,yaxis=nothing)
     if showstates
         pn = histogram(flatten(Array(fstate.state.n)), bins=1:20,
                 normalize = :probability,
