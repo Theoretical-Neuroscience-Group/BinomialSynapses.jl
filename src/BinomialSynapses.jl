@@ -6,7 +6,7 @@ using CUDA: i32
 using Distributions: Binomial, Exponential, Normal
 using LaTeXStrings
 using Plots
-using Statistics: mean, cov
+using Statistics: mean, cov, cor
 using StatsBase: mode, entropy
 using LinearAlgebra: det
 using CovarianceEstimation
