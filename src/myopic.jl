@@ -129,7 +129,7 @@ _temp_dts(sim, ::MyopicFast) = repeat(sim.tsteps.dts, m_out(sim) ÷ length(sim.t
 
 function _temp_epsps(sim)
     dts = sim.tsteps.dts
-    map = MAP(sim.fstate.model)
+    map = MEAN(sim.fstate.model)
     times = sim.times
 
     N_star = map.N
