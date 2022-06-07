@@ -1,4 +1,6 @@
 MAP(fstate::NestedParticleState; kwargs...) = MAP(fstate.model, kwargs...)
+MEAN(fstate::NestedParticleState; kwargs...) = MEAN(fstate.model, kwargs...)
+
 
 """
     MAP(model; marginal = false)
@@ -8,6 +10,9 @@ When `marginal = false`, the mode of the joint distribution of all parameters is
 """
 function MAP(model::BinomialGridModel; kwargs...)
     MAP(BinomialModel(model); kwargs...)
+end
+function MEAN(model::BinomialGridModel; kwargs...)
+    MEAN(BinomialModel(model); kwargs...)
 end
 
 function MAP(model::BinomialModel{T1, T2}; marginal::Bool = false) where {T1, T2}
@@ -28,4 +33,14 @@ function MAP(model::BinomialModel{T1, T2}; marginal::Bool = false) where {T1, T2
             model.τ
         ) |> Array |> eachrow |> mode
     return BinomialModel{eltype(T1), eltype(T2)}(eltype(T1)(v[1]), v[2:end]...)
+end
+
+function MEAN(model::BinomialModel{T1, T2})
+    return BinomialModel(
+        mean(Array(model.N)),
+        mean(Array(model.p)),
+        mean(Array(model.q)),
+        mean(Array(model.σ)),
+        mean(Array(model.τ))
+    )
 end
