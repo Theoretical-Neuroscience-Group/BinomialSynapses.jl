@@ -46,7 +46,7 @@ include("experiment.jl")
 export NestedFilterExperiment, run_experiment!, postpro_experiment!
 
 include("statistics.jl")
-export MAP
+export MAP, MEAN
 
 include("record.jl")
 export Recording
