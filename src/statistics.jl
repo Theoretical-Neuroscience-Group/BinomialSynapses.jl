@@ -35,7 +35,7 @@ function MAP(model::BinomialModel{T1, T2}; marginal::Bool = false) where {T1, T2
     return BinomialModel{eltype(T1), eltype(T2)}(eltype(T1)(v[1]), v[2:end]...)
 end
 
-function MEAN(model::BinomialModel{T1, T2})
+function MEAN(model::BinomialModel{T1, T2}) where {T1, T2}
     return BinomialModel(
         mean(Array(model.N)),
         mean(Array(model.p)),
