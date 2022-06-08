@@ -95,7 +95,7 @@ function posterior_plot(
         return
     end
     display(plot(pE, pN, pp, pq, pσ, pτ, dpi = 300, size= (600,400),bottom_margin = 1Plots.mm,left_margin = 1Plots.mm, layout = (3, 2)))
-    if i%10 == 0
+    if i%1 == 0
         savefig(string(i,".png"))
     end
 end
