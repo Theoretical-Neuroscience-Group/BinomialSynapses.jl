@@ -132,7 +132,7 @@ function posterior_plot(sim::NestedFilterExperiment,i)
             xlabel = L"\tau [s]", ylabel = L"p(\tau)")
 
     display(plot(pN, pN, pp, pq, pσ, pτ, layout = (3, 2)))
-    if i%10 == 0
+    if i%1 == 0
         savefig(string(i,".png"))
     end
 end
