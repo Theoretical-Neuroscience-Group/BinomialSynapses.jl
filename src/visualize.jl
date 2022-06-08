@@ -9,7 +9,9 @@ function show_histogram(
     end
     p = plot(
             bins,
-            counts./sum(counts),
+            #counts./sum(counts),
+            counts,
+
             xlabel=xlabel,
             ylabel=ylabel,
             legend=false,linewidth = 2
@@ -57,19 +59,29 @@ function posterior_plot(
     pE = show_EPSP_trace(times, epsps)
     pN = show_histogram(Nrng, Nind,
             xlabel = L"N [-]", ylabel = L"p(N)")
-    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+    !isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false,linewidth = 2)
+    #!isnothing(truemodel) && plot!([truemodel.N[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+
     pp = show_histogram(prng, pind,
             xlabel = L"p [-]", ylabel = L"p(p)")
-    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+    !isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false,linewidth = 2)
+    #!isnothing(truemodel) && plot!([truemodel.p[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+
     pq = show_histogram(qrng, qind,
             xlabel = L"q [A]", ylabel = L"p(q)")
-    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+    !isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false,linewidth = 2)
+    #!isnothing(truemodel) && plot!([truemodel.q[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+
     pσ = show_histogram(σrng, σind,
             xlabel = L"\sigma [A]", ylabel = L"p(\sigma)")
-    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+    !isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false,linewidth = 2)
+    #!isnothing(truemodel) && plot!([truemodel.σ[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+
     pτ = show_histogram(τrng, τind,
             xlabel = L"\tau [s]", ylabel = L"p(\tau)")
-    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+    !isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false,linewidth = 2)
+    #!isnothing(truemodel) && plot!([truemodel.τ[1]], seriestype="vline",legend=false,yaxis=nothing,linewidth = 2)
+
     if showstates
         pn = histogram(flatten(Array(fstate.state.n)), bins=1:20,
                 normalize = :probability,
