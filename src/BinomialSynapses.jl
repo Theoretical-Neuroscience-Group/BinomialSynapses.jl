@@ -63,6 +63,4 @@ export OEDPolicy, policy, Uniform
 include("myopic.jl")
 export MyopicPolicy, Myopic, MyopicFast, Myopic_tau, MyopicFast_tau
 
-
-
 end#module
