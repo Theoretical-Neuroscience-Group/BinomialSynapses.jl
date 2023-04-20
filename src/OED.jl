@@ -21,7 +21,6 @@ end
 
 _oed!(sim, policy::OEDPolicy) = _oed!(policy)
 
-
 """
     Uniform(dts)
 
