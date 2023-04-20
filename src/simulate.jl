@@ -123,12 +123,12 @@ end
 Propagate the simulation by time step `dt`.
 """
 function propagate!(sim::NestedFilterSimulation, dt)
-    time1 = @timed propagate_hidden!(sim, dt)
+    propagate_hidden!(sim, dt)
     obs = emit(sim, dt)
     time2 = @timed filter_update!(sim, obs)
     push!(sim.times, sim.times[end] + dt)
     push!(sim.epsps, obs.EPSP)
-    return time1.time + time2.time
+    return time2.time
 end
 
 """
