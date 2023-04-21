@@ -289,55 +289,6 @@ function run_exact!(
     return sim.times, sim.epsps
 end
 
-	
-function runBatchTau!(
-    sim::NestedFilterSimulation;
-    T::Integer,
-    plot_each_timestep::Bool = false,
-    recording::Recording = NoRecording
-)
-    if length(sim.times) == 0
-        initialize!(sim)
-    end
-    for i in 1:T
-        begin
-            entrop = zeros(length(keys(sim.tsteps.train)))
-            for j in 1:length(keys(sim.tsteps.train))
-                train = sim.tsteps.train[j]
-
-                entropy_temp = []
-		T1 = sim.hmodel
-    		T2 = sim.filter
-    		T3 = deepcopy(sim.hstate)
-    		T4 = deepcopy(sim.fstate)
-    		T5 = sim.tsteps
-    		T6 = deepcopy(sim.times)
-    		T7 = deepcopy(sim.epsps)
-                for l in 1:5
-
-                    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
-                    for k in 1:length(train)
-                        propagate!(sim_copy,train[k])
-                    end
-                    append!(entropy_temp,compute_entropy_tau(sim_copy.fstate.model))
-                end
-                entrop[j] = mean(entropy_temp)
-            end
-	end
-        train_opt = sim.tsteps.train[argmin(entrop)]
-	for j in 1:length(train_opt)
-	    begin
-		time = propagate!(sim,train_opt[j])
-	    end
-	    if plot_each_timestep
-		posterior_plot(sim,j)
-	    end
-	    update!(recording, sim, time)
-	end
-    end
-    save(recording)
-    return sim.times, sim.epsps
-end
 
 function compute_entropy(model)
     Nind = Array(model.Nind)
@@ -364,24 +315,7 @@ function compute_entropy(model)
     return ent
 
 end
-	
-function compute_entropy_tau(model)
-			
-    dict = Dict()
-    τind = Array(model.τind)
-    for j in 1:length(τind)
-	iτ = τind[j]
-	key = (iτ,)
-        dict[key] = get!(dict, key, 0) + 1
-    end
-    ent = 0.
-    for value in values(dict)
-        p = value/length(τind)
-        ent -= p * log(p)
-    end
-    return ent		
 
-end
 
 
 MAP(sim::NestedFilterSimulation; kwargs...) = MAP(sim.fstate.model; kwargs...)
