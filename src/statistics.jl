@@ -37,7 +37,7 @@ end
 
 function MEAN(model::BinomialModel{T1, T2}) where {T1, T2}
     return BinomialModel(
-        mean(Array(model.N)),
+        Int64(round(mean(Array(model.N)))),
         mean(Array(model.p)),
         mean(Array(model.q)),
         mean(Array(model.σ)),
