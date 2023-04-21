@@ -12,10 +12,11 @@ Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct Myopic{T1, T2, T3} <: MyopicPolicy
+struct Myopic{T1, T2, T3, T4} <: MyopicPolicy
     dts::T1
     target::T2
     penalty::T3
+    method::T4
 end
 
 """
@@ -36,7 +37,7 @@ end
     Myopic(dts)
 Minimize the joint entropy.
 """
-Myopic(dts,penalty) = Myopic(dts, _entropy,penalty)
+Myopic(dts,penalty) = Myopic(dts, _entropy,penalty,"MAP")
 
 """
     MyopicFast(dts)
@@ -68,7 +69,7 @@ function _oed!(sim, ::MyopicPolicy)
 end
 
 function _synthetic_obs(sim, policy)
-    epsp_vector = _temp_epsps(sim)
+    epsp_vector = _temp_epsps(sim, policy)
     dt_vector = _temp_dts(sim, policy)
     return BinomialObservation(cu(epsp_vector), cu(dt_vector))
 end
@@ -127,9 +128,15 @@ _temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 _temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
 _temp_dts(sim, ::MyopicFast) = repeat(sim.tsteps.dts, m_out(sim) ÷ length(sim.tsteps.dts))
 
-function _temp_epsps(sim)
+function _temp_epsps(sim, policy)
     dts = sim.tsteps.dts
-    map = MAP(sim.fstate.model)
+    if policy.method == "MAP"
+        map = MAP(sim.fstate.model)
+    elseif policy.method == "MAP_marginal"
+        map = MAP(sim.fstate.model, marginal=true)
+    elseif policy.method == "MEAN"
+        map = MEAN(sim.fstate.model)
+    end
     times = sim.times
 
     N_star = map.N
