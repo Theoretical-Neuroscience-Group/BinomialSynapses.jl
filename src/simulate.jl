@@ -230,6 +230,64 @@ end
 
 Instead of using point-based estimates for theta and the next observation, here the expected next entropy is evaluated using MC samples.
 """
+	
+function run_exact_1!(
+    sim::NestedFilterSimulation;
+    T::Integer,
+    plot_each_timestep::Bool = false,
+    recording::Recording = NoRecording
+)
+    if length(sim.times) == 0
+        initialize!(sim)
+    end
+    for i in 1:T
+        begin
+            entrop = zeros(length(sim.tsteps.dts))
+            for j in 1:length(entrop)
+                dt = sim.tsteps.dts[j]
+
+                entropy_temp = []
+	        for k in 1:100
+	    	    m_out = length(sim.fstate.model.N)
+	            random_idx = rand(1:m_out)
+
+                    N_star = Array(sim.fstate.model.N)[random_idx]
+		    p_star = Array(sim.fstate.model.p)[random_idx]
+		    q_star = Array(sim.fstate.model.q)[random_idx]
+		    σ_star = Array(sim.fstate.model.σ)[random_idx]
+		    τ_star = Array(sim.fstate.model.τ)[random_idx]
+
+    		    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
+		    T2 = sim.filter
+		    T3 = deepcopy(sim.hstate)
+		    T4 = deepcopy(sim.fstate)
+		    T5 = sim.tsteps
+		    T6 = deepcopy(sim.times)
+		    T7 = deepcopy(sim.epsps)
+
+		    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
+		    propagate!(sim_copy,dt)
+		    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
+
+		end
+		entrop[j] = mean(entropy_temp)
+	    end
+	end
+
+	dt_opt = sim.tsteps.dts[argmin(entrop)]
+
+	time = propagate!(sim,dt_opt)
+
+	if plot_each_timestep
+	    posterior_plot(sim,j)
+	end
+	update!(recording, sim, time)
+
+    end
+    save(recording)
+    return sim.times, sim.epsps
+end
+	
 function run_exact_2!(
     sim::NestedFilterSimulation;
     T::Integer,
