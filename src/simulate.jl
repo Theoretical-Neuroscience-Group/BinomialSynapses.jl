@@ -230,7 +230,7 @@ end
 
 Instead of using point-based estimates for theta and the next observation, here the expected next entropy is evaluated using MC samples.
 """
-function run_exact!(
+function run_exact_2!(
     sim::NestedFilterSimulation;
     T::Integer,
     plot_each_timestep::Bool = false,
