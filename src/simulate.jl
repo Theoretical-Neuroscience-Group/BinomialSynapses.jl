@@ -304,7 +304,7 @@ function run_exact_2!(
                 dt = sim.tsteps.dts[j]
 
                 entropy_temp = []
-	        for k in 1:10
+	        for k in 1:50
 	    	    m_out = length(sim.fstate.model.N)
 	            random_idx = rand(1:m_out)
 
@@ -322,7 +322,7 @@ function run_exact_2!(
 		    T6 = deepcopy(sim.times)
 		    T7 = deepcopy(sim.epsps)
 
-		    for l in 1:10
+		    for l in 1:20
 		        sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
 		        propagate!(sim_copy,dt)
 		        append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
