@@ -234,7 +234,8 @@ function run_exact_1!(
     sim::NestedFilterSimulation;
     T::Integer,
     plot_each_timestep::Bool = false,
-    recording::Recording = NoRecording
+    recording::Recording = NoRecording,
+    M = 100
 )
     if length(sim.times) == 0
         initialize!(sim)
@@ -245,7 +246,7 @@ function run_exact_1!(
             for j in 1:length(entrop)
                 dt = sim.tsteps.dts[j]
                 entropy_temp = []
-	            for k in 1:100
+	            for k in 1:M
                     sim_copy = deepcopy(sim)
                     m_out = length(sim_copy.fstate.model.N)
                     random_idx = rand(1:m_out)
@@ -286,7 +287,8 @@ function run_exact_2!(
     sim::NestedFilterSimulation;
     T::Integer,
     plot_each_timestep::Bool = false,
-    recording::Recording = NoRecording
+    recording::Recording = NoRecording,
+    M = 100
 )
     if length(sim.times) == 0
         initialize!(sim)
@@ -297,7 +299,7 @@ function run_exact_2!(
             for j in 1:length(entrop)
                 dt = sim.tsteps.dts[j]
                 entropy_temp = []
-	            for k in 1:100
+	            for k in 1:M
                     sim_copy = deepcopy(sim)
                     m_out = length(sim_copy.fstate.model.N)
                     random_idx = rand(1:m_out)
