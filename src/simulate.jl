@@ -271,9 +271,9 @@ function run_exact_1!(
 		        end
 		        entrop[j] = mean(entropy_temp)
 	        end
-	    end
-        dt_opt = sim.tsteps.dts[argmin(entrop)]
-        time = propagate!(sim,dt_opt)
+            dt_opt = sim.tsteps.dts[argmin(entrop)]
+            time = propagate!(sim,dt_opt)
+        end
         if plot_each_timestep
             posterior_plot(sim,j)
         end
