@@ -227,7 +227,6 @@ function runBatch_map!(
 end	
 	
 """
-
 Instead of using point-based estimates for theta and the next observation, here the expected next entropy is evaluated using MC samples.
 """
 	
@@ -245,44 +244,39 @@ function run_exact_1!(
             entrop = zeros(length(sim.tsteps.dts))
             for j in 1:length(entrop)
                 dt = sim.tsteps.dts[j]
-
                 entropy_temp = []
-	        for k in 1:100
-	    	    m_out = length(sim.fstate.model.N)
-	            random_idx = rand(1:m_out)
-
-                    N_star = Array(sim.fstate.model.N)[random_idx]
-		    p_star = Array(sim.fstate.model.p)[random_idx]
-		    q_star = Array(sim.fstate.model.q)[random_idx]
-		    σ_star = Array(sim.fstate.model.σ)[random_idx]
-		    τ_star = Array(sim.fstate.model.τ)[random_idx]
-
-    		    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
-		    T2 = sim.filter
-		    T3 = deepcopy(sim.hstate)
-		    T4 = deepcopy(sim.fstate)
-		    T5 = sim.tsteps
-		    T6 = deepcopy(sim.times)
-		    T7 = deepcopy(sim.epsps)
-
-		    sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
-		    propagate!(sim_copy,dt)
-		    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
-
-		end
-		entrop[j] = mean(entropy_temp)
+	            for k in 1:100
+                    sim_copy = deepcopy(sim)
+                    m_out = length(sim_copy.fstate.model.N)
+                    random_idx = rand(1:m_out)
+                    N_star = Array(sim_copy.fstate.model.N)[random_idx]
+                    p_star = Array(sim_copy.fstate.model.p)[random_idx]
+                    q_star = Array(sim_copy.fstate.model.q)[random_idx]
+                    σ_star = Array(sim_copy.fstate.model.σ)[random_idx]
+                    τ_star = Array(sim_copy.fstate.model.τ)[random_idx]
+                    x = 1.
+                    times = sim.times
+                    L = length(times)
+                    if L > 1
+                        for ii in 2:L
+                            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
+                        end
+                    end
+                    x_temp = 1-(1-(1-p_star)*x)*exp(-dt/τ_star)
+                    e_temp = x_temp*N_star*p_star*q_star
+                    obs = BinomialObservation(e_temp, dt)
+                    update!(sim_copy.fstate, obs, sim_copy.filter)
+                    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
+		        end
+		        entrop[j] = mean(entropy_temp)
+	        end
 	    end
-	end
-
-	dt_opt = sim.tsteps.dts[argmin(entrop)]
-
-	time = propagate!(sim,dt_opt)
-
-	if plot_each_timestep
-	    posterior_plot(sim,j)
-	end
-	update!(recording, sim, time)
-
+        dt_opt = sim.tsteps.dts[argmin(entrop)]
+        time = propagate!(sim,dt_opt)
+        if plot_each_timestep
+            posterior_plot(sim,j)
+        end
+	    update!(recording, sim, time)
     end
     save(recording)
     return sim.times, sim.epsps
@@ -302,46 +296,43 @@ function run_exact_2!(
             entrop = zeros(length(sim.tsteps.dts))
             for j in 1:length(entrop)
                 dt = sim.tsteps.dts[j]
-
                 entropy_temp = []
-	        for k in 1:50
-	    	    m_out = length(sim.fstate.model.N)
-	            random_idx = rand(1:m_out)
-
-                    N_star = Array(sim.fstate.model.N)[random_idx]
-		    p_star = Array(sim.fstate.model.p)[random_idx]
-		    q_star = Array(sim.fstate.model.q)[random_idx]
-		    σ_star = Array(sim.fstate.model.σ)[random_idx]
-		    τ_star = Array(sim.fstate.model.τ)[random_idx]
-
-    		    T1 = ScalarBinomialModel(N_star, p_star, q_star, σ_star, τ_star)
-		    T2 = sim.filter
-		    T3 = deepcopy(sim.hstate)
-		    T4 = deepcopy(sim.fstate)
-		    T5 = sim.tsteps
-		    T6 = deepcopy(sim.times)
-		    T7 = deepcopy(sim.epsps)
-
-		    for l in 1:20
-		        sim_copy = NestedFilterSimulation(T1,T2,T3,T4,T5,T6,T7)
-		        propagate!(sim_copy,dt)
-		        append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
-		    end
-
-		end
-		entrop[j] = mean(entropy_temp)
+	            for k in 1:100
+                    sim_copy = deepcopy(sim)
+                    m_out = length(sim_copy.fstate.model.N)
+                    random_idx = rand(1:m_out)
+                    N_star = Array(sim_copy.fstate.model.N)[random_idx]
+                    p_star = Array(sim_copy.fstate.model.p)[random_idx]
+                    q_star = Array(sim_copy.fstate.model.q)[random_idx]
+                    σ_star = Array(sim_copy.fstate.model.σ)[random_idx]
+                    τ_star = Array(sim_copy.fstate.model.τ)[random_idx]
+                    x = 1.
+                    v = 0.
+                    times = sim.times
+                    L = length(times)
+                    if L > 1
+                        for ii in 2:L
+                            pit = 1-exp(-(times[ii]-times[ii-1])/τ_star)
+                            v = pit*(1-pit)*N_star*(1-x+p_star*x)+(1-pit)^2*(p_star*(1-p_star)*N_star*x+(1-p_star)^2*v)
+                            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
+                        end
+                    end
+                    x_temp = 1-(1-(1-p_star)*x)*exp(-dt/τ_star)
+                    e_temp = x_temp*N_star*p_star*q_star
+                    var_temp 
+                    obs = BinomialObservation(e_temp, dt)
+                    update!(sim_copy.fstate, obs, sim_copy.filter)
+                    append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
+		        end
+		        entrop[j] = mean(entropy_temp)
+	        end
 	    end
-	end
-
-	dt_opt = sim.tsteps.dts[argmin(entrop)]
-
-	time = propagate!(sim,dt_opt)
-
-	if plot_each_timestep
-	    posterior_plot(sim,j)
-	end
-	update!(recording, sim, time)
-
+        dt_opt = sim.tsteps.dts[argmin(entrop)]
+        time = propagate!(sim,dt_opt)
+        if plot_each_timestep
+            posterior_plot(sim,j)
+        end
+	    update!(recording, sim, time)
     end
     save(recording)
     return sim.times, sim.epsps
