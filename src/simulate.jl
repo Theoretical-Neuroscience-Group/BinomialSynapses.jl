@@ -248,18 +248,13 @@ function run_exact_1!(
                 entropy_temp = []
 	            for k in 1:M
                     sim_copy = deepcopy(sim)
-                    print(compute_entropy(sim_copy.fstate.model))
-                    print("\n")
-                    print(compute_entropy(sim.fstate.model))
-                    print("\n")
                     m_out = length(sim_copy.fstate.model.N)
                     random_idx = rand(1:m_out)
-                    map = MAP(sim_copy.fstate.model)
-                    N_star = map.N
-                    p_star = map.p
-                    q_star = map.q
-                    σ_star = map.σ
-                    τ_star = map.τ
+                    N_star = Array(sim_copy.fstate.model.N)[random_idx]
+                    p_star = Array(sim_copy.fstate.model.p)[random_idx]
+                    q_star = Array(sim_copy.fstate.model.q)[random_idx]
+                    σ_star = Array(sim_copy.fstate.model.σ)[random_idx]
+                    τ_star = Array(sim_copy.fstate.model.τ)[random_idx]
                     x = 1.
                     times = sim.times
                     L = length(times)
