@@ -250,7 +250,7 @@ function run_exact_1!(
                     sim_copy = deepcopy(sim)
                     print(compute_entropy(sim_copy.fstate.model))
                     print("\n")
-                    print(compute_entropy(sim_copy.fstate.model))
+                    print(compute_entropy(sim.fstate.model))
                     print("\n")
                     m_out = length(sim_copy.fstate.model.N)
                     random_idx = rand(1:m_out)
