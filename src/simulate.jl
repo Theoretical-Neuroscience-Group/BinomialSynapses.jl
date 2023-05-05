@@ -247,8 +247,11 @@ function run_exact_1!(
                 dt = sim.tsteps.dts[j]
                 entropy_temp = []
 	            for k in 1:M
-                    print(compute_entropy(sim_copy.fstate.model))
                     sim_copy = deepcopy(sim)
+                    print(compute_entropy(sim_copy.fstate.model))
+                    print("\n")
+                    print(compute_entropy(sim_copy.fstate.model))
+                    print("\n")
                     m_out = length(sim_copy.fstate.model.N)
                     random_idx = rand(1:m_out)
                     map = MAP(sim_copy.fstate.model)
