@@ -164,6 +164,30 @@ function run!(
     return sim.times, sim.epsps
 end
 
+function estimate_posterior!(
+    sim::NestedFilterExperiment,
+    epscs, dts; 
+    T::Integer, 
+    plot_each_timestep::Bool = false, 
+    recording::Recording = NoRecording
+)
+
+    for i in 1:T
+        begin
+    	    obs = BinomialObservation(epsc[i], dt[i])
+            filter_update!(sim, obs)
+            push!(sim.times, sim.times[end] + dt)
+            push!(sim.epsps, obs.EPSP)
+        end
+        if plot_each_timestep
+            posterior_plot(sim,i)
+        end
+        update!(recording, sim, 0.0) 
+    end
+    save(recording)
+    return sim.times, sim.epsps
+end
+
 
 
 function runBatch_map!(
