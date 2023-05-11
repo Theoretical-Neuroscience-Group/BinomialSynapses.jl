@@ -175,12 +175,12 @@ function estimate_posterior!(
     for i in 1:T
         begin
     	    obs = BinomialObservation(epscs[i], dts[i])
-            filter_update!(sim, obs)
+            time2 = @timed filter_update!(sim, obs)
         end
         if plot_each_timestep
             posterior_plot(sim,i)
         end
-        update!(recording, sim, 0.0) 
+        update!(recording, sim, time2.time) 
     end
     save(recording)
 end
