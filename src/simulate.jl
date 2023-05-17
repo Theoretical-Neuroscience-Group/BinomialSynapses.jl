@@ -301,36 +301,35 @@ function run_exact_2!(
                 entropy_temp = []
 	            for k in 1:M
                     sim_copy = deepcopy(sim)
-                    m_out = length(sim_copy.fstate.model.N)
-                    random_idx = rand(1:m_out)
-                    N_star = Array(sim_copy.fstate.model.N)[random_idx]
-                    p_star = Array(sim_copy.fstate.model.p)[random_idx]
-                    q_star = Array(sim_copy.fstate.model.q)[random_idx]
-                    σ_star = Array(sim_copy.fstate.model.σ)[random_idx]
-                    τ_star = Array(sim_copy.fstate.model.τ)[random_idx]
-                    x = 1.
-                    v = 0.
-                    times = sim.times
-                    L = length(times)
-                    if L > 1
-                        for ii in 2:L
-                            pit = 1-exp(-(times[ii]-times[ii-1])/τ_star)
-                            v = pit*(1-pit)*N_star*(1-x+p_star*x)+(1-pit)^2*(p_star*(1-p_star)*N_star*x+(1-p_star)^2*v)
-                            x = 1-(1-(1-p_star)*x)*exp(-(times[ii]-times[ii-1])/τ_star)
-                        end
-                    end
-                    x_temp = 1-(1-(1-p_star)*x)*exp(-dt/τ_star)
-                    e_temp = x_temp*N_star*p_star*q_star
-                    var_temp 
+                    m_out, m_in = size(Array(sim_copy.fstate.state.n))
+                    random_idx_out = rand(1:m_out)
+                    random_idx_in = rand(1:m_in)
+
+                    N_star = Array(sim_copy.fstate.model.N)[random_idx_out]
+                    p_star = Array(sim_copy.fstate.model.p)[random_idx_out]
+                    q_star = Array(sim_copy.fstate.model.q)[random_idx_out]
+                    σ_star = Array(sim_copy.fstate.model.σ)[random_idx_out]
+                    τ_star = Array(sim_copy.fstate.model.τ)[random_idx_out]
+
+                    n_ = Array(sim_copy.fstate.state.n)[random_idx_out,random_idx_in]
+                    k_ = Array(sim_copy.fstate.state.k)[random_idx_out,random_idx_in]
+                    
+                    p_refill = 1 - exp(-dt / τ_star)
+                    n_  = relu(N_star - n_ + k_)
+                    k_ = rand(Binomial(n_, p_refill))
+                    n_ = N_star - n_ + k_
+                    k_ = rand(Binomial(n_, p_star))
+                    e_temp = Float32(rand(Normal(q_star*k_, σ_star)))
+
                     obs = BinomialObservation(e_temp, dt)
                     update!(sim_copy.fstate, obs, sim_copy.filter)
                     append!(entropy_temp,compute_entropy(sim_copy.fstate.model))
 		        end
 		        entrop[j] = mean(entropy_temp)
 	        end
-	    end
-        dt_opt = sim.tsteps.dts[argmin(entrop)]
-        time = propagate!(sim,dt_opt)
+            dt_opt = sim.tsteps.dts[argmin(entrop)]
+            time = propagate!(sim,dt_opt)
+        end
         if plot_each_timestep
             posterior_plot(sim,j)
         end
