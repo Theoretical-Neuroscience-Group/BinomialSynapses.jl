@@ -339,7 +339,7 @@ function run_exact_2!(
                     n_  = relu(N_star - n_ + k_)
                     k_ = rand(Binomial(n_, p_refill))
                     n_ = N_star - n_ + k_
-                    k_ = rand(Binomial(n_, p_star))
+                    k_ = rand(Binomial(n_, Float64(p_star)))
                     e_temp = Float32(rand(Normal(q_star*k_, σ_star)))
 
                     obs = BinomialObservation(e_temp, dt)
