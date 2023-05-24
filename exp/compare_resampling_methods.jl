@@ -56,7 +56,7 @@ plots = []
 names = ["N", "p", "q", "τ", "σ"]
 for (i, name) in enumerate(names)
     plt = plot(; ylabel = "E(Estimated $name - True $name)²", xlabel = "Time")
-    plot!(plt, dat1[i, :]; label = "Multinomial resampling", ylimit = (0, maximum(dat1[i, :])))
+    plot!(plt, dat1[i, :]; label = "Multinomial resampling")
     plot!(plt, dat2[i, :]; label = "Stratified resampling")
-    savefig(plt, "resampling_$name.svg")
+    savefig(plt, "exp/resampling_$name.svg")
 end
