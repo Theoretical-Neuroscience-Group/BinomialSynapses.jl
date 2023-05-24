@@ -4,7 +4,7 @@
         function test_indices(dims...)
             v = rand(dims...)
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == dims[1:end-1]
             @test size(idx) == dims
@@ -26,7 +26,7 @@
         @testset "1D" begin
             v = [1., 1e6, 1., 0.]
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == ()
             @test size(idx) == (4,)
@@ -42,7 +42,7 @@
             v = [1e0 1e6 1e0 0e0;
                     1e0 1e0 1e6 1e0]
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == (2,)
             @test size(idx) == (2, 4)
@@ -64,7 +64,7 @@
                 v[i, j, trueidx[i, j]] = 1f6
             end
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == (2, 3)
             @test size(idx) == (2, 3, 4)
@@ -101,7 +101,7 @@
         function test_indices(dims...)
             v = CUDA.rand(dims...)
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == dims[1:end-1]
             @test size(idx) == dims
@@ -124,7 +124,7 @@
         @testset "1D" begin
             v = cu([1f0, 1f6, 1f0, 0f0])
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == ()
             @test size(idx) == (4,)
@@ -142,7 +142,7 @@
             v = cu([1f0 1f6 1f0 0f0;
                     1f0 1f0 1f6 1f0])
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == (2,)
             @test size(idx) == (2, 4)
@@ -167,7 +167,7 @@
             end
             v = cu(v)
             vold = copy(v)
-            u, idx = indices!(v)
+            u, idx = indices!(v, Multinomial())
 
             @test size(u) == (2, 3)
             @test size(idx) == (2, 3, 4)

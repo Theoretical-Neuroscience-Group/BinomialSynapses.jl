@@ -1,10 +1,13 @@
-function outer_indices!(u::AbstractVector)
+abstract type ResamplingMethod end
+struct Multinomial <: ResamplingMethod end
+
+function outer_indices!(u::AbstractVector, rm::ResamplingMethod)
     uu = Array(u)
-    usum, idx = outer_indices!(uu)
+    usum, idx = outer_indices!(uu, rm)
     return usum, cu(idx)
 end
 
-function outer_indices!(u::Vector)
+function outer_indices!(u::Vector, ::Multinomial)
     M_out  = length(u)
     usum   = zero(eltype(u))
 
@@ -46,8 +49,8 @@ end
 
 Resample the outer particles of the `state` and `model` ensemble based on their likelihoods `u`.
 """
-function outer_resample!(state, model, u)
-    usum, idx = indices!(u)
+function outer_resample!(state, model, u, resampling_method)
+    _, idx = indices!(u, resampling_method)
     resample!(state, idx)
     resample!(model, idx)
     return state, model
@@ -60,9 +63,10 @@ Return index table and total likelihoods from likelihood table `v`.
 This function modifies v; after execution, v will be the cumulative sum of the original v
 along the last dimension.
 """
-indices!(v::AnyCuVector) = outer_indices!(v)
+indices!(v::AnyCuVector, rm::ResamplingMethod) = outer_indices!(v, rm)
+indices!(v::AnyCuVector, rm::Multinomial) = outer_indices!(v, rm)
 
-function indices!(v::AnyCuArray)
+function indices!(v::AnyCuArray, ::Multinomial)
     function kernel!(
         u, v, idx, r, 
         Rout, M_out, M_in
@@ -156,9 +160,10 @@ function indices!(v::AnyCuArray)
 end
 
 # CPU fallbacks:
-indices!(v::AbstractVector) = outer_indices!(v)
+indices!(v::AbstractVector, rm::ResamplingMethod) = outer_indices!(v, rm)
+indices!(v::AbstractVector, rm::Multinomial) = outer_indices!(v, rm)
 
-function indices!(v::AbstractArray{T}) where T
+function indices!(v::AbstractArray{T}, ::Multinomial) where T
     # initializations:
 
     # indices
