@@ -280,6 +280,7 @@ end
 # CPU fallbacks:
 indices!(v::AbstractVector, rm::ResamplingMethod) = outer_indices!(v, rm)
 indices!(v::AbstractVector, rm::Multinomial) = outer_indices!(v, rm)
+indices!(v::AbstractVector, rm::Stratified) = outer_indices!(v, rm)
 
 function indices!(v::AbstractArray{T}, ::Multinomial) where T
     # initializations:
@@ -314,6 +315,52 @@ function indices!(v::AbstractArray{T}, ::Multinomial) where T
             @inbounds v[i, j] += vsum
             @inbounds vsum = v[i, j]
             @inbounds r[i, mirrorj] = CurMax
+        end
+        # compute average likelihood across inner particles
+        # (with normalization constant that was omitted from v for speed)
+        @inbounds u[i] = vsum
+
+        # O(n) binning algorithm for sorted samples
+        bindex = 1 # bin index
+        for j in 1:M_in
+            # scale random numbers (this is equivalent to normalizing v)
+            @inbounds rsample = r[i, j] * vsum
+            # checking bindex <= M_in - 1 not necessary since
+            # v[i, M_in] = vsum
+            @inbounds while rsample > v[i, bindex]
+                bindex += 1
+            end
+            @inbounds idx[i, j] = bindex
+        end
+    end
+    return u, idx
+end
+
+function indices!(v::AbstractArray{T}, ::Stratified) where T
+    # initializations:
+
+    # indices
+    idx = Array{Int}(undef, size(v)...)   
+
+    # outer likelihoods
+    # Initialize to -1 in order to track which elements have been written to.
+    # Since likelihoods are nonnegative, negative elements have never been visited.
+    u = zeros(T, size(v)[1:end-1]...)     
+
+    # random numbers
+    r = Array{T}(undef, size(v)...)
+
+    Rout  = CartesianIndices(u) # indices for first n-1 dimensions
+    M_out = length(u)
+    M_in  = last(size(v))
+    
+    for id in 1:M_out
+        vsum = zero(T)
+        @inbounds i = Rout[id]
+        for j in 1:M_in
+            @inbounds v[i, j] += vsum
+            @inbounds vsum = v[i, j]
+            @inbounds r[i, j] = (j - 1 + rand(Float32)) / M_in
         end
         # compute average likelihood across inner particles
         # (with normalization constant that was omitted from v for speed)
