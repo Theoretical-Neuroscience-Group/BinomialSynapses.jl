@@ -99,7 +99,6 @@ function initialize!(sim::NestedFilterSimulation)
     filter_update!(sim, obs)
     push!(sim.times, dt)
     push!(sim.epsps, obs.EPSP)
-    push!(sim.outputs, mean(sim.fstate.model.N))
     return sim
 end
 
