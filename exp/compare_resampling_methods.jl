@@ -52,7 +52,6 @@ pop!(rec2.data)
 dat1 = reduce(hcat, mean(collect, reshape(rec1.data, 1000, 100); dims=2)[:, 1])
 dat2 = reduce(hcat, mean(collect, reshape(rec2.data, 1000, 100); dims=2)[:, 1])
 
-plots = []
 names = ["N", "p", "q", "τ", "σ"]
 for (i, name) in enumerate(names)
     plt = plot(; ylabel = "E(Estimated $name - True $name)²", xlabel = "Time")
