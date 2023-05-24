@@ -61,11 +61,7 @@ function outer_indices!(u::Vector, ::Stratified)
         u[i] = u[i-1]
     end
     u[1] = 0
-
-    # sample descending sequence of sorted random numbers
-    # Algorithm by:
-    # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
-    # September 1980, Pages 359--364
+    
     idx = zeros(Int, M_out)
     bindex = M_out # bin index
     @inbounds for i in M_out:-1:1
@@ -208,11 +204,6 @@ function indices!(v::AnyCuArray, ::Stratified)
         offset = (blockIdx().x - 1i32) * blockDim().x
         while offset < M_out
             id = tid + offset
-            # sample descending sequence of sorted random numbers
-            # r[i,M_in] >= ... >= r[i,2] >= r[i,1]
-            # Algorithm by:
-            # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
-            # September 1980, Pages 359--364
             vsum = 0f0
             for j in 1:M_in
                 if id <= M_out
