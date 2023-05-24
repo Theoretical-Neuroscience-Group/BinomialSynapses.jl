@@ -1,5 +1,6 @@
 abstract type ResamplingMethod end
 struct Multinomial <: ResamplingMethod end
+struct Stratified <: ResamplingMethod end
 
 function outer_indices!(u::AbstractVector, rm::ResamplingMethod)
     uu = Array(u)
@@ -44,6 +45,41 @@ function outer_indices!(u::Vector, ::Multinomial)
     return usum, idx
 end
 
+
+function outer_indices!(u::Vector, ::Stratified)
+    M_out  = length(u)
+    usum   = zero(eltype(u))
+
+    # compute cumulative sum, overwriting u
+    @inbounds for i in 1:M_out
+        usum += u[i]
+        u[i] = usum
+    end
+
+    # shift cumulative sums to the right by one
+    @inbounds for i in M_out:-1:2
+        u[i] = u[i-1]
+    end
+    u[1] = 0
+
+    # sample descending sequence of sorted random numbers
+    # Algorithm by:
+    # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
+    # September 1980, Pages 359--364
+    idx = zeros(Int, M_out)
+    bindex = M_out # bin index
+    @inbounds for i in M_out:-1:1
+        rsample = (i - 1 + rand(eltype(u))) * usum / M_out
+        # checking bindex >= 1 is redundant since
+        # ucum[1] = 0
+        while rsample < u[bindex]
+            bindex -= 1
+        end
+        idx[i] = bindex
+    end
+    return usum, idx
+end
+
 """
     outer_resample!(state, model, u)
 
@@ -65,6 +101,7 @@ along the last dimension.
 """
 indices!(v::AnyCuVector, rm::ResamplingMethod) = outer_indices!(v, rm)
 indices!(v::AnyCuVector, rm::Multinomial) = outer_indices!(v, rm)
+indices!(v::AnyCuVector, rm::Stratified) = outer_indices!(v, rm)
 
 function indices!(v::AnyCuArray, ::Multinomial)
     function kernel!(
@@ -93,6 +130,96 @@ function indices!(v::AnyCuArray, ::Multinomial)
                         # compute cumulative sums
                         @inbounds vsum = v[i, j] += vsum
                         @inbounds r[i, mirrorj] = CurMax
+                    end
+                end
+            end
+            if id <= M_out
+                @inbounds i = Rout[id]
+
+                if u[i] < 0 # prevents visiting same `i' more than once
+                    # compute average likelihood across inner particles
+                    # (with normalization constant that was omitted from v for speed)
+                    @inbounds u[i] = vsum
+
+                    # O(n) binning algorithm for sorted samples
+                    bindex = 1 # bin index
+                    for j in 1:M_in
+                        # scale random numbers (this is equivalent to normalizing v)
+                        @inbounds rsample = r[i, j] * vsum
+                        # checking bindex <= M_in - 1 not necessary since
+                        # v[i, M_in] = vsum
+                        @inbounds while rsample > v[i, bindex]
+                            bindex += 1
+                        end
+                        @inbounds idx[i, j] = bindex
+                    end
+                end
+            end
+
+            offset += window
+        end
+        return nothing
+    end
+
+    # initializations:
+
+    # indices
+    idx = CuArray{Int}(undef, size(v)...)   
+
+    # outer likelihoods
+    # Initialize to -1 in order to track which elements have been written to.
+    # Since likelihoods are nonnegative, negative elements have never been visited.
+    u = CUDA.fill(-one(Float32), size(v)[1:end-1]...)     
+
+    # random numbers
+    r = CuArray{Float32}(undef, size(v)...)
+
+    Rout  = CartesianIndices(u) # indices for first n-1 dimensions
+    M_out = length(u)
+    M_in  = last(size(v))
+
+    kernel  = @cuda launch=false kernel!(
+                u, v, idx, r,
+                Rout, M_out, M_in
+              )
+    config  = launch_configuration(kernel.fun)
+    threads = max(32, min(config.threads, M_out))
+    blocks  = cld(M_out, threads)
+    kernel(
+        u, v,
+        idx, 
+        r,
+        Rout, M_out, M_in
+        ;
+        threads=threads, blocks=blocks
+    )
+    return u, idx
+end
+
+
+function indices!(v::AnyCuArray, ::Stratified)
+    function kernel!(
+        u, v, idx, r, 
+        Rout, M_out, M_in
+    )
+        # grid-stride loop
+        tid    = threadIdx().x
+        window = (blockDim().x - 1i32) * gridDim().x
+        offset = (blockIdx().x - 1i32) * blockDim().x
+        while offset < M_out
+            id = tid + offset
+            # sample descending sequence of sorted random numbers
+            # r[i,M_in] >= ... >= r[i,2] >= r[i,1]
+            # Algorithm by:
+            # Bentley & Saxe, ACM Transactions on Mathematical Software, Vol 6, No 3
+            # September 1980, Pages 359--364
+            vsum = 0f0
+            for j in 1:M_in
+                if id <= M_out
+                    @inbounds i = Rout[id]
+                    if u[i] < 0 # prevents visiting same `i' more than once
+                        @inbounds vsum = v[i, j] += vsum
+                        @inbounds r[i, j] = (j - 1 + rand(Float32)) / M_in
                     end
                 end
             end

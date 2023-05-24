@@ -30,7 +30,7 @@ export emit
 
 include("resample.jl")
 export outer_resample!, indices!, resample!
-export Multinomial
+export Multinomial, Stratified
 
 include("likelihood.jl")
 export likelihood, likelihood_resample!
