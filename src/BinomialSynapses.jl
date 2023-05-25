@@ -30,14 +30,15 @@ export Timestep, FixedTimestep, RandomTimestep, get_step, DeterministicTrain, Ba
 include("emission.jl")
 export emit
 
+include("resample.jl")
+export outer_resample!, indices!, resample!
+export Multinomial, Stratified
+
 include("likelihood.jl")
 export likelihood, likelihood_resample!
 
 include("jitter.jl")
 export jitter!
-
-include("resample.jl")
-export outer_resample!, indices!, resample!
 
 include("filter.jl")
 export NestedParticleFilter, NestedParticleState, update!
