@@ -189,8 +189,8 @@ function run_adaptative_eta!(
             print("\n")            
             η = deepcopy(sim.tsteps.penalty)
             Δ_ent = new_ent - prev_ent
-            if i > 2
-                sim.tsteps.penalty = α*Δ_ent/sim.times[i] - α*η
+            if i > 1
+                sim.tsteps.penalty = α*Δ_ent/sim.times[i] - α*η + η
             end
             print(sim.tsteps.penalty)
             print("\n")
