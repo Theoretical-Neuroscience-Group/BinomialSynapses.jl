@@ -165,6 +165,34 @@ function run!(
     return sim.times, sim.epsps
 end
 
+function run_adaptative_eta!(
+    sim::NestedFilterSimulation; 
+    T::Integer, 
+    plot_each_timestep::Bool = false, 
+    recording::Recording = NoRecording,
+    α = 0
+)
+    if length(sim.times) == 0
+        initialize!(sim)
+    end
+    for i in 1:T
+        begin
+            prev_ent = compute_entropy(sim.fstate.model)
+            time = propagate!(sim)
+            new_ent = compute_entropy(sim.fstate.model)
+            η = deepcopy(sim.tsteps.penalty)
+            Δ_ent = new_ent - prev_ent
+            sim.tsteps.penalty = α*Δ_ent/sim.times[i] - α*η
+        end
+        if plot_each_timestep
+            posterior_plot(sim,i)
+        end
+        update!(recording, sim, time) 
+    end
+    save(recording)
+    return sim.times, sim.epsps
+end
+
 function estimate_posterior!(
     sim::NestedFilterExperiment,
     epscs, dts; 
