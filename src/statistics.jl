@@ -33,9 +33,16 @@ function MAP(model::BinomialModel{T1, T2}; marginal::Bool = false) where {T1, T2
             model.q, 
             model.σ, 
             model.τ
-        ) |> Array |> eachrow |> mode
+        ) |> Array
     print(StatsBase.countmap(collect(eachrow(v))))
     print("\n")
+    v = hcat(
+            model.N, 
+            model.p, 
+            model.q, 
+            model.σ, 
+            model.τ
+        ) |> Array |> eachrow |> mode
     return BinomialModel{eltype(T1), eltype(T2)}(eltype(T1)(v[1]), v[2:end]...)
 end
 
