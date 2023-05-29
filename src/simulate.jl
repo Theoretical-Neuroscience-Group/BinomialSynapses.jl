@@ -176,12 +176,18 @@ function run_adaptative_eta!(
     end
     for i in 1:T
         begin
+            print(i)
+            print("\n")
+            print(sim.tsteps.penalty)
+            print("\n")
             prev_ent = compute_entropy(sim.fstate.model)
             time = propagate!(sim)
             new_ent = compute_entropy(sim.fstate.model)
             η = deepcopy(sim.tsteps.penalty)
             Δ_ent = new_ent - prev_ent
             sim.tsteps.penalty = α*Δ_ent/sim.times[i] - α*η
+            print(sim.tsteps.penalty)
+            print("\n")
         end
         if plot_each_timestep
             posterior_plot(sim,i)

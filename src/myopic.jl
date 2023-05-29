@@ -183,7 +183,6 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
 
     minent = Inf
     imin = 0
-    print(size(Nind, 1))
     @inbounds for i in 1:size(Nind, 1)
     samples = [Nrng[Nind[i, :]]'./Nrng[end];prng[pind[i, :]]'./prng[end];qrng[qind[i, :]]'./qrng[end];σrng[σind[i, :]]'./σrng[end];τrng[τind[i, :]]'./τrng[end]]
         Σ_est = cov(samples')
