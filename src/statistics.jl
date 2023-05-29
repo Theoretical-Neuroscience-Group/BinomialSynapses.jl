@@ -32,6 +32,8 @@ function MAP(model::BinomialModel{T1, T2}; marginal::Bool = false) where {T1, T2
             model.σ, 
             model.τ
         ) |> Array |> eachrow |> mode
+    print(countmap(collect(eachrow(v))))
+    print("\n")
     return BinomialModel{eltype(T1), eltype(T2)}(eltype(T1)(v[1]), v[2:end]...)
 end
 
