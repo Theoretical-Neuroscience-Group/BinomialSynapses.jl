@@ -18,11 +18,10 @@ gauss(x, μ, σ) = exp(-((x-μ)/σ)^2/2)
 function likelihood_indices(
     k::AnyCuArray,
     model::AbstractBinomialModel, 
-    obs,
-    rm::ResamplingMethod
+    obs
 )
     v = gauss.(obs, model.q .* k, model.σ)
-    u, idx = indices!(v, rm)
+    u, idx = indices!(v)
     
     # normalization of u
     α = last(size(k)) * sqrt(2*Float32(pi))
@@ -34,13 +33,8 @@ end
     likelihood_resample!(state, model::AbstractBinomialModel, obs)
 Return the likelihood of an observation conditioned on the current state and model ensemble and at the same time resample the state ensemble (inner particles).
 """
-function likelihood_resample!(
-    state::BinomialState,
-    model,
-    obs::BinomialObservation,
-    rm::ResamplingMethod
-)
-    u, idx = likelihood_indices(state.k, model, obs.EPSP, rm)
+function likelihood_resample!(state::BinomialState, model, obs::BinomialObservation)
+    u, idx = likelihood_indices(state.k, model, obs.EPSP)
     resample!(state, idx)
     return u
 end

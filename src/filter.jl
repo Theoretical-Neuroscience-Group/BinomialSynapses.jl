@@ -3,12 +3,9 @@
 
 Construct a nested particle filter with a given jittering kernel width parameter.
 """
-struct NestedParticleFilter{T <: ResamplingMethod}
+struct NestedParticleFilter
     jittering_width::Int
-    resampling_method::T
 end
-
-NestedParticleFilter(jw::Int) = NestedParticleFilter(jw, Multinomial())
 
 """
     NestedParticleState(state, model)
@@ -51,7 +48,7 @@ function update!(
 
     jitter!(model, filter.jittering_width)
     propagate!(state, model, observation.dt)
-    u = likelihood_resample!(state, model, observation, filter.resampling_method)
-    outer_resample!(state, model, u, filter.resampling_method)
+    u = likelihood_resample!(state, model, observation)
+    outer_resample!(state, model, u)
     return filterstate
 end
