@@ -1,3 +1,5 @@
+using StatsBase
+
 MAP(fstate::NestedParticleState; kwargs...) = MAP(fstate.model, kwargs...)
 MEAN(fstate::NestedParticleState; kwargs...) = MEAN(fstate.model, kwargs...)
 
