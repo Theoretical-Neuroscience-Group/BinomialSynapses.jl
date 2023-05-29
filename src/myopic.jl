@@ -12,7 +12,7 @@ Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct Myopic{T1, T2, T3, T4} <: MyopicPolicy
+mutable struct Myopic{T1, T2, T3, T4} <: MyopicPolicy
     dts::T1
     target::T2
     penalty::T3
