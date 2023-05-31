@@ -180,7 +180,7 @@ function run_adaptative_eta!(
             time = propagate!(sim)
             new_ent = compute_entropy(sim.fstate.model)
             η = deepcopy(sim.tsteps.penalty)
-            Δ_ent = new_ent - prev_ent
+            Δ_ent = prev_ent - new_ent
             if i > 1
                 sim.tsteps.penalty = α*Δ_ent/sim.times[i] - α*η + η
             end
