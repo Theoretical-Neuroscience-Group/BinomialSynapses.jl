@@ -24,7 +24,7 @@ include("propagate.jl")
 export propagate!
 
 include("timestep.jl")
-export Timestep, FixedTimestep, RandomTimestep, get_step
+export Timestep, FixedTimestep, RandomTimestep, DeterministicTrain
 
 include("emission.jl")
 export emit
@@ -45,7 +45,7 @@ include("statistics.jl")
 export MAP
 
 include("record.jl")
-export Recording, save
+export Recording
 
 include("simulate.jl")
 export NestedFilterSimulation, initialize!, run!

@@ -1,6 +1,6 @@
 @testset "propagate.jl" begin
-    println("             > propagate.jl")
-    @testset "GPU" begin
+    @info "Testing propagate.jl"
+    CUDA.functional() && @testset "GPU" begin
         m_out = 1024
         m_in  = 1024
 
@@ -60,8 +60,8 @@
         m_out = 16
         m_in  = 16
 
-        state = BinomialState(128, m_out, m_in, :cpu)
-        model = BinomialModel(128, m_out, :cpu)
+        state = BinomialState(128, m_out, m_in, device = :cpu)
+        model = BinomialModel(128, m_out, device = :cpu)
 
         for i in 1:10
             propagate!(state, model, 0.1)

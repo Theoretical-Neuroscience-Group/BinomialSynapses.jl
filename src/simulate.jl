@@ -18,7 +18,8 @@ end
         N, p, q, σ, τ,
         Nrng, prng, qrng, σrng, τrng,
         m_out, m_in, width;
-        timestep::Timestep = RandomTimestep(Exponential(0.121))
+        timestep::Timestep = RandomTimestep(Exponential(0.121)),
+        device = :gpu
     )
 
 This is the main way simulations are supposed to be constructed by the user, i.e.
@@ -33,14 +34,16 @@ function NestedFilterSimulation(
     N, p, q, σ, τ,
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
-    timestep::Timestep = RandomTimestep(Exponential(0.121))
+    timestep::Timestep = RandomTimestep(Exponential(0.121)),
+    device::Symbol = :gpu
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
     filter = NestedParticleFilter(width)
     hstate = ScalarBinomialState(N, 0)
     fstate = NestedParticleState(
                 m_out, m_in,
-                Nrng, prng, qrng, σrng, τrng
+                Nrng, prng, qrng, σrng, τrng,
+                device = device
              )
     times = zeros(0)
     epsps = zeros(0)
@@ -97,7 +100,8 @@ function initialize!(sim::NestedFilterSimulation)
     return sim
 end
 
-get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
+(ts::Timestep)(::NestedFilterSimulation) = ts()
+
 
 """
     propagate!(sim)
@@ -105,7 +109,7 @@ get_step(sim::NestedFilterSimulation) = get_step(sim.tsteps)
 Propagate the simulation, i.e. choose a time step and then propagate the simulation by it.
 """
 function propagate!(sim::NestedFilterSimulation)
-    dt = get_step(sim)
+    dt = sim.tsteps(sim)
     propagate!(sim, dt)
 end
 
@@ -122,6 +126,8 @@ function propagate!(sim::NestedFilterSimulation, dt)
     push!(sim.epsps, obs.EPSP)
     return sim
 end
+
+propagate!(::NestedFilterSimulation, ::Nothing) = nothing
 
 """
     run!(
@@ -144,8 +150,12 @@ function run!(
         initialize!(sim)
     end
     for i in 1:T
-        begin
-            time = @timed propagate!(sim)
+        time = @timed begin
+            r = propagate!(sim)
+            if isnothing(r)
+                @warn "Simulation ended prematurely due to `get_step` returning `nothing`."
+                break
+            end
         end
         if plot_each_timestep
             posterior_plot(sim)
