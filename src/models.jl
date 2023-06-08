@@ -312,3 +312,45 @@ struct BinomialObservation{T1, T2}
     EPSP::T1
     dt::T2
 end
+
+function Base.show(io::IO, ::MIME"text/plain", model::AbstractBinomialModel)
+    if length(model.N) == 1
+        print(io, "Binomial release model with parameters
+    N = $(model.N)
+    p = $(model.p)
+    q = $(model.q)
+    σ = $(model.σ)
+    τ = $(model.τ)")
+    else
+        print(io, "Binomial release model with parameters
+    N = <$(typeof(model.N))>
+    p = <$(typeof(model.p))>
+    q = <$(typeof(model.q))>
+    σ = <$(typeof(model.σ))>
+    τ = <$(typeof(model.τ))>")
+    end
+end
+
+function Base.show(io::IO, model::AbstractBinomialModel)
+    if length(model.N) == 1
+        print(io, "Binomial release model with parameters N = $(model.N), p = $(model.p), q = $(model.q), σ = $(model.σ), τ = $(model.τ)")
+    else
+        print(io, "Binomial release model with parameters N = <Array of size $(size(model.N))>, p = <Array of size $(size(model.p))>, q = <Array of size $(size(model.q))>, σ = <Array of size $(size(model.σ))>, τ = <Array of size $(size(model.τ))>")
+    end
+end
+
+function Base.show(io::IO, ::MIME"text/plain", state::AbstractBinomialState)
+    if length(state.n) == 1
+        print(io, "n = $(state.n), k = $(state.k)")
+    else
+        print(io, "n = <$(typeof(state.n))>, k = <$(typeof(state.k))>")
+    end
+end
+
+function Base.show(io::IO, state::AbstractBinomialState)
+    if length(state.n) == 1
+        print(io, "n = $(state.n), k = $(state.k)")
+    else
+        print(io, "n = <$(typeof(state.n))>, k = <$(typeof(state.k))>")
+    end
+end

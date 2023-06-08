@@ -55,9 +55,8 @@ end
 
 Return the number of outer particles of the simulation `sim`.
 """
-function m_out(sim::NestedFilterSimulation)
-    return size(sim.fstate.state.n, 1)
-end
+m_out(sim::NestedFilterSimulation) = m_out(sim.fstate)
+
 
 """
     propagate_hidden!(sim, dt)
@@ -181,4 +180,19 @@ function Recording(f1, f2, sim::NestedFilterSimulation)
     res = f1(sim, time)
     data = [res]
     return Recording(f1, f2, data)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", sim::NestedFilterSimulation)
+    # status = isempty(sim.epsps) ? "Uninitialized" : "Initialized"
+    print(io, "Nested particle filter simulation 
+    Filter: ", sim.filter, "
+    time step counter: ", length(sim.epsps), "
+    # of outer particles: ", m_out(sim.fstate), "
+    # of inner particles: ", m_in(sim.fstate), "
+    True model: ", sim.hmodel, "
+    Initial hidden state: ", sim.hstate)
+end
+
+function Base.show(io::IO, ::NestedFilterSimulation)
+    print(io, "Nested particle filter simulation")
 end

@@ -58,3 +58,29 @@ end
 (timestep::FixedTimestep)() = timestep.dt
 (timestep::RandomTimestep)() = rand(timestep.distribution)
 (timestep::DeterministicTrain)() = isempty(timestep.stack) ? nothing : pop!(timestep.stack)
+  
+
+function Base.show(io::IO, ::MIME"text/plain", timestep::FixedTimestep)
+    print(io, "Fixed time step dt = ", timestep.dt)
+end
+
+function Base.show(io::IO, timestep::FixedTimestep)
+    print(io, "Fixed time step dt = ", timestep.dt)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", timestep::RandomTimestep)
+    print(io, "Random time step with distribution ", timestep.distribution)
+end
+
+function Base.show(io::IO, timestep::RandomTimestep)
+    print(io, "Random time step with distribution ", timestep.distribution)
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", timestep::DeterministicTrain)
+    print(io, "Deterministic sequence of timesteps")
+end
+
+function Base.show(io::IO, timestep::DeterministicTrain)
+    print(io, "Deterministic sequence of timesteps")
+end

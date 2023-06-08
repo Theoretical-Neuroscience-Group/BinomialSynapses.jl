@@ -39,6 +39,10 @@ function NestedParticleState(
     return NestedParticleState(state, model)
 end
 
+m_out(fstate::NestedParticleState) = size(fstate.state.n)[end-1]
+m_in(fstate::NestedParticleState) = size(fstate.state.n)[end]
+
+
 """
     update!(filterstate, obs, filter)
 
@@ -57,4 +61,22 @@ function update!(
     u = likelihood_resample!(state, model, observation)
     outer_resample!(state, model, u)
     return filterstate
+end
+
+function Base.show(io::IO, ::MIME"text/plain", filter::NestedParticleFilter)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end
+
+function Base.show(io::IO, filter::NestedParticleFilter)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", state::NestedParticleState)
+    print(io, "Nested particle state with
+model: $(state.model)
+state: $(state.state)")
+end
+
+function Base.show(io::IO, state::NestedParticleState)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
 end

@@ -302,3 +302,18 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopi
     return argmin(entropies)
 end
 
+function Base.show(io::IO, ::MIME"text/plain", ::Myopic)
+    print(io, "Myopic OED policy")
+end
+
+function Base.show(io::IO, ::Myopic)
+    print(io, "Myopic OED policy")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", ::MyopicFast)
+    print(io, "Fast myopic OED policy")
+end
+
+function Base.show(io::IO, ::MyopicFast)
+    print(io, "Fast myopic OED policy")
+end
