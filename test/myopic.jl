@@ -261,28 +261,47 @@
         end
 
         CUDA.functional() && @testset "GPU" begin
-            Nrng = CuArray(Int.(Nrng))
-            prng = CuArray(Float32.(prng))
-            qrng = CuArray(Float32.(qrng))
-            σrng = CuArray(Float32.(σrng))
-            τrng = CuArray(Float32.(τrng))
 
             Nind = rand(1:4, 4, 10)
             Nind[2, 1:5] .= 1
             Nind[2, 6:10] .= 2
             pind = qind = σind = τind = Nind
 
-            Nind = cu(Nind)
-
             model = BinomialGridModel(
                 cu(Nind), cu(pind), cu(qind), cu(σind), cu(τind),
-                cu(Nrng), cu(prng), cu(qrng), cu(σrng), cu(τrng)
+                cu(collect(Nrng)),
+                cu(collect(prng)),
+                cu(collect(qrng)),
+                cu(collect(σrng)),
+                cu(collect(τrng))
             )
             
             policy = Myopic([1.])
             obs = BinomialObservation(zeros(4), [0.1, 0.2, 0.3, 0.4])
 
             @test _diffentropy(model, obs, policy) ≈ 0.2
+
+            println("")
+            @info "Benchmarking evaluation of _diffentropy"
+
+            Nind = rand(1:4, 20, 2048)
+            pind = qind = σind = τind = Nind
+
+            model = BinomialGridModel(
+                cu(Nind), cu(pind), cu(qind), cu(σind), cu(τind),
+                cu(collect(Nrng)),
+                cu(collect(prng)),
+                cu(collect(qrng)),
+                cu(collect(σrng)),
+                cu(collect(τrng))
+            )
+
+            policy = Myopic([1.])
+            obs = BinomialObservation(zeros(20), 0.1:0.1:2.0)
+
+            display(@benchmark CUDA.@sync _diffentropy($model, $obs, $policy))
+            println("")
+            println("")
         end
     end
 end
