@@ -10,7 +10,7 @@ BinomialGridModel(
 )
 BinomialGridModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
 BinomialModel
-BinomialModel(Nmax::Integer, m_out::Integer, device = :gpu)
+BinomialModel(Nmax::Integer, m_out::Integer, device::Symbol = :gpu)
 BinomialModel(m_out::Integer, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
 BinomialModel(model::BinomialGridModel)
 ScalarBinomialModel
@@ -26,7 +26,6 @@ emit
 Timestep
 FixedTimestep
 RandomTimestep
-get_step
 ```
 
 ## Particle Filter

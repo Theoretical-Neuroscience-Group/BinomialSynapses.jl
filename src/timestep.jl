@@ -10,11 +10,11 @@ The following basic types are supported:
 abstract type Timestep end
 
 """
-    get_step(::Timestep)
+    (ts::Timestep)()
 
 Returns a value for the time step, based on the chosen method for choosing a time step.
 """
-function get_step(::Timestep) end
+function (ts::Timestep)() end
 
 """
     FixedTimestep(dt)
@@ -23,6 +23,11 @@ function get_step(::Timestep) end
 """
 struct FixedTimestep{T} <: Timestep
     dt::T
+    function FixedTimestep(dt::Real)
+        dt <= 0 &&
+            throw(ErrorException("FixedTimestep must have strictly positive argument."))
+        return new{typeof(dt)}(dt)
+    end
 end
 
 """
@@ -35,5 +40,47 @@ struct RandomTimestep{T} <: Timestep
     distribution::T
 end
 
-get_step(timestep::FixedTimestep) = timestep.dt
-get_step(timestep::RandomTimestep) = rand(timestep.distribution)
+"""
+    DeterministicTrain(train)
+
+Produces a predefined finite sequence of time steps.
+The simulation terminates when the sequence is exhausted.
+"""
+struct DeterministicTrain{T} <: Timestep
+    stack::T
+    function DeterministicTrain(v::AbstractVector{<:Real})
+        any(v .<= 0) && 
+            throw(ErrorException("DeterminisicTrain needs strictly positive arguments."))
+        return new{typeof(v)}(reverse(v))
+    end
+end
+
+(timestep::FixedTimestep)() = timestep.dt
+(timestep::RandomTimestep)() = rand(timestep.distribution)
+(timestep::DeterministicTrain)() = isempty(timestep.stack) ? nothing : pop!(timestep.stack)
+  
+
+function Base.show(io::IO, ::MIME"text/plain", timestep::FixedTimestep)
+    print(io, "Fixed time step dt = ", timestep.dt)
+end
+
+function Base.show(io::IO, timestep::FixedTimestep)
+    print(io, "Fixed time step dt = ", timestep.dt)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", timestep::RandomTimestep)
+    print(io, "Random time step with distribution ", timestep.distribution)
+end
+
+function Base.show(io::IO, timestep::RandomTimestep)
+    print(io, "Random time step with distribution ", timestep.distribution)
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", timestep::DeterministicTrain)
+    print(io, "Deterministic sequence of timesteps")
+end
+
+function Base.show(io::IO, timestep::DeterministicTrain)
+    print(io, "Deterministic sequence of timesteps")
+end

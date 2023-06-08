@@ -1,5 +1,5 @@
-@testset "record.jl" begin
-    println("             > record.jl")
+CUDA.functional() && @testset "record.jl" begin
+    @info "Testing record.jl"
     N = 10
     p = 0.85
     q = 1.0

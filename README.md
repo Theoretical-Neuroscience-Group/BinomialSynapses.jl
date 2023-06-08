@@ -1,4 +1,6 @@
 # BinomialSynapses
+[![ci](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/Theoretical-Neuroscience-Group/BinomialSynapses.jl/actions/workflows/ci.yaml)
+[![Codecov](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl)
 [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url]
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
@@ -8,6 +10,9 @@
 [docs-dev-url]: https://theoretical-neuroscience-group.github.io/BinomialSynapses.jl/dev/
 <!-- [![Build status](https://badge.buildkite.com/15db27ead6ca652df308f96b4805115a1720f1d75155d90b63.svg)](https://buildkite.com/theoretical-neuroscience-group/binomialsynapses) -->
 <!-- [![Coverage](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Theoretical-Neuroscience-Group/BinomialSynapses.jl) -->
+
+This is a package for performing filering and active learning for a binomial synaptic model using nested particle filters.
+Performance is achieved by providing a CUDA GPU implementation, but the code also runs (much more slowly) on the CPU.
 
 ## Installation
 

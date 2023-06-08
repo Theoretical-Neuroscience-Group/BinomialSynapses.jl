@@ -15,6 +15,7 @@ export
        BinomialModel,
        BinomialGridModel,
        ScalarBinomialModel,
+       AbstractBinomialState,
        BinomialState,
        ScalarBinomialState,
        BinomialObservation
@@ -23,7 +24,7 @@ include("propagate.jl")
 export propagate!
 
 include("timestep.jl")
-export Timestep, FixedTimestep, RandomTimestep, get_step
+export Timestep, FixedTimestep, RandomTimestep, DeterministicTrain
 
 include("emission.jl")
 export emit
@@ -38,7 +39,7 @@ include("resample.jl")
 export outer_resample!, indices!, resample!
 
 include("filter.jl")
-export NestedParticleFilter, NestedParticleState, update!
+export NestedParticleFilter, NestedParticleState, update!, m_out, m_in
 
 include("statistics.jl")
 export MAP
@@ -47,7 +48,7 @@ include("record.jl")
 export Recording
 
 include("simulate.jl")
-export NestedFilterSimulation, initialize!, m_out, run!
+export NestedFilterSimulation, initialize!, run!
 
 include("visualize.jl")
 export posterior_plot

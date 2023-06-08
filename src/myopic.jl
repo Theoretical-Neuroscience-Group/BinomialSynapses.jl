@@ -56,9 +56,7 @@ Minimize the entropy of τ.
 """
 MyopicFast_tau(dts,penalty) = MyopicFast(dts, _tauentropy,penalty)
 
-function _oed!(sim, ::MyopicPolicy)
-    policy = sim.tsteps
-
+function (policy::MyopicPolicy)(sim::NestedFilterSimulation)
     obs = _synthetic_obs(sim, policy)
     temp_state = _temp_state(sim, policy)
 
@@ -70,7 +68,7 @@ end
 function _synthetic_obs(sim, policy)
     epsp_vector = _temp_epsps(sim)
     dt_vector = _temp_dts(sim, policy)
-    return BinomialObservation(cu(epsp_vector), cu(dt_vector))
+    return BinomialObservation(epsp_vector, dt_vector)
 end
 
 
@@ -122,8 +120,12 @@ end
 
 _temp_state(sim, ::MyopicFast) = deepcopy(sim.fstate)
 
-_temp_dts(sim, ::Myopic) = collect(sim.tsteps.dts)
-_temp_dts(sim, ::MyopicFast) = repeat(sim.tsteps.dts, m_out(sim) ÷ length(sim.tsteps.dts))
+_temp_dts(sim, policy) = _temp_dts(sim.tsteps.dts, sim.fstate.model.N, policy, m_out(sim)) 
+
+_temp_dts(dts, ::AbstractArray, ::Myopic, ::Integer) = collect(dts)
+_temp_dts(dts, ::AbstractArray, ::MyopicFast, m::Integer) = repeat(dts, m ÷ length(dts))
+_temp_dts(dts, ::AnyCuArray, ::Myopic, ::Integer) = cu(collect(dts))
+_temp_dts(dts, ::AnyCuArray, ::MyopicFast, m::Integer) = cu(repeat(dts, m ÷ length(dts)))
 
 function _temp_epsps(sim)
     dts = sim.tsteps.dts
@@ -135,6 +137,21 @@ function _temp_epsps(sim)
     q_star = map.q
     τ_star = map.τ
 
+    e_temp = _temp_epsps(times, N_star, p_star, q_star, τ_star, dts, sim.fstate.model.N)
+
+    return return _shape_epsps(e_temp, sim, sim.tsteps)
+end
+
+function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts, ::AnyCuArray)
+    return cu(_temp_epsps(times, N_star, p_star, q_star, τ_star, dts))
+end
+
+# CPU fallback:
+function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts, ::AbstractArray)
+    return _temp_epsps(times, N_star, p_star, q_star, τ_star, dts)
+end
+
+function _temp_epsps(times, N_star, p_star, q_star, τ_star, dts)
     x = 1.
     L = length(times)
     if L > 1
@@ -143,12 +160,12 @@ function _temp_epsps(sim)
         end
     end
 
-    e_temp = zeros(Float32, length(dts))
+    e_temp = zeros(length(dts))
     for kk in 1:length(e_temp)
         x_temp = 1-(1-(1-p_star)*x)*exp(-dts[kk]/τ_star)
         e_temp[kk] = x_temp*N_star*p_star*q_star
     end
-    return _shape_epsps(e_temp, sim, sim.tsteps)
+    return e_temp
 end
 
 _shape_epsps(e_temp, sim, ::Myopic) = e_temp
@@ -287,4 +304,20 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy:
     end
     
     return argmin(entropies)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", ::Myopic)
+    print(io, "Myopic OED policy")
+end
+
+function Base.show(io::IO, ::Myopic)
+    print(io, "Myopic OED policy")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", ::MyopicFast)
+    print(io, "Fast myopic OED policy")
+end
+
+function Base.show(io::IO, ::MyopicFast)
+    print(io, "Fast myopic OED policy")
 end

@@ -1,7 +1,7 @@
 name = "BinomialSynapses"
 uuid = "8a0f34ba-5679-4d46-87d2-b44c4b1cf105"
 authors = ["Simone Carlo Surace", "Camille Gontier"]
-version = "0.4.2"
+version = "0.4.3"
 
 [deps]
 BinomialGPU = "c5bbfde1-2136-42cd-9b65-d5719df69ebf"
@@ -14,7 +14,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 BinomialGPU = "0.3, 0.4"
-CUDA = "3"
+CUDA = "3.8"
 Distributions = "0.25"
 LaTeXStrings = "1"
 Plots = "1"

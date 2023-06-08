@@ -18,20 +18,30 @@ struct NestedParticleState{T1, T2}
 end
 
 """
-    NestedParticleState(m_out, m_in, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
+    NestedParticleState(
+        m_out, m_in, 
+        my_Nrng, my_prng, my_qrng, my_σrng, my_τrng, 
+        device = :gpu
+    )
 
 Construct a randomly initialized particle system with a given number of outer (`m_out`) and inner (`m_in`) particles and specified grids for the parameters.
 """
 function NestedParticleState(
     m_out::Integer, m_in::Integer,
-    my_Nrng, my_prng, my_qrng, my_σrng, my_τrng
+    my_Nrng, my_prng, my_qrng, my_σrng, my_τrng;
+    device::Symbol = :gpu
 )
-    model = BinomialGridModel(m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng)
-    n     = repeat(model.N, 1, m_in)
-    k     = CUDA.zeros(Int, m_out, m_in)
-    state = BinomialState(n, k)
+    model = BinomialGridModel(
+        m_out, my_Nrng, my_prng, my_qrng, my_σrng, my_τrng, 
+        device = device
+    )
+    state = BinomialState(model.N, m_in)
     return NestedParticleState(state, model)
 end
+
+m_out(fstate::NestedParticleState) = size(fstate.state.n)[end-1]
+m_in(fstate::NestedParticleState) = size(fstate.state.n)[end]
+
 
 """
     update!(filterstate, obs, filter)
@@ -51,4 +61,22 @@ function update!(
     u = likelihood_resample!(state, model, observation)
     outer_resample!(state, model, u)
     return filterstate
+end
+
+function Base.show(io::IO, ::MIME"text/plain", filter::NestedParticleFilter)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end
+
+function Base.show(io::IO, filter::NestedParticleFilter)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
+end
+
+function Base.show(io::IO, ::MIME"text/plain", state::NestedParticleState)
+    print(io, "Nested particle state with
+model: $(state.model)
+state: $(state.state)")
+end
+
+function Base.show(io::IO, state::NestedParticleState)
+    print(io, "Nested particle filter with jittering width = ", filter.jittering_width)
 end
