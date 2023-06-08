@@ -1,67 +1,60 @@
 """
     MyopicPolicy <: OEDPolicy
-
 A myopic OEDPolicy, i.e. one in which only the effect of the next time step on the parameter estimation, e.g. the entropy of a parameter, is taken into account.
 """
 abstract type MyopicPolicy <: OEDPolicy end
 
 """
     Myopic(dts, target)
-
 A parallel implementation of a myopic policy with candidate time steps `dts` and optimization target `target`, in which multiple copies of the particles 
 are propagated in parallel.
-
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct Myopic{T1, T2} <: MyopicPolicy
+struct Myopic{T1, T2, T3} <: MyopicPolicy
     dts::T1
     target::T2
+    penalty::T3
 end
 
 """
     MyopicFast(dts, target)
-
 MyopicFast` is the same as `Myopic`, except that instead of expanding states and parameters along another dimension, and propagating each parameter with each dt, `dts` are randomly assigned to members of the parameter ensemble.
-
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
 """
-struct MyopicFast{T1, T2} <: MyopicPolicy
+struct MyopicFast{T1, T2, T3} <: MyopicPolicy
     dts::T1
     target::T2
+    penalty::T3    
 end
 
 # default target is miniminum entropy
 """
     Myopic(dts)
-
 Minimize the joint entropy.
 """
-Myopic(dts) = Myopic(dts, _entropy)
+Myopic(dts,penalty) = Myopic(dts, _entropy,penalty)
 
 """
     MyopicFast(dts)
-
 Minimize the joint entropy.
 """
-MyopicFast(dts) = MyopicFast(dts, _entropy)
+MyopicFast(dts,penalty) = MyopicFast(dts, _entropy,penalty)
 
 """
     Myopic_tau(dts)
-
 Minimize the entropy of τ.
 """
-Myopic_tau(dts) = Myopic(dts, _tauentropy)
+Myopic_tau(dts,penalty) = Myopic(dts, _tauentropy,penalty)
 
 """
     MyopicFast_tau(dts)
-
 Minimize the entropy of τ.
 """
-MyopicFast_tau(dts) = MyopicFast(dts, _tauentropy)
+MyopicFast_tau(dts,penalty) = MyopicFast(dts, _tauentropy,penalty)
 
 function (policy::MyopicPolicy)(sim::NestedFilterSimulation)
     obs = _synthetic_obs(sim, policy)
@@ -178,7 +171,7 @@ end
 _shape_epsps(e_temp, sim, ::Myopic) = e_temp
 _shape_epsps(e_temp, sim, ::MyopicFast) = repeat(e_temp, m_out(sim)÷length(sim.tsteps.dts))
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
@@ -187,6 +180,8 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+
+    η = policy.penalty
 
     minent = Inf
     imin = 0
@@ -206,15 +201,15 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
             p = value/size(Nind, 2)
             ent -= p * log(p)
         end
-        if ent < minent
-            minent = ent
+        if ent + η*dts[i] < minent
+            minent = ent + η*dts[i]
             imin = i 
         end
     end
     return dts[imin]
 end
 
-function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # CPU algorithm: move index arrays to CPU
     Nind = Array(model.Nind)
     pind = Array(model.pind)
@@ -223,9 +218,12 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+    
+    η = policy.penalty
 
     counts = Dict{Tuple{Float64, Int, Int, Int, Int, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
+    entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(Nind)
         iN = Nind[i]
         ip = pind[i]
@@ -236,9 +234,9 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
         key = (dt, iN, ip, iq, iσ, iτ)
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
+        entropies[dt] = η*dt
     end
 
-    entropies = Dict{Float64, Float64}()
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
@@ -248,11 +246,13 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFa
     return argmin(entropies)
 end
 
-function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopic)
+function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+    
+    η = policy.penalty
 
     minent = Inf
     imin = 0
@@ -268,31 +268,35 @@ function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::Myopi
             p = value/size(τind, 2)
             ent -= p * log(p)
         end
-        if ent < minent
-            minent = ent
+        if ent + η*dts[i] < minent
+            minent = ent + η*dts[i]
             imin = i 
         end
     end
     return dts[imin]
 end
 
-function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, ::MyopicFast) 
+function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::MyopicFast) 
     # CPU algorithm: move index arrays to CPU
     τind = Array(model.τind)
 
     dts = Array(obs.dt)
+    
+    η = policy.penalty
 
     counts = Dict{Tuple{Float64, Int}, Int}()
     totals = Dict{Float64, Int}() # total counts per dt
+    entropies = Dict{Float64, Float64}()
     @inbounds for i in 1:length(τind)
         iτ = τind[i]
         dt = dts[i]
         key = (dt, iτ)
         counts[key] = get!(counts, key, 0) + 1
         totals[dt] = get!(totals, dt, 0.) + 1
+        entropies[dt] = η*dt
     end
 
-    entropies = Dict{Float64, Float64}()
+    
     @inbounds for (key, count) in counts
         dt = key[1]
         p = count/totals[dt]
