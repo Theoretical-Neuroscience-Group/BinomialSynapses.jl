@@ -53,3 +53,9 @@ posterior_plot(sim.fstate, times, epsps, truemodel = sim.hmodel)
 
 - On the nested particle filter: Crisan, Dan, and Joaquin Miguez. "Nested particle filters for online parameter estimation in discrete-time state-space Markov models." Bernoulli 24.4A (2018): 3039-3086.
 - On the model of stochastic synapse: Gontier, Camille, and Jean-Pascal Pfister. "Identifiability of a Binomial Synapse." Frontiers in computational neuroscience 14 (2020): 86.
+
+## Citing this work
+Please cite the following paper:
+
+[Camille Gontier, Simone Carlo Surace, Igor Delvendahl, Martin Müller, Jean-Pascal Pfister (2022). Efficient Sampling-Based Bayesian Active Learning for synaptic characterization. arXiv preprint.
+](https://arxiv.org/abs/2201.07539)
