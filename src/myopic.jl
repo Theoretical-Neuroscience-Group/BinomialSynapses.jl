@@ -11,6 +11,7 @@ are propagated in parallel.
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
+- `_diffentropy`: minimizes the joint differential entropy of the posterior distribution over parameters. This computes the covariance matrix of the joint distribution, and calculated the differential entropy of a multivariate Gaussian with that covariance matrix.
 """
 struct Myopic{T1, T2, T3} <: MyopicPolicy
     dts::T1
@@ -24,6 +25,7 @@ MyopicFast` is the same as `Myopic`, except that instead of expanding states and
 Implemented settings of `target`: choose time step such that it
 - `_entropy`: minimizes the joint entropy of the posterior distribution over parameters
 - `_tauentropy`: minimizes the marginal entropy of `τ`
+- `_diffentropy`: minimizes the joint differential entropy of the posterior distribution over parameters. This computes the covariance matrix of the joint distribution, and calculated the differential entropy of a multivariate Gaussian with that covariance matrix.
 """
 struct MyopicFast{T1, T2, T3} <: MyopicPolicy
     dts::T1
@@ -244,6 +246,47 @@ function _entropy(model::BinomialGridModel, obs::BinomialObservation, policy::My
     end
     
     return argmin(entropies)
+end
+
+function _diffentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
+    # CPU algorithm: move index arrays to CPU
+    Nind = Array(model.Nind)
+    pind = Array(model.pind)
+    qind = Array(model.qind)
+    σind = Array(model.σind)
+    τind = Array(model.τind)
+
+    Nrng = Array(model.Nrng)
+    prng = Array(model.prng)
+    qrng = Array(model.qrng)
+    σrng = Array(model.σrng)
+    τrng = Array(model.τrng)
+
+    dts = Array(obs.dt)
+
+    η = policy.penalty
+
+    minent = Inf
+    imin = 0
+    @inbounds for i in 1:size(Nind, 1)
+        samples = hcat(
+            Nrng[Nind[i, :]],
+            prng[pind[i, :]],
+            qrng[qind[i, :]],
+            σrng[σind[i, :]],
+            τrng[τind[i, :]]
+        )
+        method = LinearShrinkage(DiagonalUnequalVariance(), 0.5)
+        Σ_est = cov(method, samples, dims = 1)
+    
+        ent = entropy(MvNormal(Σ_est))
+
+        if ent + η*dts[i] < minent
+            minent = ent + η*dts[i]
+            imin = i 
+        end
+    end
+    return dts[imin]
 end
 
 function _tauentropy(model::BinomialGridModel, obs::BinomialObservation, policy::Myopic)
