@@ -38,7 +38,7 @@ end
     Myopic(dts)
 Minimize the joint entropy.
 """
-Myopic(dts,penalty) = Myopic(dts, _entropy,penalty)
+Myopic(dts,penalty) = Myopic(dts, _diffentropy,penalty)
 
 """
     MyopicFast(dts)
