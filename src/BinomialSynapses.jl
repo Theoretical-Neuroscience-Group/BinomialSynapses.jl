@@ -3,7 +3,7 @@ module BinomialSynapses
 using BinomialGPU
 using CUDA
 using CUDA: i32
-using Distributions: Binomial, Exponential, Normal
+using Distributions: Binomial, Exponential, Normal, MvNormal
 using LaTeXStrings
 using Plots
 using Statistics: mean
