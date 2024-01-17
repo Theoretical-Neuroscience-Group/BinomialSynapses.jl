@@ -35,10 +35,11 @@ function NestedFilterSimulation(
     Nrng, prng, qrng, σrng, τrng,
     m_out, m_in, width;
     timestep::Timestep = RandomTimestep(Exponential(0.121)),
-    device::Symbol = :gpu
+    device::Symbol = :gpu,
+    resampling_method::ResamplingMethod = Multinomial()
 )
     hmodel = ScalarBinomialModel(N, p, q, σ, τ)
-    filter = NestedParticleFilter(width)
+    filter = NestedParticleFilter(width, resampling_method)
     hstate = ScalarBinomialState(N, 0)
     fstate = NestedParticleState(
                 m_out, m_in,

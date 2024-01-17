@@ -18,7 +18,7 @@
         ks .= ns .% 64
 
         u1      = likelihood(ks, model, 0.3)
-        u2, idx = likelihood_indices(ks, model, 0.3)
+        u2, idx = likelihood_indices(ks, model, 0.3, Multinomial())
 
         @test u1 ≈ u2
         @test maximum(idx) <= m_in
@@ -47,7 +47,7 @@
         ks .= ns .% 64
 
         u1      = likelihood(ks, model, 0.3f0)
-        u2, idx = likelihood_indices(ks, model, 0.3f0)
+        u2, idx = likelihood_indices(ks, model, 0.3f0, Multinomial())
 
         @test u1 ≈ u2
         @test maximum(idx) <= m_in
@@ -67,7 +67,9 @@
             println("Benchmarking function likelihood_resample!: should take about 4ms")
             state = BinomialState(ns, ks)
             obs   = BinomialObservation(0.3f0, 0.1f0)
-            display(@benchmark CUDA.@sync likelihood_resample!($state, $model, $obs))
+            display(@benchmark CUDA.@sync likelihood_resample!(
+                $state, $model, $obs, Multinomial()
+            ))
             println("")
             println("")
         end
@@ -86,7 +88,7 @@
 
         ks = [3 3 3 3; 1 1 1 1; 1 1 1 1; 3 3 3 3; 3 1 1 1; 1 3 3 3]
 
-        u, idx = likelihood_indices(ks, model, observation)
+        u, idx = likelihood_indices(ks, model, observation, Multinomial())
 
         # Combinations of q and k that correspond to the observation should have
         # a high likelihood
@@ -115,7 +117,7 @@
 
         ks = cu([3 3 3 3; 1 1 1 1; 1 1 1 1; 3 3 3 3; 3 1 1 1; 1 3 3 3])
 
-        u, idx = likelihood_indices(ks, model, observation)
+        u, idx = likelihood_indices(ks, model, observation, Multinomial())
         u = Array(u)
         idx = Array(idx)
 
@@ -155,7 +157,7 @@
             (3,1,2)
         )
 
-        u, idx = likelihood_indices(ks, model, observation)
+        u, idx = likelihood_indices(ks, model, observation, Multinomial())
 
         @test size(u) == (2, 3)
         @test size(idx) == (2, 3, 4)
@@ -198,7 +200,7 @@
             (3,1,2)
         ))
 
-        u, idx = likelihood_indices(ks, model, observation)
+        u, idx = likelihood_indices(ks, model, observation, Multinomial())
 
         @test size(u) == (2, 3)
         @test size(idx) == (2, 3, 4)
